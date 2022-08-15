@@ -1,7 +1,7 @@
 """
 This source file is part of an OSTIS project. For the latest info, see https://github.com/ostis-ai
 Distributed under the MIT License
-(See an accompanying file LICENSE or a copy at http://opensource.org/licenses/MIT)
+(See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
 
 from enum import Enum
@@ -24,3 +24,11 @@ class QuestionStatus(Enum):
     QUESTION_FINISHED = "question_finished"
     QUESTION_FINISHED_SUCCESSFULLY = "question_finished_successfully"
     QUESTION_FINISHED_UNSUCCESSFULLY = "question_finished_unsuccessfully"
+
+
+class ScAlias(Enum):
+    ACTION_NODE = "_action_node"
+    RELATION_EDGE = "_relation_edge"
+    ACCESS_EDGE = "_access_edge"
+    ELEMENT = "_element"
+    LINK = "_link"
