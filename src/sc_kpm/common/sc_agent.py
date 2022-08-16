@@ -12,7 +12,7 @@ from sc_client.constants.common import ScEventType
 from sc_client.constants.exceptions import InvalidValueError
 from sc_client.models import ScAddr, ScEvent, ScEventParams
 
-from sc_common.sc_keynodes import ScKeynodes
+from sc_kpm.common.sc_keynodes import ScKeynodes
 
 
 class ScAgentAbstract(ABC):

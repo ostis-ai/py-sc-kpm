@@ -10,9 +10,9 @@ from sc_client import client
 from sc_client.constants import sc_types
 from sc_client.models import ScAddr, ScTemplate, ScTemplateResult
 
-from sc_common.identifiers import CommonIdentifiers, ScAlias
-from sc_common.sc_keynodes import ScKeynodes
-from sc_utils.common_utils import get_link_content, search_role_relation_template
+from sc_kpm import ScKeynodes
+from sc_kpm.common import CommonIdentifiers, ScAlias
+from sc_kpm.utils.common_utils import get_link_content, search_role_relation_template
 
 
 def get_structure_elements(structure: ScAddr) -> List[ScAddr]:

@@ -1,15 +1,15 @@
-from typing import Dict, List, Union
-
 import time
 from datetime import datetime
+from typing import Dict, List, Union
+
 from sc_client import client
 from sc_client.constants import sc_types
-from sc_client.models import ScAddr, ScTemplate, ScConstruction
+from sc_client.models import ScAddr, ScConstruction, ScTemplate
 
-from sc_common.identifiers import CommonIdentifiers, QuestionStatus, ScAlias
-from sc_common.sc_keynodes import ScKeynodes
-from sc_utils.common_utils import generate_edge, generate_node, generate_role_relation, check_edge
-from sc_utils.search_utils import get_first_search_template_result
+from sc_kpm import ScKeynodes
+from sc_kpm.common import CommonIdentifiers, QuestionStatus, ScAlias
+from sc_kpm.utils.common_utils import check_edge, generate_edge, generate_node, generate_role_relation
+from sc_kpm.utils.search_utils import get_first_search_template_result
 
 Idtf = str
 COMMON_WAIT_TIME = 5

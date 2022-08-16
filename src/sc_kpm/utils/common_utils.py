@@ -9,11 +9,18 @@ from typing import List, Optional
 from sc_client import client
 from sc_client.constants import sc_types
 from sc_client.constants.sc_types import ScType
-from sc_client.models import ScAddr, ScConstruction, ScIdtfResolveParams, ScLinkContent, ScLinkContentType, ScTemplate, \
-    ScTemplateResult
+from sc_client.models import (
+    ScAddr,
+    ScConstruction,
+    ScIdtfResolveParams,
+    ScLinkContent,
+    ScLinkContentType,
+    ScTemplate,
+    ScTemplateResult,
+)
 
-from sc_common.identifiers import ScAlias, CommonIdentifiers
-from sc_common.sc_keynodes import ScKeynodes
+from sc_kpm import ScKeynodes
+from sc_kpm.common import CommonIdentifiers, ScAlias
 
 
 def generate_nodes(*node_types: ScType) -> List[ScAddr]:
@@ -128,4 +135,3 @@ def delete_elements(*addrs: ScAddr) -> bool:
 
 def delete_edge(source: ScAddr, edge_type: ScType, target: ScAddr) -> bool:
     return delete_elements(*get_edges(source, edge_type, target))
-

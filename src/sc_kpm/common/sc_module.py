@@ -9,7 +9,7 @@ from typing import List, Set
 
 from sc_client import client
 
-from sc_common.sc_agent import ScAgent
+from sc_kpm.common.sc_agent import ScAgent
 
 
 class ScModule(ABC):

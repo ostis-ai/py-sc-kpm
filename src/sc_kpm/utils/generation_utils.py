@@ -1,9 +1,9 @@
 from sc_client.constants import sc_types
 from sc_client.models import ScAddr
 
-from sc_common.identifiers import CommonIdentifiers
-from sc_common.sc_keynodes import ScKeynodes
-from sc_utils.common_utils import generate_role_relation, generate_edge, generate_norole_relation, generate_node
+from sc_kpm import ScKeynodes
+from sc_kpm.common import CommonIdentifiers
+from sc_kpm.utils.common_utils import generate_edge, generate_node, generate_norole_relation, generate_role_relation
 
 
 def wrap_in_oriented_set(set_node: ScAddr, start_element: ScAddr, *elements: ScAddr) -> None:
