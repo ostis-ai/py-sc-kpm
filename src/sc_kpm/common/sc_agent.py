@@ -4,6 +4,7 @@ Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
 
+import logging
 from abc import ABC, abstractmethod
 from typing import Union
 
@@ -14,6 +15,8 @@ from sc_client.models import ScAddr, ScEvent, ScEventParams
 
 from sc_kpm.common.sc_keynodes import ScKeynodes
 from sc_kpm.common.sc_result import ScResult
+
+logger = logging.getLogger(__name__)
 
 
 class ScAgentAbstract(ABC):
@@ -35,13 +38,13 @@ class ScAgentAbstract(ABC):
         event_params = ScEventParams(source_node_addr, self.event_type, _callback)
         sc_event = client.events_create(event_params)
         self._event = sc_event[0]
-        print(f"{self.__class__.__name__} is registred")
+        logger.debug("%s is registered", self.__class__.__name__)
 
     def unregister(self) -> None:
         if isinstance(self._event, ScEvent):
             client.events_destroy(self._event)
-            print(f"{self.__class__.__name__} event was destroyed")
-        print(f"{self.__class__.__name__} is unregistred")
+            logger.debug("%s event is destroyed", self.__class__.__name__)
+        logger.debug("%s is unregistered", self.__class__.__name__)
 
     @classmethod
     @abstractmethod
