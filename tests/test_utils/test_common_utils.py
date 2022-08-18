@@ -9,8 +9,6 @@ from sc_client.constants import sc_types
 
 from sc_kpm.utils.common_utils import (
     check_edge,
-    delete_edges,
-    delete_elements,
     create_binary_relation,
     create_edge,
     create_link,
@@ -19,6 +17,8 @@ from sc_kpm.utils.common_utils import (
     create_nodes,
     create_norole_relation,
     create_role_relation,
+    delete_edges,
+    delete_elements,
     get_edge,
     get_edges,
     get_element_by_role_relation,

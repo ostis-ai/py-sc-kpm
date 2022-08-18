@@ -4,31 +4,35 @@ Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
 
+import logging
+
 from sc_client.constants import sc_types
 from sc_client.constants.common import ScEventType
 
-from sc_kpm import ScKeynodes, ScAgent
+from sc_kpm import ScAgent, ScKeynodes, ScModule
 from sc_kpm.common import CommonIdentifiers, QuestionStatus
-from sc_kpm.utils.action_utils import execute_agent, check_action_class
-from sc_kpm.utils.common_utils import delete_elements, create_edge, create_node
-from tests.common_tests import BaseTestCase
-import logging
+from sc_kpm.utils.action_utils import check_action_class, execute_agent
+from sc_kpm.utils.common_utils import create_edge, create_node, delete_elements
+from tests.common_tests import BaseTestCase, server
 
-logging.basicConfig(filename="testing.log", filemode='w', level=logging.DEBUG)
+logging.basicConfig(filename="testing.log", filemode="w", level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
-class ExampleAgent(ScAgent):
+class ScAgentTest(ScAgent):
     @classmethod
     def setup(cls):
         cls.source_node = "test_node"
         cls.event_type = ScEventType.ADD_OUTGOING_EDGE
 
-    @staticmethod
-    def on_event(*_, target_node):
-        logger.info(f"{ExampleAgent.__name__} is started")
+    def on_event(self, _src, _edge, target_node):
+        logger.info(f"{ScAgentTest.__name__} is started")
         for status in (QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY, QuestionStatus.QUESTION_FINISHED):
             create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, ScKeynodes()[status.value], target_node)
+
+
+class ScModuleTest(ScModule):
+    agents = [ScAgentTest()]
 
 
 class TestActionUtils(BaseTestCase):
@@ -50,8 +54,10 @@ class TestActionUtils(BaseTestCase):
         assert check_action_class(action_class, test_node) is False
 
     def test_call_agent(self):
-        agent = ExampleAgent()
-        node = create_node(sc_types.NODE_CONST, agent.source_node)
+        module = ScModuleTest()
+        server.add_modules(module)
+        node = create_node(sc_types.NODE_CONST, ScAgentTest.source_node)
         assert node.is_valid()
-        agent.register()
-        assert execute_agent({}, [], agent.source_node, reaction=QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY)
+        reaction = QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY
+        assert execute_agent({}, [], ScAgentTest.source_node, reaction=reaction, wait_time=1)
+        server.remove_modules(module)

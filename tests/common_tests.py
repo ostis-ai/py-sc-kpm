@@ -6,15 +6,15 @@ Distributed under the MIT License
 
 from unittest import TestCase
 
-import sc_client.client
-
+from sc_kpm.common.sc_module import ScServer
 
 SC_SERVER_URL = "ws://localhost:8090/ws_json"
+server = ScServer(SC_SERVER_URL)
 
 
 class BaseTestCase(TestCase):
     def setUp(self) -> None:
-        sc_client.client.connect(SC_SERVER_URL)
+        server.start()
 
     def tearDown(self) -> None:
-        sc_client.client.disconnect()
+        server.stop()

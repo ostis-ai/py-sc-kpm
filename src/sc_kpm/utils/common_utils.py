@@ -39,9 +39,9 @@ def create_node(node_type: ScType, sys_idtf: str = None) -> ScAddr:
 
 
 def create_links(
-        *contents: str,
-        content_type: ScLinkContentType = ScLinkContentType.STRING,
-        link_type: ScType = sc_types.LINK_CONST,
+    *contents: str,
+    content_type: ScLinkContentType = ScLinkContentType.STRING,
+    link_type: ScType = sc_types.LINK_CONST,
 ) -> List[ScAddr]:
     construction = ScConstruction()
     for content in contents:
@@ -51,9 +51,7 @@ def create_links(
 
 
 def create_link(
-        content: str,
-        content_type: ScLinkContentType = ScLinkContentType.STRING,
-        link_type: ScType = sc_types.LINK_CONST
+    content: str, content_type: ScLinkContentType = ScLinkContentType.STRING, link_type: ScType = sc_types.LINK_CONST
 ) -> ScAddr:
     return create_links(content, content_type=content_type, link_type=link_type)[0]
 
