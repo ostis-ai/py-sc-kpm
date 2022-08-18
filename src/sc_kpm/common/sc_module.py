@@ -5,7 +5,7 @@ Distributed under the MIT License
 """
 
 from abc import ABC
-from typing import List, Set
+from typing import Set
 
 from sc_client import client
 
@@ -13,7 +13,7 @@ from sc_kpm.common.sc_agent import ScAgent
 
 
 class ScModule(ABC):
-    agents: List[ScAgent] = []
+    agents: Set[ScAgent] = set()
 
     def __init__(self):
         _current_modules.add(self)
