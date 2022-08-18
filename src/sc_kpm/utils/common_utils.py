@@ -3,6 +3,7 @@ This source file is part of an OSTIS project. For the latest info, see https://g
 Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
+
 import logging
 from typing import List, Optional
 
@@ -21,6 +22,7 @@ from sc_client.models import (
 
 from sc_kpm import ScKeynodes
 from sc_kpm.common import CommonIdentifiers, ScAlias
+from sc_kpm.common.identifiers import Idtf
 
 
 def generate_nodes(*node_types: ScType) -> List[ScAddr]:
@@ -37,25 +39,33 @@ def generate_node(node_type: ScType, sys_idtf: str = None) -> ScAddr:
     return generate_nodes(node_type)[0]
 
 
-def generate_links(*contents: str) -> List[ScAddr]:
+def generate_links(
+        *contents: str,
+        content_type: ScLinkContentType = ScLinkContentType.STRING,
+        link_type: ScType = sc_types.LINK_CONST,
+) -> List[ScAddr]:
     construction = ScConstruction()
     for content in contents:
-        link_content = ScLinkContent(content, ScLinkContentType.STRING.value)
-        construction.create_link(sc_types.LINK, link_content)
+        link_content = ScLinkContent(content, content_type.value)
+        construction.create_link(link_type, link_content)
     return client.create_elements(construction)
 
 
-def generate_link(content: str) -> ScAddr:
-    return generate_links(content)[0]
+def generate_link(
+        content: str,
+        content_type: ScLinkContentType = ScLinkContentType.STRING,
+        link_type: ScType = sc_types.LINK_CONST
+) -> ScAddr:
+    return generate_links(content, content_type=content_type, link_type=link_type)[0]
 
 
-def generate_edge(src: ScAddr, edge_type: ScType, trg: ScAddr) -> ScAddr:
+def generate_edge(edge_type: ScType, src: ScAddr, trg: ScAddr) -> ScAddr:
     construction = ScConstruction()
     construction.create_edge(edge_type, src, trg)
     return client.create_elements(construction)[0]
 
 
-def generate_binary_relation(src: ScAddr, edge_type: ScType, trg: ScAddr, *relations: ScAddr) -> ScAddr:
+def generate_binary_relation(edge_type: ScType, src: ScAddr, trg: ScAddr, *relations: ScAddr) -> ScAddr:
     construction = ScConstruction()
     construction.create_edge(edge_type, src, trg, ScAlias.RELATION_EDGE.value)
     for relation in relations:
@@ -64,18 +74,18 @@ def generate_binary_relation(src: ScAddr, edge_type: ScType, trg: ScAddr, *relat
 
 
 def generate_role_relation(src: ScAddr, trg: ScAddr, *rrel_nodes: ScAddr) -> ScAddr:
-    return generate_binary_relation(src, sc_types.EDGE_ACCESS_CONST_POS_PERM, trg, *rrel_nodes)
+    return generate_binary_relation(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, trg, *rrel_nodes)
 
 
 def generate_norole_relation(src: ScAddr, trg: ScAddr, *nrel_nodes: ScAddr) -> ScAddr:
-    return generate_binary_relation(src, sc_types.EDGE_D_COMMON_CONST, trg, *nrel_nodes)
+    return generate_binary_relation(sc_types.EDGE_D_COMMON_CONST, src, trg, *nrel_nodes)
 
 
-def check_edge(source: ScAddr, edge_type: ScType, target: ScAddr) -> bool:
-    return get_edge(source, edge_type, target).is_valid()
+def check_edge(edge_type: ScType, source: ScAddr, target: ScAddr) -> bool:
+    return get_edge(edge_type, source, target).is_valid()
 
 
-def get_edges(source: ScAddr, edge_type: ScType, target: ScAddr) -> List[ScAddr]:
+def get_edges(edge_type: ScType, source: ScAddr, target: ScAddr) -> List[ScAddr]:
     templ = ScTemplate()
     templ.triple(source, edge_type, target)
     results = client.template_search(templ)
@@ -83,12 +93,12 @@ def get_edges(source: ScAddr, edge_type: ScType, target: ScAddr) -> List[ScAddr]
     return [result.get(1) for result in results]
 
 
-def get_edge(source: ScAddr, edge_type: ScType, target: ScAddr) -> ScAddr:
-    edges = get_edges(source, edge_type, target)
-    return edges[0] if len(edges) > 0 else ScAddr(0)
+def get_edge(edge_type: ScType, source: ScAddr, target: ScAddr) -> ScAddr:
+    edges = get_edges(edge_type, source, target)
+    return edges[0] if edges else ScAddr(0)
 
 
-def get_system_idtf(addr: ScAddr) -> str:
+def get_system_idtf(addr: ScAddr) -> Idtf:
     keynodes = ScKeynodes()
     nrel_system_idtf = keynodes[CommonIdentifiers.NREL_SYSTEM_IDENTIFIER.value]
 
@@ -101,7 +111,7 @@ def get_system_idtf(addr: ScAddr) -> str:
         nrel_system_idtf,
     )
     result = client.template_search(templ)
-    if len(result) > 0:
+    if result:
         return get_link_content(result[0].get(ScAlias.LINK.value))
     return ""
 
@@ -116,7 +126,7 @@ def search_role_relation_template(src: ScAddr, rrel_node: ScAddr) -> Optional[Sc
         rrel_node,
     )
     result = client.template_search(templ)
-    return result[0] if len(result) > 0 else None
+    return result[0] if result else None
 
 
 def get_element_by_role_relation(src: ScAddr, rrel_node: ScAddr) -> ScAddr:
@@ -133,5 +143,5 @@ def delete_elements(*addrs: ScAddr) -> bool:
     return client.delete_elements(*addrs)
 
 
-def delete_edge(source: ScAddr, edge_type: ScType, target: ScAddr) -> bool:
-    return delete_elements(*get_edges(source, edge_type, target))
+def delete_edge(edge_type: ScType, source: ScAddr, target: ScAddr) -> bool:
+    return delete_elements(*get_edges(edge_type, source, target))

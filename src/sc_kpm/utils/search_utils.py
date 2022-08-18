@@ -63,7 +63,7 @@ def search_next_element_template(set_node: ScAddr, cur_element_edge: ScAddr) -> 
 
 def get_first_search_template_result(template: ScTemplate) -> Optional[ScTemplateResult]:
     search_results = client.template_search(template)
-    if len(search_results) > 0:
+    if search_results:
         return search_results[0]
     return None
 

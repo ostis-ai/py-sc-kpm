@@ -1,3 +1,9 @@
+"""
+This source file is part of an OSTIS project. For the latest info, see https://github.com/ostis-ai
+Distributed under the MIT License
+(See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
+"""
+
 import time
 from datetime import datetime
 from typing import Dict, List, Union
@@ -8,15 +14,15 @@ from sc_client.models import ScAddr, ScConstruction, ScTemplate
 
 from sc_kpm import ScKeynodes
 from sc_kpm.common import CommonIdentifiers, QuestionStatus, ScAlias
+from sc_kpm.common.identifiers import Idtf
 from sc_kpm.utils.common_utils import check_edge, generate_edge, generate_node, generate_role_relation
 from sc_kpm.utils.search_utils import get_first_search_template_result
 
-Idtf = str
 COMMON_WAIT_TIME = 5
 RREL_PREFIX = "rrel_"
 
 
-def validate_action(action_class: Union[ScAddr, Idtf], action_node: ScAddr) -> bool:
+def check_action_class(action_class: Union[ScAddr, Idtf], action_node: ScAddr) -> bool:
     keynodes = ScKeynodes()
     action_class = keynodes[action_class] if isinstance(action_class, Idtf) else action_class
     templ = ScTemplate()
@@ -40,33 +46,36 @@ def get_action_answer(action: ScAddr) -> ScAddr:
     return result.get(ScAlias.ELEMENT.value) if result else ScAddr(0)
 
 
-def call_agent(
-    arguments: Dict[ScAddr, bool],
+IsDynamic = bool
+
+
+def execute_agent(
+    arguments: Dict[ScAddr, IsDynamic],
     concepts: List[Idtf],
     initiation: Idtf = QuestionStatus.QUESTION_INITIATED.value,
     reaction: QuestionStatus = QuestionStatus.QUESTION_FINISHED_UNSUCCESSFULLY,
     wait_time: int = COMMON_WAIT_TIME,
 ) -> bool:
     keynodes = ScKeynodes()
-    question = call_agent_without_waiting(arguments, concepts, initiation)
+    question = call_agent(arguments, concepts, initiation)
     wait_agent(wait_time, question, keynodes[QuestionStatus.QUESTION_FINISHED.value])
-    result = check_edge(keynodes[reaction.value], sc_types.EDGE_ACCESS_VAR_POS_PERM, question)
+    result = check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, keynodes[reaction.value], question)
     return result
 
 
-def call_agent_without_waiting(
-    arguments: Dict[ScAddr, bool],
+def call_agent(
+    arguments: Dict[ScAddr, IsDynamic],
     concepts: List[Idtf],
     initiation: Idtf = QuestionStatus.QUESTION_INITIATED.value,
 ) -> ScAddr:
     keynodes = ScKeynodes()
-    question = generate_action_with_arguments(arguments, concepts)
-    generate_edge(keynodes[initiation], sc_types.EDGE_ACCESS_CONST_POS_PERM, question)
+    question = _generate_action_with_arguments(arguments, concepts)
+    generate_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, keynodes[initiation], question)
     return question
 
 
-def generate_action_with_arguments(arguments: Dict[ScAddr, bool], concepts: List[Idtf]) -> ScAddr:
-    action = generate_action(concepts)
+def _generate_action_with_arguments(arguments: Dict[ScAddr, IsDynamic], concepts: List[Idtf]) -> ScAddr:
+    action = _generate_action(concepts)
     keynodes = ScKeynodes()
     rrel_dynamic_arg = keynodes[CommonIdentifiers.RREL_DYNAMIC_ARGUMENT.value]
 
@@ -77,13 +86,13 @@ def generate_action_with_arguments(arguments: Dict[ScAddr, bool], concepts: List
             if is_dynamic:
                 variable = generate_node(sc_types.NODE_CONST)
                 generate_role_relation(action, variable, rrel_dynamic_arg, rrel_idtf)
-                generate_edge(variable, sc_types.EDGE_ACCESS_CONST_POS_TEMP, argument)
+                generate_edge(sc_types.EDGE_ACCESS_CONST_POS_TEMP, variable, argument)
             else:
                 generate_role_relation(action, argument, rrel_idtf)
     return action
 
 
-def generate_action(concepts: List[Idtf]) -> ScAddr:
+def _generate_action(concepts: List[Idtf]) -> ScAddr:
     keynodes = ScKeynodes()
     construction = ScConstruction()
     construction.create_node(sc_types.NODE_CONST, ScAlias.ACTION_NODE.value)
@@ -101,15 +110,13 @@ def generate_action(concepts: List[Idtf]) -> ScAddr:
 def wait_agent(seconds: int, question_node: ScAddr, reaction_node: ScAddr):
     start = datetime.now()
     delta = 0
-    while not check_edge(reaction_node, sc_types.EDGE_ACCESS_VAR_POS_PERM, question_node) and delta < seconds:
+    while not check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, reaction_node, question_node) and delta < seconds:
         delta = (datetime.now() - start).seconds
         time.sleep(0.1)
 
 
-def finish_action(action_node: ScAddr, status: QuestionStatus = None) -> ScAddr:
-    keynodes = ScKeynodes()
-    status = status if status else QuestionStatus.QUESTION_FINISHED
-    return generate_edge(keynodes[status.value], sc_types.EDGE_ACCESS_CONST_POS_PERM, action_node)
+def finish_action(action_node: ScAddr, status: QuestionStatus = QuestionStatus.QUESTION_FINISHED) -> ScAddr:
+    return generate_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, ScKeynodes()[status.value], action_node)
 
 
 def finish_action_with_status(action_node: ScAddr, is_success: bool = True) -> None:

@@ -9,7 +9,7 @@ from sc_client.constants.common import ScEventType
 
 from sc_kpm import ScKeynodes, ScAgent
 from sc_kpm.common import CommonIdentifiers, QuestionStatus
-from sc_kpm.utils.action_utils import call_agent, validate_action
+from sc_kpm.utils.action_utils import execute_agent, check_action_class
 from sc_kpm.utils.common_utils import delete_elements, generate_edge, generate_node
 from tests.common_tests import BaseTestCase
 import logging
@@ -28,7 +28,7 @@ class ExampleAgent(ScAgent):
     def on_event(*_, target_node):
         logger.info(f"{ExampleAgent.__name__} is started")
         for status in (QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY, QuestionStatus.QUESTION_FINISHED):
-            generate_edge(ScKeynodes()[status.value], sc_types.EDGE_ACCESS_CONST_POS_PERM, target_node)
+            generate_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, ScKeynodes()[status.value], target_node)
 
 
 class TestActionUtils(BaseTestCase):
@@ -37,21 +37,21 @@ class TestActionUtils(BaseTestCase):
         question = ScKeynodes()[CommonIdentifiers.QUESTION.value]
         test_node = generate_node(sc_types.NODE_CONST)
         action_class_node = generate_node(sc_types.NODE_CONST, action_class)
-        assert validate_action(action_class_node, test_node) is False
-        assert validate_action(action_class, test_node) is False
-        class_edge = generate_edge(action_class_node, sc_types.EDGE_ACCESS_CONST_POS_PERM, test_node)
-        assert validate_action(action_class_node, test_node) is False
-        assert validate_action(action_class, test_node) is False
-        generate_edge(question, sc_types.EDGE_ACCESS_CONST_POS_PERM, test_node)
-        assert validate_action(action_class_node, test_node)
-        assert validate_action(action_class, test_node)
+        assert check_action_class(action_class_node, test_node) is False
+        assert check_action_class(action_class, test_node) is False
+        class_edge = generate_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, action_class_node, test_node)
+        assert check_action_class(action_class_node, test_node) is False
+        assert check_action_class(action_class, test_node) is False
+        generate_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, question, test_node)
+        assert check_action_class(action_class_node, test_node)
+        assert check_action_class(action_class, test_node)
         delete_elements(class_edge)
-        assert validate_action(action_class_node, test_node) is False
-        assert validate_action(action_class, test_node) is False
+        assert check_action_class(action_class_node, test_node) is False
+        assert check_action_class(action_class, test_node) is False
 
     def test_call_agent(self):
         agent = ExampleAgent()
         node = generate_node(sc_types.NODE_CONST, agent.source_node)
         assert node.is_valid()
         agent.register()
-        assert call_agent({}, [], agent.source_node, reaction=QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY)
+        assert execute_agent({}, [], agent.source_node, reaction=QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY)

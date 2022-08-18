@@ -1,3 +1,9 @@
+"""
+This source file is part of an OSTIS project. For the latest info, see https://github.com/ostis-ai
+Distributed under the MIT License
+(See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
+"""
+
 from sc_client.constants import sc_types
 from sc_client.models import ScAddr
 
@@ -12,7 +18,7 @@ def wrap_in_oriented_set(set_node: ScAddr, start_element: ScAddr, *elements: ScA
     nrel_sequence = keynodes[CommonIdentifiers.NREL_BASIC_SEQUENCE.value]
     curr_edge = generate_role_relation(set_node, start_element, rrel_one)
     for next_element in elements:
-        next_edge = generate_edge(set_node, sc_types.EDGE_ACCESS_CONST_POS_PERM, next_element)
+        next_edge = generate_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, set_node, next_element)
         generate_norole_relation(curr_edge, next_edge, nrel_sequence)
         curr_edge = next_edge
 
@@ -25,11 +31,11 @@ def generate_oriented_set(*elements: ScAddr) -> ScAddr:
 
 def wrap_in_structure(struct_node: ScAddr, *elements: ScAddr) -> None:
     for elem in elements:
-        generate_edge(struct_node, sc_types.EDGE_ACCESS_CONST_POS_PERM, elem)
+        generate_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, struct_node, elem)
 
 
 def generate_structure(*elements: ScAddr) -> ScAddr:
     struct_node = generate_node(sc_types.NODE_CONST_STRUCT)
     for elem in elements:
-        generate_edge(struct_node, sc_types.EDGE_ACCESS_CONST_POS_PERM, elem)
+        generate_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, struct_node, elem)
     return struct_node

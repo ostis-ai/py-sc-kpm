@@ -4,7 +4,7 @@ name: pull-request-CI
 
 on:
   pull_request:
-    branches: [ develop, main, release/** ]
+    branches: [ main, release/** ]
 
 jobs:
   check_pr_commits:

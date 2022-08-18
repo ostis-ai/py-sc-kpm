@@ -67,19 +67,19 @@ class TestActionUtils(BaseTestCase):
 
     def test_edge_utils(self):
         source, target = generate_nodes(sc_types.NODE_CONST_CLASS, sc_types.NODE_CONST)
-        empty = get_edge(source, sc_types.EDGE_ACCESS_VAR_POS_PERM, target)
+        empty = get_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, source, target)
         assert empty.is_valid() is False
 
-        edge = generate_edge(source, sc_types.EDGE_ACCESS_CONST_POS_PERM, target)
+        edge = generate_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, source, target)
         assert edge.is_valid()
-        same_edge = get_edge(source, sc_types.EDGE_ACCESS_VAR_POS_PERM, target)
+        same_edge = get_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, source, target)
         assert same_edge.is_valid() and same_edge.value == edge.value
-        assert check_edge(source, sc_types.EDGE_ACCESS_VAR_POS_PERM, target)
+        assert check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, source, target)
 
         edge_counter = 10
         for _ in range(edge_counter):
-            generate_edge(source, sc_types.EDGE_ACCESS_CONST_POS_PERM, target)
-        result = get_edges(source, sc_types.EDGE_ACCESS_VAR_POS_PERM, target)
+            generate_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, source, target)
+        result = get_edges(sc_types.EDGE_ACCESS_VAR_POS_PERM, source, target)
         assert len(result) == edge_counter + 1
         for edge in result:
             assert edge.is_valid()
@@ -91,9 +91,9 @@ class TestActionUtils(BaseTestCase):
         rrel_node = generate_node(sc_types.NODE_CONST_ROLE, rrel_idtf)
         nrel_node = generate_node(sc_types.NODE_CONST_ROLE, nrel_idtf)
 
-        rrel_edge_1 = generate_binary_relation(src, sc_types.EDGE_ACCESS_CONST_POS_PERM, rrel_trg, rrel_node)
+        rrel_edge_1 = generate_binary_relation(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, rrel_trg, rrel_node)
         rrel_edge_2 = generate_role_relation(src, rrel_trg, rrel_node)
-        nrel_edge_1 = generate_binary_relation(src, sc_types.EDGE_D_COMMON_CONST, nrel_trg, nrel_node)
+        nrel_edge_1 = generate_binary_relation(sc_types.EDGE_D_COMMON_CONST, src, nrel_trg, nrel_node)
         nrel_edge_2 = generate_norole_relation(src, nrel_trg, nrel_node)
         edges = [rrel_edge_1, rrel_edge_2, nrel_edge_1, nrel_edge_2]
         for edge in edges:
@@ -118,9 +118,9 @@ class TestActionUtils(BaseTestCase):
 
     def test_deletion_utils(self):
         src, rrel_trg, nrel_trg = generate_nodes(sc_types.NODE_CONST, sc_types.NODE_CONST, sc_types.NODE_CONST)
-        rrel_edge = generate_binary_relation(src, sc_types.EDGE_ACCESS_CONST_POS_PERM, rrel_trg)
+        rrel_edge = generate_binary_relation(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, rrel_trg)
         nrel_edge = generate_norole_relation(src, nrel_trg)
-        assert delete_edge(src, sc_types.EDGE_ACCESS_VAR_POS_PERM, rrel_trg)
+        assert delete_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, src, rrel_trg)
         assert delete_elements(nrel_edge, src, rrel_trg, nrel_trg)
 
         result = client.check_elements(rrel_edge)[0]
