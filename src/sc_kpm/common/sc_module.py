@@ -4,12 +4,15 @@ Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
 
+import logging
 from abc import ABC, abstractmethod
 from typing import List
 
 from sc_client import client
 
 from sc_kpm.common.sc_agent import ScAgent
+
+logger = logging.getLogger(__name__)
 
 
 class ScModuleAbstract(ABC):
@@ -36,7 +39,7 @@ class ScModule(ScModuleAbstract):
                         raise TypeError("All elements of the module agents list must be agents")
                     agent.register()
                 self._is_registered = True
-                print(f"{self.__class__.__name__} is registred")
+                logger.debug("%s is registered", self.__class__.__name__)
             else:
                 raise RuntimeError("Cannot register agents: connection to the sc-server is not established")
 
@@ -44,4 +47,4 @@ class ScModule(ScModuleAbstract):
         for agent in self.agents:
             agent.unregister()
         self._is_registered = False
-        print(f"{self.__class__.__name__} is unregistred")
+        logger.debug("%s is unregistered", self.__class__.__name__)
