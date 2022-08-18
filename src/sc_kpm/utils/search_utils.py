@@ -15,21 +15,21 @@ from sc_kpm.common import CommonIdentifiers, ScAlias
 from sc_kpm.utils.common_utils import get_link_content, search_role_relation_template
 
 
-def get_structure_elements(structure: ScAddr) -> List[ScAddr]:
-    structure_elements = []
+def get_set_elements(set_node: ScAddr) -> List[ScAddr]:
+    elements = []
     for target in (sc_types.LINK_VAR, sc_types.NODE_VAR):
         templ = ScTemplate()
-        templ.triple(structure, sc_types.EDGE_ACCESS_VAR_POS_PERM, target)
+        templ.triple(set_node, sc_types.EDGE_ACCESS_VAR_POS_PERM, target)
         search_results = client.template_search(templ)
         for result in search_results:
-            structure_elements.append(result.get(2))
-    return structure_elements
+            elements.append(result.get(2))
+    return elements
 
 
-def get_elements_from_oriented_set(set_node: ScAddr) -> List[ScAddr]:
+def get_oriented_set_elements(set_node: ScAddr) -> List[ScAddr]:
     def get_next_element(access_edge: ScAddr = None):
         if access_edge:
-            elem_search_result = search_next_element_template(set_node, access_edge)
+            elem_search_result = _search_next_element_template(set_node, access_edge)
         else:
             keynodes = ScKeynodes()
             elem_search_result = search_role_relation_template(set_node, keynodes[CommonIdentifiers.RREL_ONE.value])
@@ -39,7 +39,7 @@ def get_elements_from_oriented_set(set_node: ScAddr) -> List[ScAddr]:
         return elem_search_result.get(ScAlias.ACCESS_EDGE.value)
 
     elements = []
-    elements_count = get_power_of_set(set_node)
+    elements_count = get_set_power(set_node)
     if elements_count:
         edge = get_next_element()
         while edge:
@@ -47,7 +47,7 @@ def get_elements_from_oriented_set(set_node: ScAddr) -> List[ScAddr]:
     return elements
 
 
-def search_next_element_template(set_node: ScAddr, cur_element_edge: ScAddr) -> Optional[ScTemplateResult]:
+def _search_next_element_template(set_node: ScAddr, cur_element_edge: ScAddr) -> Optional[ScTemplateResult]:
     keynodes = ScKeynodes()
     templ = ScTemplate()
     templ.triple_with_relation(
@@ -58,25 +58,17 @@ def search_next_element_template(set_node: ScAddr, cur_element_edge: ScAddr) -> 
         keynodes[CommonIdentifiers.NREL_BASIC_SEQUENCE.value],
     )
     templ.triple(set_node, ScAlias.ACCESS_EDGE.value, [sc_types.UNKNOWN, ScAlias.ELEMENT.value])
-    return get_first_search_template_result(templ)
+    return _get_first_search_template_result(templ)
 
 
-def get_first_search_template_result(template: ScTemplate) -> Optional[ScTemplateResult]:
+def _get_first_search_template_result(template: ScTemplate) -> Optional[ScTemplateResult]:
     search_results = client.template_search(template)
     if search_results:
         return search_results[0]
     return None
 
 
-def get_content_from_links_set(links_set_node: ScAddr) -> str:
-    links = get_elements_from_oriented_set(links_set_node)
-    parts = []
-    for link in links:
-        parts.append(get_link_content(link))
-    return "".join(parts)
-
-
-def get_power_of_set(source: ScAddr) -> int:
+def get_set_power(source: ScAddr) -> int:
     templ = ScTemplate()
     templ.triple(source, sc_types.EDGE_ACCESS_VAR_POS_PERM, sc_types.UNKNOWN)
     search_results = client.template_search(templ)

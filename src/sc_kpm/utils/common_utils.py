@@ -4,7 +4,6 @@ Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
 
-import logging
 from typing import List, Optional
 
 from sc_client import client
@@ -25,21 +24,21 @@ from sc_kpm.common import CommonIdentifiers, ScAlias
 from sc_kpm.common.identifiers import Idtf
 
 
-def generate_nodes(*node_types: ScType) -> List[ScAddr]:
+def create_nodes(*node_types: ScType) -> List[ScAddr]:
     construction = ScConstruction()
     for node_type in node_types:
         construction.create_node(node_type)
     return client.create_elements(construction)
 
 
-def generate_node(node_type: ScType, sys_idtf: str = None) -> ScAddr:
+def create_node(node_type: ScType, sys_idtf: str = None) -> ScAddr:
     if sys_idtf:
         params = ScIdtfResolveParams(idtf=sys_idtf, type=node_type)
         return client.resolve_keynodes(params)[0]
-    return generate_nodes(node_type)[0]
+    return create_nodes(node_type)[0]
 
 
-def generate_links(
+def create_links(
         *contents: str,
         content_type: ScLinkContentType = ScLinkContentType.STRING,
         link_type: ScType = sc_types.LINK_CONST,
@@ -51,21 +50,21 @@ def generate_links(
     return client.create_elements(construction)
 
 
-def generate_link(
+def create_link(
         content: str,
         content_type: ScLinkContentType = ScLinkContentType.STRING,
         link_type: ScType = sc_types.LINK_CONST
 ) -> ScAddr:
-    return generate_links(content, content_type=content_type, link_type=link_type)[0]
+    return create_links(content, content_type=content_type, link_type=link_type)[0]
 
 
-def generate_edge(edge_type: ScType, src: ScAddr, trg: ScAddr) -> ScAddr:
+def create_edge(edge_type: ScType, src: ScAddr, trg: ScAddr) -> ScAddr:
     construction = ScConstruction()
     construction.create_edge(edge_type, src, trg)
     return client.create_elements(construction)[0]
 
 
-def generate_binary_relation(edge_type: ScType, src: ScAddr, trg: ScAddr, *relations: ScAddr) -> ScAddr:
+def create_binary_relation(edge_type: ScType, src: ScAddr, trg: ScAddr, *relations: ScAddr) -> ScAddr:
     construction = ScConstruction()
     construction.create_edge(edge_type, src, trg, ScAlias.RELATION_EDGE.value)
     for relation in relations:
@@ -73,28 +72,30 @@ def generate_binary_relation(edge_type: ScType, src: ScAddr, trg: ScAddr, *relat
     return client.create_elements(construction)[0]
 
 
-def generate_role_relation(src: ScAddr, trg: ScAddr, *rrel_nodes: ScAddr) -> ScAddr:
-    return generate_binary_relation(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, trg, *rrel_nodes)
+def create_role_relation(src: ScAddr, trg: ScAddr, *rrel_nodes: ScAddr) -> ScAddr:
+    return create_binary_relation(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, trg, *rrel_nodes)
 
 
-def generate_norole_relation(src: ScAddr, trg: ScAddr, *nrel_nodes: ScAddr) -> ScAddr:
-    return generate_binary_relation(sc_types.EDGE_D_COMMON_CONST, src, trg, *nrel_nodes)
+def create_norole_relation(src: ScAddr, trg: ScAddr, *nrel_nodes: ScAddr) -> ScAddr:
+    return create_binary_relation(sc_types.EDGE_D_COMMON_CONST, src, trg, *nrel_nodes)
 
 
 def check_edge(edge_type: ScType, source: ScAddr, target: ScAddr) -> bool:
-    return get_edge(edge_type, source, target).is_valid()
+    return get_edge(source, target, edge_type).is_valid()
 
 
-def get_edges(edge_type: ScType, source: ScAddr, target: ScAddr) -> List[ScAddr]:
-    templ = ScTemplate()
-    templ.triple(source, edge_type, target)
-    results = client.template_search(templ)
-    logging.debug(results)
-    return [result.get(1) for result in results]
+def get_edges(source: ScAddr, target: ScAddr, *edge_types: ScType) -> List[ScAddr]:
+    result_edges = []
+    for edge_type in edge_types:
+        templ = ScTemplate()
+        templ.triple(source, edge_type, target)
+        results = client.template_search(templ)
+        result_edges.extend([result.get(1) for result in results])
+    return result_edges
 
 
-def get_edge(edge_type: ScType, source: ScAddr, target: ScAddr) -> ScAddr:
-    edges = get_edges(edge_type, source, target)
+def get_edge(source: ScAddr, target: ScAddr, edge_type: ScType) -> ScAddr:
+    edges = get_edges(source, target, edge_type)
     return edges[0] if edges else ScAddr(0)
 
 
@@ -143,5 +144,5 @@ def delete_elements(*addrs: ScAddr) -> bool:
     return client.delete_elements(*addrs)
 
 
-def delete_edge(edge_type: ScType, source: ScAddr, target: ScAddr) -> bool:
-    return delete_elements(*get_edges(edge_type, source, target))
+def delete_edges(source: ScAddr, target: ScAddr, *edge_types: ScType) -> bool:
+    return delete_elements(*get_edges(source, target, *edge_types))

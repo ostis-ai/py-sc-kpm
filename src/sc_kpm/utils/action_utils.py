@@ -15,8 +15,8 @@ from sc_client.models import ScAddr, ScConstruction, ScTemplate
 from sc_kpm import ScKeynodes
 from sc_kpm.common import CommonIdentifiers, QuestionStatus, ScAlias
 from sc_kpm.common.identifiers import Idtf
-from sc_kpm.utils.common_utils import check_edge, generate_edge, generate_node, generate_role_relation
-from sc_kpm.utils.search_utils import get_first_search_template_result
+from sc_kpm.utils.common_utils import check_edge, create_edge, create_node, create_role_relation
+from sc_kpm.utils.search_utils import _get_first_search_template_result
 
 COMMON_WAIT_TIME = 5
 RREL_PREFIX = "rrel_"
@@ -42,7 +42,7 @@ def get_action_answer(action: ScAddr) -> ScAddr:
         sc_types.EDGE_ACCESS_VAR_POS_PERM,
         keynodes[CommonIdentifiers.NREL_ANSWER.value],
     )
-    result = get_first_search_template_result(templ)
+    result = _get_first_search_template_result(templ)
     return result.get(ScAlias.ELEMENT.value) if result else ScAddr(0)
 
 
@@ -69,13 +69,13 @@ def call_agent(
     initiation: Idtf = QuestionStatus.QUESTION_INITIATED.value,
 ) -> ScAddr:
     keynodes = ScKeynodes()
-    question = _generate_action_with_arguments(arguments, concepts)
-    generate_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, keynodes[initiation], question)
+    question = _create_action_with_arguments(arguments, concepts)
+    create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, keynodes[initiation], question)
     return question
 
 
-def _generate_action_with_arguments(arguments: Dict[ScAddr, IsDynamic], concepts: List[Idtf]) -> ScAddr:
-    action = _generate_action(concepts)
+def _create_action_with_arguments(arguments: Dict[ScAddr, IsDynamic], concepts: List[Idtf]) -> ScAddr:
+    action = _create_action(concepts)
     keynodes = ScKeynodes()
     rrel_dynamic_arg = keynodes[CommonIdentifiers.RREL_DYNAMIC_ARGUMENT.value]
 
@@ -84,22 +84,22 @@ def _generate_action_with_arguments(arguments: Dict[ScAddr, IsDynamic], concepts
             rrel_idtf = keynodes[f"{RREL_PREFIX}{index}"]
             is_dynamic = arguments[argument]
             if is_dynamic:
-                variable = generate_node(sc_types.NODE_CONST)
-                generate_role_relation(action, variable, rrel_dynamic_arg, rrel_idtf)
-                generate_edge(sc_types.EDGE_ACCESS_CONST_POS_TEMP, variable, argument)
+                variable = create_node(sc_types.NODE_CONST)
+                create_role_relation(action, variable, rrel_dynamic_arg, rrel_idtf)
+                create_edge(sc_types.EDGE_ACCESS_CONST_POS_TEMP, variable, argument)
             else:
-                generate_role_relation(action, argument, rrel_idtf)
+                create_role_relation(action, argument, rrel_idtf)
     return action
 
 
-def _generate_action(concepts: List[Idtf]) -> ScAddr:
+def _create_action(concepts: List[Idtf]) -> ScAddr:
     keynodes = ScKeynodes()
     construction = ScConstruction()
     construction.create_node(sc_types.NODE_CONST, ScAlias.ACTION_NODE.value)
     for concept in concepts:
         construction.create_edge(
             sc_types.EDGE_ACCESS_CONST_POS_PERM,
-            keynodes.__getitem__(concept, sc_types.NODE_CONST_CLASS),
+            keynodes.resolve(concept, sc_types.NODE_CONST_CLASS),
             ScAlias.ACTION_NODE.value,
         )
     addr_list = client.create_elements(construction)
@@ -116,7 +116,7 @@ def wait_agent(seconds: int, question_node: ScAddr, reaction_node: ScAddr):
 
 
 def finish_action(action_node: ScAddr, status: QuestionStatus = QuestionStatus.QUESTION_FINISHED) -> ScAddr:
-    return generate_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, ScKeynodes()[status.value], action_node)
+    return create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, ScKeynodes()[status.value], action_node)
 
 
 def finish_action_with_status(action_node: ScAddr, is_success: bool = True) -> None:
