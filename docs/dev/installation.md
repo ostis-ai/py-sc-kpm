@@ -3,8 +3,8 @@
 Install all project:
 
 ```sh
-git clone https://github.com/ostis-ai/py-sc-client.git
-cd py-sc-client
+git clone https://github.com/ostis-ai/py-sc-kpm.git
+cd py-sc-kpm
 pip install -r requirements-dev.txt
 ```
 
