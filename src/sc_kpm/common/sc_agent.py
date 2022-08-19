@@ -60,5 +60,5 @@ class ScAgent(ScAgentAbstract):
         raise NotImplementedError
 
     @abstractmethod
-    def on_event(self, source_node: ScAddr, edge: ScAddr, target_node: ScAddr) -> None:
+    def on_event(self, source_node: ScAddr, edge: ScAddr, target_node: ScAddr) -> ScResult:
         raise NotImplementedError

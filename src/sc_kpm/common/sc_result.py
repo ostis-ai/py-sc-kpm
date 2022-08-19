@@ -8,16 +8,16 @@ from enum import Enum
 
 
 class ScResult(Enum):
-    # SC_RESULT_ERROR should be 0 anytime
-    SC_RESULT_ERROR = 0  # unknown error
-    # SC_RESULT_OK should be 1 anytime
-    SC_RESULT_OK = 1  # no any error
-    SC_RESULT_ERROR_INVALID_PARAMS = 2  # invalid function parameters error
-    SC_RESULT_ERROR_INVALID_TYPE = 3  # invalid type error
-    SC_RESULT_ERROR_IO = 4  # input/output error
-    SC_RESULT_ERROR_INVALID_STATE = 5  # invalid state of processed object
-    SC_RESULT_ERROR_NOT_FOUND = 6  # item not found
-    SC_RESULT_ERROR_NO_WRITE_RIGHTS = 7  # no rights to change or delete object
-    SC_RESULT_ERROR_NO_READ_RIGHTS = 8  # no rights to read object
-    SC_RESULT_NO = 9  # no any result
-    SC_RESULT_UNKNOWN = 10  # result unknown
+    # ScResult.ERROR should be 0 anytime
+    ERROR = 0  # unknown error
+    # ScResult.OK should be 1 anytime
+    OK = 1  # no any error
+    ERROR_INVALID_PARAMS = 2  # invalid function parameters error
+    ERROR_INVALID_TYPE = 3  # invalid type error
+    ERROR_IO = 4  # input/output error
+    ERROR_INVALID_STATE = 5  # invalid state of processed object
+    ERROR_NOT_FOUND = 6  # item not found
+    ERROR_NO_WRITE_RIGHTS = 7  # no rights to change or delete object
+    ERROR_NO_READ_RIGHTS = 8  # no rights to read object
+    NO = 9  # no any result
+    UNKNOWN = 10  # result unknown
