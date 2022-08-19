@@ -54,8 +54,6 @@ class ScServer(ScServerAbstract):
     def _serve(self):
         while client.is_connected() and self.is_active:
             time.sleep(self.ping_freq)
-            if len(self.modules) == 0:
-                break
         self._unregister_sc_modules()
         self._clear_modules()
 
