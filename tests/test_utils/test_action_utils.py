@@ -39,7 +39,6 @@ class ScModuleTest(ScModule):
 
 class TestActionUtils(BaseTestCase):
     def test_validate_action(self):
-        self.assertTrue(True)
         action_class = "test_action_class"
         question = ScKeynodes()[CommonIdentifiers.QUESTION.value]
         test_node = create_node(sc_types.NODE_CONST)
@@ -57,7 +56,6 @@ class TestActionUtils(BaseTestCase):
         assert check_action_class(action_class, test_node) is False
 
     def test_call_agent(self):
-        self.assertTrue(True)
         module = ScModuleTest()
         server.add_modules(module)
         node = create_node(sc_types.NODE_CONST, ScAgentTest.source_node)
