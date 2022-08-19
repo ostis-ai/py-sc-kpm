@@ -6,7 +6,7 @@ Distributed under the MIT License
 
 from unittest import TestCase
 
-from sc_kpm.common.sc_server import ScServer
+from sc_kpm import ScServer
 
 SC_SERVER_URL = "ws://localhost:8090/ws_json"
 server = ScServer(SC_SERVER_URL)
