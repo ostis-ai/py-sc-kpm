@@ -31,14 +31,13 @@ def create_oriented_set(*elements: ScAddr) -> ScAddr:
 
 
 def wrap_in_set(set_node: ScAddr, *elements: ScAddr) -> None:
-    for elem in elements:
-        create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, set_node, elem)
+    for element in elements:
+        create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, set_node, element)
 
 
 def create_set(set_type: ScType, *elements: ScAddr) -> ScAddr:
     set_node = create_node(set_type)
-    for elem in elements:
-        create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, set_node, elem)
+    wrap_in_set(set_node, *elements)
     return set_node
 
 
