@@ -26,16 +26,16 @@ class ScModule(ScModuleAbstract):
     agents: List[ScAgent] = []
 
     def __init__(self):
-        self.is_registred = False
+        self._is_registered = False
 
     def register(self) -> None:
-        if not self.is_registred:
+        if not self._is_registered:
             if client.is_connected():
                 for agent in self.agents:
                     if not isinstance(agent, ScAgent):
                         raise TypeError("All elements of the module agents list must be agents")
                     agent.register()
-                self.is_registred = True
+                self._is_registered = True
                 print(f"{self.__class__.__name__} is registred")
             else:
                 raise RuntimeError("Cannot register agents: connection to the sc-server is not established")
@@ -43,5 +43,5 @@ class ScModule(ScModuleAbstract):
     def unregister(self) -> None:
         for agent in self.agents:
             agent.unregister()
-        self.is_registred = False
+        self._is_registered = False
         print(f"{self.__class__.__name__} is unregistred")
