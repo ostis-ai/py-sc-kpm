@@ -20,13 +20,11 @@ logger = logging.getLogger(__name__)
 
 
 class ScAgentAbstract(ABC):
-    source_node: Union[str, ScAddr] = None
-    event_type: ScEventType = ScEventType.UNKNOWN
-
-    def __init__(self):
+    def __init__(self, source_node: Union[str, ScAddr] = ScAddr(0), event_type: ScEventType = ScEventType.UNKNOWN):
+        self.source_node = source_node
+        self.event_type = event_type
         self.keynodes = ScKeynodes()
         self._event = None
-        self.setup()
 
     def register(self) -> None:
         def _callback(addr: ScAddr, edge_addr: ScAddr, other_addr: ScAddr) -> None:
@@ -46,22 +44,12 @@ class ScAgentAbstract(ABC):
             logger.debug("%s event is destroyed", self.__class__.__name__)
         logger.debug("%s is unregistered", self.__class__.__name__)
 
-    @classmethod
-    @abstractmethod
-    def setup(cls):
-        raise NotImplementedError
-
     @abstractmethod
     def on_event(self, source_node: ScAddr, edge: ScAddr, target_node: ScAddr) -> ScResult:
         raise NotImplementedError
 
 
 class ScAgent(ScAgentAbstract):
-    @classmethod
-    @abstractmethod
-    def setup(cls):
-        raise NotImplementedError
-
     @abstractmethod
     def on_event(self, source_node: ScAddr, edge: ScAddr, target_node: ScAddr) -> ScResult:
         raise NotImplementedError
