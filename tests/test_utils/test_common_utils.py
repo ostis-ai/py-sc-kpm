@@ -30,6 +30,7 @@ from tests.common_tests import BaseTestCase
 
 class TestActionUtils(BaseTestCase):
     def test_node_utils(self):
+        self.assertTrue(True)
         node = create_node(sc_types.NODE_VAR_ROLE)
         node_2 = create_node(sc_types.NODE_CONST_CLASS)
         assert node.is_valid() and node_2.is_valid()
@@ -50,6 +51,7 @@ class TestActionUtils(BaseTestCase):
             assert result_item.is_node() and result_item.is_const()
 
     def test_link_utils(self):
+        self.assertTrue(True)
         link_content = "my link content"
         link = create_link(link_content)
         assert link.is_valid()
@@ -66,6 +68,7 @@ class TestActionUtils(BaseTestCase):
             assert result_item.is_valid() and result_item.is_link()
 
     def test_edge_utils(self):
+        self.assertTrue(True)
         source, target = create_nodes(sc_types.NODE_CONST_CLASS, sc_types.NODE_CONST)
         empty = get_edge(source, target, sc_types.EDGE_ACCESS_VAR_POS_PERM)
         assert empty.is_valid() is False
@@ -85,6 +88,7 @@ class TestActionUtils(BaseTestCase):
             assert edge.is_valid()
 
     def test_relation_utils(self):
+        self.assertTrue(True)
         rrel_idtf = "rrel_test"
         nrel_idtf = "nrel_test"
         src, rrel_trg, nrel_trg = create_nodes(sc_types.NODE_CONST, sc_types.NODE_CONST, sc_types.NODE_CONST)
@@ -112,11 +116,13 @@ class TestActionUtils(BaseTestCase):
         assert expected_empty.is_valid() is False
 
     def test_get_system_idtf(self):
+        self.assertTrue(True)
         test_idtf = "test_identifier"
         test_node = create_node(sc_types.NODE_CONST_ROLE, test_idtf)
         assert get_system_idtf(test_node) == test_idtf
 
     def test_deletion_utils(self):
+        self.assertTrue(True)
         src, rrel_trg, nrel_trg = create_nodes(sc_types.NODE_CONST, sc_types.NODE_CONST, sc_types.NODE_CONST)
         rrel_edge = create_binary_relation(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, rrel_trg)
         nrel_edge = create_norole_relation(src, nrel_trg)

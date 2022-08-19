@@ -35,7 +35,7 @@ def wrap_in_set(set_node: ScAddr, *elements: ScAddr) -> None:
         create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, set_node, elem)
 
 
-def create_set(set_type: ScType = sc_types.NODE_CONST, *elements: ScAddr) -> ScAddr:
+def create_set(set_type: ScType, *elements: ScAddr) -> ScAddr:
     set_node = create_node(set_type)
     for elem in elements:
         create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, set_node, elem)

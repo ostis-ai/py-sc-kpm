@@ -12,7 +12,7 @@ from sc_client.models import ScAddr, ScTemplate, ScTemplateResult
 
 from sc_kpm import ScKeynodes
 from sc_kpm.common import CommonIdentifiers, ScAlias
-from sc_kpm.utils.common_utils import get_link_content, search_role_relation_template
+from sc_kpm.utils.common_utils import search_role_relation_template
 
 
 def get_set_elements(set_node: ScAddr) -> List[ScAddr]:
