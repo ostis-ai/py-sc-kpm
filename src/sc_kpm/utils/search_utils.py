@@ -16,35 +16,32 @@ from sc_kpm.utils.common_utils import search_role_relation_template
 
 
 def get_set_elements(set_node: ScAddr) -> List[ScAddr]:
-    elements = []
-    for target in (sc_types.LINK_VAR, sc_types.NODE_VAR):
-        templ = ScTemplate()
-        templ.triple(set_node, sc_types.EDGE_ACCESS_VAR_POS_PERM, target)
-        search_results = client.template_search(templ)
-        for result in search_results:
-            elements.append(result.get(2))
+    templ = ScTemplate()
+    templ.triple(set_node, sc_types.EDGE_ACCESS_VAR_POS_PERM, sc_types.UNKNOWN)
+    search_results = client.template_search(templ)
+    elements = [result.get(2) for result in search_results]
+    elements.reverse()  # Elements are found in reverse order
     return elements
 
 
 def get_oriented_set_elements(set_node: ScAddr) -> List[ScAddr]:
-    def get_next_element(access_edge: ScAddr = None):
-        if access_edge:
-            elem_search_result = _search_next_element_template(set_node, access_edge)
-        else:
-            keynodes = ScKeynodes()
-            elem_search_result = search_role_relation_template(set_node, keynodes[CommonIdentifiers.RREL_ONE.value])
-        if elem_search_result is None:
-            return None
-        elements.append(elem_search_result.get(ScAlias.ELEMENT.value))
-        return elem_search_result.get(ScAlias.ACCESS_EDGE.value)
-
     elements = []
-    elements_count = get_set_power(set_node)
-    if elements_count:
-        edge = get_next_element()
-        while edge:
-            edge = get_next_element(edge)
+    next_edge = _get_next_element(set_node, elements)
+    while next_edge := _get_next_element(set_node, elements, next_edge):
+        pass
     return elements
+
+
+def _get_next_element(set_node: ScAddr, elements: List[ScAddr], access_edge: ScAddr = None) -> Optional[ScAddr]:
+    if access_edge:
+        elem_search_result = _search_next_element_template(set_node, access_edge)
+    else:
+        keynodes = ScKeynodes()
+        elem_search_result = search_role_relation_template(set_node, keynodes[CommonIdentifiers.RREL_ONE.value])
+    if elem_search_result is None:
+        return None
+    elements.append(elem_search_result.get(ScAlias.ELEMENT.value))
+    return elem_search_result.get(ScAlias.ACCESS_EDGE.value)
 
 
 def _search_next_element_template(set_node: ScAddr, cur_element_edge: ScAddr) -> Optional[ScTemplateResult]:
@@ -62,8 +59,7 @@ def _search_next_element_template(set_node: ScAddr, cur_element_edge: ScAddr) ->
 
 
 def _get_first_search_template_result(template: ScTemplate) -> Optional[ScTemplateResult]:
-    search_results = client.template_search(template)
-    if search_results:
+    if search_results := client.template_search(template):
         return search_results[0]
     return None
 
