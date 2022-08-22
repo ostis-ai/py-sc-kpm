@@ -25,7 +25,7 @@ class TestSearchUtils(BaseTestCase):
         ]
         wrap_in_set(set_node, *elements)
         search_results = get_set_elements(set_node)
-        assert are_elements_equal(search_results, elements)
+        assert _are_elements_equal(search_results, elements)
 
     def test_get_oriented_set_elements(self):
         set_node = create_node(sc_types.NODE_CONST)
@@ -36,7 +36,7 @@ class TestSearchUtils(BaseTestCase):
         ]
         wrap_in_oriented_set(set_node, *elements)
         search_results = get_oriented_set_elements(set_node)
-        assert are_elements_equal(search_results, elements)
+        assert _are_elements_equal(search_results, elements)
 
     def test_get_set_power(self):
         set_node = create_node(sc_types.NODE_CONST)
@@ -50,7 +50,7 @@ class TestSearchUtils(BaseTestCase):
         assert search_results == len(elements)
 
 
-def are_elements_equal(elements1: List[ScAddr], elements2: List[ScAddr]):
+def _are_elements_equal(elements1: List[ScAddr], elements2: List[ScAddr]):
     """Temporary while ScAddr don't have __eq__ method"""
     if len(elements1) != len(elements2):
         return False

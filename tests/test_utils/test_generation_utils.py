@@ -27,14 +27,14 @@ class TestGenerationUtils(BaseTestCase):
         start_element = create_node(sc_types.NODE_CONST)
         other_element = create_node(sc_types.NODE_CONST)
         wrap_in_oriented_set(set_node, start_element, other_element)
-        template = _create_oriented_set_template(set_node, start_element, other_element)
+        template = _get_oriented_set_template(set_node, start_element, other_element)
         assert client.template_search(template)
 
     def test_create_oriented_set(self):
         start_element = create_node(sc_types.NODE_CONST)
         other_element = create_node(sc_types.NODE_CONST)
         set_node = create_oriented_set(start_element, other_element)
-        template = _create_oriented_set_template(set_node, start_element, other_element)
+        template = _get_oriented_set_template(set_node, start_element, other_element)
         assert client.template_search(template)
 
     def test_wrap_in_set(self):
@@ -42,27 +42,27 @@ class TestGenerationUtils(BaseTestCase):
         element1 = create_node(sc_types.NODE_CONST)
         element2 = create_node(sc_types.NODE_CONST)
         wrap_in_set(set_node, element1, element2)
-        template = _create_set_template(set_node, element1, element2)
+        template = _get_set_template(set_node, element1, element2)
         assert client.template_search(template)
 
     def test_create_set(self):
         element1 = create_node(sc_types.NODE_CONST)
         element2 = create_node(sc_types.NODE_CONST)
         set_node = create_set(sc_types.NODE_CONST, element1, element2)
-        template = _create_set_template(set_node, element1, element2)
+        template = _get_set_template(set_node, element1, element2)
         assert client.template_search(template)
 
     def test_create_structure(self):
         element1 = create_node(sc_types.NODE_CONST)
         element2 = create_node(sc_types.NODE_CONST)
         set_node = create_structure(element1, element2)
-        template = _create_set_template(set_node, element1, element2)
+        template = _get_set_template(set_node, element1, element2)
         search_results = client.template_search(template)
         assert search_results
         assert search_results[0].addrs[0].value == set_node.value
 
 
-def _create_oriented_set_template(set_node: ScAddr, start_element: ScAddr, other_element: ScAddr) -> ScTemplate:
+def _get_oriented_set_template(set_node: ScAddr, start_element: ScAddr, other_element: ScAddr) -> ScTemplate:
     keynodes = ScKeynodes()
     rrel_one = keynodes[CommonIdentifiers.RREL_ONE.value]
     nrel_sequence = keynodes[CommonIdentifiers.NREL_BASIC_SEQUENCE.value]
@@ -90,7 +90,7 @@ def _create_oriented_set_template(set_node: ScAddr, start_element: ScAddr, other
     return template
 
 
-def _create_set_template(set_node: ScAddr, element1: ScAddr, element2: ScAddr) -> ScTemplate:
+def _get_set_template(set_node: ScAddr, element1: ScAddr, element2: ScAddr) -> ScTemplate:
     template = ScTemplate()
     template.triple(
         set_node,
@@ -105,7 +105,7 @@ def _create_set_template(set_node: ScAddr, element1: ScAddr, element2: ScAddr) -
     return template
 
 
-def _create_structure_template(element1: ScAddr, element2: ScAddr) -> ScTemplate:
+def _get_structure_template(element1: ScAddr, element2: ScAddr) -> ScTemplate:
     template = ScTemplate()
     template.triple(
         [sc_types.NODE_VAR_STRUCT, set_node := "_set_node"],
