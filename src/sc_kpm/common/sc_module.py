@@ -6,6 +6,7 @@ Distributed under the MIT License
 
 import logging
 from abc import ABC, abstractmethod
+from collections import namedtuple
 from typing import List
 
 from sc_client import client
@@ -13,6 +14,8 @@ from sc_client import client
 from sc_kpm.common.sc_agent import ScAgent
 
 logger = logging.getLogger(__name__)
+
+RegisterParams = namedtuple("RegisterParams", "ScAgent element event_type")
 
 
 class ScModuleAbstract(ABC):
@@ -26,25 +29,24 @@ class ScModuleAbstract(ABC):
 
 
 class ScModule(ScModuleAbstract):
-    agents: List[ScAgent] = []
-
-    def __init__(self):
-        self._is_registered = False
+    params: List[RegisterParams] = []
+    _agents: List[ScAgent] = []
 
     def register(self) -> None:
-        if not self._is_registered:
+        if not self._agents:
             if client.is_connected():
-                for agent in self.agents:
-                    if not isinstance(agent, ScAgent):
-                        raise TypeError("All elements of the module agents list must be agents")
-                    agent.register()
-                self._is_registered = True
+                for param in self.params:
+                    if not isinstance(param, RegisterParams):
+                        raise TypeError("All elements of the module params list must be RegisterParams instance")
+                    agent = param.ScAgent()
+                    agent.register(param.element, param.event_type)
+                    self._agents.append(agent)
                 logger.debug("%s is registered", self.__class__.__name__)
             else:
                 raise RuntimeError("Cannot register agents: connection to the sc-server is not established")
 
     def unregister(self) -> None:
-        for agent in self.agents:
+        for agent in self._agents:
             agent.unregister()
-        self._is_registered = False
+        self._agents.clear()
         logger.debug("%s is unregistered", self.__class__.__name__)
