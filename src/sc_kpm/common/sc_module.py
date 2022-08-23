@@ -7,11 +7,13 @@ Distributed under the MIT License
 import logging
 from abc import ABC, abstractmethod
 from collections import namedtuple
-from typing import List
+from typing import List, Type, Union
 
 from sc_client import client
+from sc_client.constants.common import ScEventType
+from sc_client.models import ScAddr
 
-from sc_kpm.common.sc_agent import ScAgent
+from sc_kpm.common.sc_agent import ScAgentAbstract
 
 logger = logging.getLogger(__name__)
 
@@ -20,33 +22,39 @@ RegisterParams = namedtuple("RegisterParams", "ScAgent element event_type")
 
 class ScModuleAbstract(ABC):
     @abstractmethod
-    def register(self) -> None:
+    def _register(self) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    def unregister(self) -> None:
+    def _unregister(self) -> None:
         raise NotImplementedError
 
 
 class ScModule(ScModuleAbstract):
-    params: List[RegisterParams] = []
-    _agents: List[ScAgent] = []
+    _reg_params: List[RegisterParams] = []
+    _agents: List[ScAgentAbstract] = []
 
-    def register(self) -> None:
-        if not self._agents:
+    def register_agent(
+        self, agent: Type[ScAgentAbstract], element: Union[str, ScAddr], event_type: ScEventType
+    ) -> ScModuleAbstract:
+        self._reg_params.append(RegisterParams(agent, element, event_type))
+        return self
+
+    def _register(self) -> None:
+        if self._reg_params and not self._agents:
             if client.is_connected():
-                for param in self.params:
-                    if not isinstance(param, RegisterParams):
+                for params in self._reg_params:
+                    if not isinstance(params, RegisterParams):
                         raise TypeError("All elements of the module params list must be RegisterParams instance")
-                    agent = param.ScAgent()
-                    agent.register(param.element, param.event_type)
+                    agent = params.ScAgent()
+                    agent._register(params.element, params.event_type)  # pylint: disable=protected-access
                     self._agents.append(agent)
                 logger.debug("%s is registered", self.__class__.__name__)
             else:
                 raise RuntimeError("Cannot register agents: connection to the sc-server is not established")
 
-    def unregister(self) -> None:
+    def _unregister(self) -> None:
         for agent in self._agents:
-            agent.unregister()
+            agent._unregister()  # pylint: disable=protected-access
         self._agents.clear()
         logger.debug("%s is unregistered", self.__class__.__name__)

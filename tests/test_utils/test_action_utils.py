@@ -31,7 +31,8 @@ class ScAgentTest(ScAgent):
 
 
 class ScModuleTest(ScModule):
-    params = [RegisterParams(ScAgentTest, test_node_idtf, ScEventType.ADD_OUTGOING_EDGE)]
+    def __init__(self):
+        self.register_agent(ScAgentTest, test_node_idtf, ScEventType.ADD_OUTGOING_EDGE)
 
 
 class TestActionUtils(BaseTestCase):

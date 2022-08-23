@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 class ScAgentAbstract(ABC):
     _event: ScEvent = None
 
-    def register(self, element: Union[str, ScAddr] = ScAddr(0), event_type: ScEventType = ScEventType.UNKNOWN) -> None:
+    def _register(self, element: Union[str, ScAddr] = ScAddr(0), event_type: ScEventType = ScEventType.UNKNOWN) -> None:
         def _callback(addr: ScAddr, edge_addr: ScAddr, other_addr: ScAddr) -> None:
             self.on_event(addr, edge_addr, other_addr)
 
@@ -34,7 +34,7 @@ class ScAgentAbstract(ABC):
         self._event = sc_event[0]
         logger.debug("%s is registered", self.__class__.__name__)
 
-    def unregister(self) -> None:
+    def _unregister(self) -> None:
         if isinstance(self._event, ScEvent):
             client.events_destroy(self._event)
             logger.debug("%s event is destroyed", self.__class__.__name__)
