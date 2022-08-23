@@ -27,6 +27,11 @@ class TestSearchUtils(BaseTestCase):
         search_results = get_set_elements(set_node)
         assert _are_elements_equal(search_results, elements)
 
+    def test_get_set_elements_empty(self):
+        set_node = create_node(sc_types.NODE_CONST)
+        search_results = get_set_elements(set_node)
+        assert search_results == []
+
     def test_get_oriented_set_elements(self):
         set_node = create_node(sc_types.NODE_CONST)
         elements = [
@@ -38,6 +43,11 @@ class TestSearchUtils(BaseTestCase):
         search_results = get_oriented_set_elements(set_node)
         assert _are_elements_equal(search_results, elements)
 
+    def test_get_oriented_set_elements_empty(self):
+        set_node = create_node(sc_types.NODE_CONST)
+        search_results = get_oriented_set_elements(set_node)
+        assert search_results == []
+
     def test_get_set_power(self):
         set_node = create_node(sc_types.NODE_CONST)
         elements = [
@@ -48,6 +58,11 @@ class TestSearchUtils(BaseTestCase):
         wrap_in_set(set_node, *elements)
         search_results = get_set_power(set_node)
         assert search_results == len(elements)
+
+    def test_get_set_power_empty(self):
+        set_node = create_node(sc_types.NODE_CONST)
+        search_results = get_set_power(set_node)
+        assert search_results == 0
 
 
 def _are_elements_equal(elements1: List[ScAddr], elements2: List[ScAddr]):
