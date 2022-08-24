@@ -45,7 +45,7 @@ def create_links(
 ) -> List[ScAddr]:
     construction = ScConstruction()
     for content in contents:
-        link_content = ScLinkContent(content, content_type.value)
+        link_content = ScLinkContent(content, content_type)
         construction.create_link(link_type, link_content)
     return client.create_elements(construction)
 
