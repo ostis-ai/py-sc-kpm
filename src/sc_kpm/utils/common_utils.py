@@ -4,7 +4,7 @@ Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
 
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from sc_client import client
 from sc_client.constants import sc_types
@@ -39,7 +39,7 @@ def create_node(node_type: ScType, sys_idtf: str = None) -> ScAddr:
 
 
 def create_links(
-    *contents: str,
+    *contents: Union[str, int],
     content_type: ScLinkContentType = ScLinkContentType.STRING,
     link_type: ScType = sc_types.LINK_CONST,
 ) -> List[ScAddr]:
@@ -51,7 +51,9 @@ def create_links(
 
 
 def create_link(
-    content: str, content_type: ScLinkContentType = ScLinkContentType.STRING, link_type: ScType = sc_types.LINK_CONST
+    content: Union[str, int],
+    content_type: ScLinkContentType = ScLinkContentType.STRING,
+    link_type: ScType = sc_types.LINK_CONST,
 ) -> ScAddr:
     return create_links(content, content_type=content_type, link_type=link_type)[0]
 
@@ -133,7 +135,7 @@ def get_element_by_role_relation(src: ScAddr, rrel_node: ScAddr) -> ScAddr:
     return search_result.get(ScAlias.ELEMENT.value) if search_result else ScAddr(0)
 
 
-def get_link_content(link: ScAddr) -> str:
+def get_link_content(link: ScAddr) -> Union[str, int]:
     content_part = client.get_link_content(link)
     return content_part[0].data
 
