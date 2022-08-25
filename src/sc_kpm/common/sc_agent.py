@@ -22,12 +22,12 @@ logger = logging.getLogger(__name__)
 class ScAgentAbstract(ABC):
     _event: ScEvent = None
 
-    def _register(self, element: Union[str, ScAddr] = ScAddr(0), event_type: ScEventType = ScEventType.UNKNOWN) -> None:
+    def _register(self, element: Union[str, ScAddr], event_type: ScEventType) -> None:
         def _callback(addr: ScAddr, edge_addr: ScAddr, other_addr: ScAddr) -> ScResult:
             return self.on_event(addr, edge_addr, other_addr)
 
         source_node_addr = ScKeynodes()[element] if isinstance(element, str) else element
-        if source_node_addr is None:
+        if not source_node_addr:
             raise InvalidValueError("Element with provided address does not exist.")
         event_params = ScEventParams(source_node_addr, event_type, _callback)
         sc_event = client.events_create(event_params)
