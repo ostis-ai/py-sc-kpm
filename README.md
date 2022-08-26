@@ -320,8 +320,13 @@ def create_structure(*elements: ScAddr) -> ScAddr: ...
 ```
 
 Set consists of elements and set node that connects them.
-In structure sc_type of `set_node` is `sc_types.NODE_CONST_STRUCT`
-!!!IMAGE HERE!!!
+
+![set](docs/schemes/png/set.png)
+
+In structure sc_type of main node is `sc_types.NODE_CONST_STRUCT`
+
+![structure](docs/schemes/png/structure.png)
+![structure2](docs/schemes/png/structure_circuit.png)
 
 ```python
 from sc_kpm import sc_types
@@ -346,7 +351,7 @@ def create_oriented_set(*elements: ScAddr) -> ScAddr: ...
 ```
 
 Oriented set is more complex, but is has orientation
-!!!IMAGE HERE!!!
+![oriented set](docs/schemes/png/oriented_set.png)
 
 ```python
 from sc_kpm import sc_types
@@ -414,6 +419,117 @@ assert power == len(elements)
 
 ## Action utils
 
-Utils to work with actions
+Utils to work with actions, events and agents
 
-_in process_
+!!!IMAGE HERE!!!
+
+### Check action class
+
+```pycon
+def check_action_class(action_class: Union[ScAddr, Idtf], action_node: ScAddr) -> bool: ...
+```
+
+True if action class has connection to action node.
+You can use identifier of action class instead of ScAddr
+
+![check action class](docs/schemes/png/check_action_class.png)
+
+```python
+from sc_kpm import sc_types, ScKeynodes
+from sc_kpm.common.identifiers import CommonIdentifiers
+from sc_kpm.utils.common_utils import create_node, create_edge
+from sc_kpm.utils.action_utils import check_action_class
+
+action_node = create_node(sc_types.NODE_CONST)
+create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, ScKeynodes()[CommonIdentifiers.QUESTION.value], action_node)
+action_class = create_node(sc_types.NODE_CONST_CLASS, "some_classification")
+create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, action_class, action_node)
+
+assert check_action_class(action_class, action_node)  # True
+# or
+assert check_action_class("some_classification", action_node)  # True
+```
+
+### Get action answer
+
+```pycon
+def get_action_answer(action_node: ScAddr) -> ScAddr: ...
+```
+
+Get structure with output of action
+
+![agent answer](docs/schemes/png/agent_answer.png)
+
+```python
+from sc_kpm import sc_types, ScKeynodes
+from sc_kpm.common.identifiers import CommonIdentifiers
+from sc_kpm.utils.common_utils import create_node, create_edge
+from sc_kpm.utils.action_utils import get_action_answer
+
+action_node = create_node(sc_types.NODE_CONST)
+answer_struct = create_node(sc_types.NODE_CONST_STRUCT)
+edge = create_edge(sc_types.EDGE_D_COMMON_CONST, action_node, answer_struct)
+create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, ScKeynodes()[CommonIdentifiers.NREL_ANSWER.value], edge)
+
+result = get_action_answer(action_node)
+assert result == answer_struct
+```
+
+### Call and execute agent
+
+```pycon
+def call_agent(
+    arguments: Dict[ScAddr, IsDynamic],
+    concepts: List[Idtf],
+    initiation: Idtf = QuestionStatus.QUESTION_INITIATED.value,
+) -> ScAddr: ...
+
+def execute_agent(
+    arguments: Dict[ScAddr, IsDynamic],
+    concepts: List[Idtf],
+    initiation: Idtf = QuestionStatus.QUESTION_INITIATED.value,
+    reaction: QuestionStatus = QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY,
+    wait_time: int = COMMON_WAIT_TIME,
+) -> bool: ...
+```
+
+Call agent, wait for it some seconds, and return if there is reaction
+!!!IMAGE HERE!!!
+
+```python
+...
+```
+
+### Finish action
+
+```pycon
+def finish_action(action_node: ScAddr, status: QuestionStatus = QuestionStatus.QUESTION_FINISHED) -> ScAddr: ...
+def finish_action_with_status(action_node: ScAddr, is_success: bool = True) -> None: ...
+```
+
+Function `finish_action` connects status class to action node.
+`finish_action_with_status` connects `question_finished` and `question_finished_(un)successfully` statuses to it.
+
+![finish_action](docs/schemes/png/finish_action.png)
+
+```python
+from sc_kpm import sc_types, ScKeynodes
+from sc_kpm.common.identifiers import QuestionStatus
+from sc_kpm.utils.common_utils import create_node, check_edge
+from sc_kpm.utils.action_utils import finish_action, finish_action_with_status
+
+action_node = create_node(sc_types.NODE_CONST)
+
+finish_action_with_status(action_node)
+# or
+finish_action_with_status(action_node, True)
+# # or
+finish_action(action_node, QuestionStatus.QUESTION_FINISHED)
+finish_action(action_node, QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY)
+
+keynodes = ScKeynodes()
+question_finished = keynodes[QuestionStatus.QUESTION_FINISHED.value]
+question_finished_successfully = keynodes[QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY.value]
+assert check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, question_finished, action_node)
+assert check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, question_finished_successfully, action_node)
+```

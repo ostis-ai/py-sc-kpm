@@ -32,11 +32,11 @@ def check_action_class(action_class: Union[ScAddr, Idtf], action_node: ScAddr) -
     return len(search_results) > 0
 
 
-def get_action_answer(action: ScAddr) -> ScAddr:
-    templ = ScTemplate()
+def get_action_answer(action_node: ScAddr) -> ScAddr:
     keynodes = ScKeynodes()
+    templ = ScTemplate()
     templ.triple_with_relation(
-        action,
+        action_node,
         [sc_types.EDGE_D_COMMON_VAR, ScAlias.RELATION_EDGE.value],
         [sc_types.NODE_VAR_STRUCT, ScAlias.ELEMENT.value],
         sc_types.EDGE_ACCESS_VAR_POS_PERM,
@@ -53,7 +53,7 @@ def execute_agent(
     arguments: Dict[ScAddr, IsDynamic],
     concepts: List[Idtf],
     initiation: Idtf = QuestionStatus.QUESTION_INITIATED.value,
-    reaction: QuestionStatus = QuestionStatus.QUESTION_FINISHED_UNSUCCESSFULLY,
+    reaction: QuestionStatus = QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY,
     wait_time: int = COMMON_WAIT_TIME,
 ) -> bool:
     keynodes = ScKeynodes()
@@ -79,10 +79,9 @@ def _create_action_with_arguments(arguments: Dict[ScAddr, IsDynamic], concepts: 
     keynodes = ScKeynodes()
     rrel_dynamic_arg = keynodes[CommonIdentifiers.RREL_DYNAMIC_ARGUMENT.value]
 
-    for index, argument in enumerate(arguments, 1):
+    for index, (argument, is_dynamic) in enumerate(arguments.items(), 1):
         if argument.is_valid():
             rrel_idtf = keynodes[f"{RREL_PREFIX}{index}"]
-            is_dynamic = arguments[argument]
             if is_dynamic:
                 variable = create_node(sc_types.NODE_CONST)
                 create_role_relation(action, variable, rrel_dynamic_arg, rrel_idtf)
@@ -120,9 +119,10 @@ def finish_action(action_node: ScAddr, status: QuestionStatus = QuestionStatus.Q
 
 
 def finish_action_with_status(action_node: ScAddr, is_success: bool = True) -> None:
-    if is_success:
-        status_node = QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY
-    else:
-        status_node = QuestionStatus.QUESTION_FINISHED_UNSUCCESSFULLY
-    finish_action(action_node, status_node)
     finish_action(action_node, QuestionStatus.QUESTION_FINISHED)
+    finish_action(
+        action_node,
+        QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY
+        if is_success
+        else QuestionStatus.QUESTION_FINISHED_UNSUCCESSFULLY,
+    )
