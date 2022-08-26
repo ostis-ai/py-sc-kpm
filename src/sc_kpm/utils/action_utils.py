@@ -75,20 +75,21 @@ def call_agent(
 
 
 def _create_action_with_arguments(arguments: Dict[ScAddr, IsDynamic], concepts: List[Idtf]) -> ScAddr:
-    action = _create_action(concepts)
+    action_node = _create_action(concepts)
     keynodes = ScKeynodes()
     rrel_dynamic_arg = keynodes[CommonIdentifiers.RREL_DYNAMIC_ARGUMENT.value]
 
+    argument: ScAddr
     for index, (argument, is_dynamic) in enumerate(arguments.items(), 1):
         if argument.is_valid():
             rrel_idtf = keynodes[f"{RREL_PREFIX}{index}"]
             if is_dynamic:
-                variable = create_node(sc_types.NODE_CONST)
-                create_role_relation(action, variable, rrel_dynamic_arg, rrel_idtf)
+                variable = create_node(sc_types.NODE_CONST)  # TODO: var or const?
+                create_role_relation(action_node, variable, rrel_dynamic_arg, rrel_idtf)
                 create_edge(sc_types.EDGE_ACCESS_CONST_POS_TEMP, variable, argument)
             else:
-                create_role_relation(action, argument, rrel_idtf)
-    return action
+                create_role_relation(action_node, argument, rrel_idtf)
+    return action_node
 
 
 def _create_action(concepts: List[Idtf]) -> ScAddr:
@@ -101,8 +102,8 @@ def _create_action(concepts: List[Idtf]) -> ScAddr:
             keynodes.resolve(concept, sc_types.NODE_CONST_CLASS),
             ScAlias.ACTION_NODE.value,
         )
-    addr_list = client.create_elements(construction)
-    return addr_list[0]
+    action_node = client.create_elements(construction)[0]
+    return action_node
 
 
 # TODO rewrite to event

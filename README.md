@@ -421,7 +421,7 @@ assert power == len(elements)
 
 Utils to work with actions, events and agents
 
-!!!IMAGE HERE!!!
+![agent_base](docs/schemes/png/agent_base.png)
 
 ### Check action class
 
@@ -494,7 +494,8 @@ def execute_agent(
 ```
 
 Call agent, wait for it some seconds, and return if there is reaction
-!!!IMAGE HERE!!!
+
+![execute_agent](docs/schemes/png/execute_agent.png)
 
 ```python
 ...
