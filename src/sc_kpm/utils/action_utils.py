@@ -16,7 +16,7 @@ from sc_kpm import ScKeynodes
 from sc_kpm.common import CommonIdentifiers, QuestionStatus, ScAlias
 from sc_kpm.common.identifiers import Idtf
 from sc_kpm.utils.common_utils import check_edge, create_edge, create_node, create_role_relation
-from sc_kpm.utils.search_utils import _get_first_search_template_result
+from sc_kpm.utils.retrieve_utils import _get_first_search_template_result
 
 COMMON_WAIT_TIME = 5
 RREL_PREFIX = "rrel_"

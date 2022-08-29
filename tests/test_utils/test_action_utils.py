@@ -11,7 +11,6 @@ from sc_client.constants.common import ScEventType
 
 from sc_kpm import ScAgent, ScKeynodes, ScModule
 from sc_kpm.common import CommonIdentifiers, QuestionStatus
-from sc_kpm.common.sc_module import RegisterParams
 from sc_kpm.common.sc_result import ScResult
 from sc_kpm.utils.action_utils import check_action_class, execute_agent
 from sc_kpm.utils.common_utils import create_edge, create_node, delete_elements
@@ -32,7 +31,8 @@ class ScAgentTest(ScAgent):
 
 class ScModuleTest(ScModule):
     def __init__(self):
-        self.register_agent(ScAgentTest, test_node_idtf, ScEventType.ADD_OUTGOING_EDGE)
+        self.add_agent(ScAgentTest, test_node_idtf, ScEventType.ADD_OUTGOING_EDGE)
+        self.add_agent(ScAgentTest, test_node_idtf, ScEventType.ADD_INGOING_EDGE)
 
 
 class TestActionUtils(BaseTestCase):

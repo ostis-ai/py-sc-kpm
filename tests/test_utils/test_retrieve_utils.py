@@ -7,8 +7,8 @@ Distributed under the MIT License
 from sc_client.constants import sc_types
 
 from sc_kpm.utils.common_utils import create_link, create_node
-from sc_kpm.utils.generation_utils import wrap_in_oriented_set, wrap_in_set
-from sc_kpm.utils.search_utils import get_oriented_set_elements, get_set_elements, get_set_power
+from sc_kpm.utils.creation_utils import wrap_in_oriented_set, wrap_in_set
+from sc_kpm.utils.retrieve_utils import get_oriented_set_elements, get_set_elements, get_set_power
 from tests.common_tests import BaseTestCase
 
 

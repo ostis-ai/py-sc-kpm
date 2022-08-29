@@ -11,7 +11,7 @@ from sc_client.models import ScAddr, ScTemplate
 from sc_kpm import ScKeynodes
 from sc_kpm.common import CommonIdentifiers
 from sc_kpm.utils.common_utils import create_node
-from sc_kpm.utils.generation_utils import (
+from sc_kpm.utils.creation_utils import (
     create_oriented_set,
     create_set,
     create_structure,

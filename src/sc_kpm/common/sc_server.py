@@ -69,11 +69,11 @@ class ScServer(ScServerAbstract):
         for module in self.modules:
             if not isinstance(module, ScModule):
                 raise TypeError("All elements of the module list must be ScModule instances")
-            module._register()  # pylint: disable=protected-access
+            module.try_register()  # pylint: disable=protected-access
 
     def _unregister_sc_modules(self) -> None:
         for module in self.modules:
-            module._unregister()  # pylint: disable=protected-access
+            module.unregister()  # pylint: disable=protected-access
 
     def _clear_modules(self):
         self.modules = []

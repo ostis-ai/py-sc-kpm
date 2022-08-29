@@ -23,8 +23,8 @@ class ScAgentAbstract(ABC):
     _event: ScEvent = None
 
     def _register(self, element: Union[str, ScAddr] = ScAddr(0), event_type: ScEventType = ScEventType.UNKNOWN) -> None:
-        def _callback(addr: ScAddr, edge_addr: ScAddr, other_addr: ScAddr) -> None:
-            self.on_event(addr, edge_addr, other_addr)
+        def _callback(addr: ScAddr, edge_addr: ScAddr, other_addr: ScAddr) -> ScResult:
+            return self.on_event(addr, edge_addr, other_addr)
 
         source_node_addr = ScKeynodes()[element] if isinstance(element, str) else element
         if source_node_addr is None:

@@ -22,11 +22,11 @@ RegisterParams = namedtuple("RegisterParams", "ScAgent element event_type")
 
 class ScModuleAbstract(ABC):
     @abstractmethod
-    def _register(self) -> None:
+    def try_register(self) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    def _unregister(self) -> None:
+    def unregister(self) -> None:
         raise NotImplementedError
 
 
@@ -34,14 +34,14 @@ class ScModule(ScModuleAbstract):
     _reg_params: List[RegisterParams] = []
     _agents: List[ScAgentAbstract] = []
 
-    def register_agent(
+    def add_agent(
         self, agent: Type[ScAgentAbstract], element: Union[str, ScAddr], event_type: ScEventType
     ) -> ScModuleAbstract:
         self._reg_params.append(RegisterParams(agent, element, event_type))
         return self
 
-    def _register(self) -> None:
-        if self._reg_params and not self._agents:
+    def try_register(self) -> None:
+        if self._reg_params and not self.is_registred():
             if client.is_connected():
                 for params in self._reg_params:
                     if not isinstance(params, RegisterParams):
@@ -53,7 +53,10 @@ class ScModule(ScModuleAbstract):
             else:
                 raise RuntimeError("Cannot register agents: connection to the sc-server is not established")
 
-    def _unregister(self) -> None:
+    def is_registred(self) -> bool:
+        return bool(self._agents)
+
+    def unregister(self) -> None:
         for agent in self._agents:
             agent._unregister()  # pylint: disable=protected-access
         self._agents.clear()

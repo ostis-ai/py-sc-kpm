@@ -32,6 +32,13 @@ def get_oriented_set_elements(set_node: ScAddr) -> List[ScAddr]:
     return elements
 
 
+def get_set_power(source: ScAddr) -> int:
+    templ = ScTemplate()
+    templ.triple(source, sc_types.EDGE_ACCESS_VAR_POS_PERM, sc_types.UNKNOWN)
+    search_results = client.template_search(templ)
+    return len(search_results)
+
+
 def _get_next_element(set_node: ScAddr, elements: List[ScAddr], access_edge: ScAddr = None) -> Optional[ScAddr]:
     if access_edge:
         elem_search_result = _search_next_element_template(set_node, access_edge)
@@ -62,10 +69,3 @@ def _get_first_search_template_result(template: ScTemplate) -> Optional[ScTempla
     if search_results := client.template_search(template):
         return search_results[0]
     return None
-
-
-def get_set_power(source: ScAddr) -> int:
-    templ = ScTemplate()
-    templ.triple(source, sc_types.EDGE_ACCESS_VAR_POS_PERM, sc_types.UNKNOWN)
-    search_results = client.template_search(templ)
-    return len(search_results)
