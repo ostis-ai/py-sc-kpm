@@ -5,7 +5,7 @@ Distributed under the MIT License
 """
 
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, List, Union
 
 from sc_client import client
@@ -19,7 +19,6 @@ from sc_kpm.utils.common_utils import check_edge, create_edge, create_node, crea
 from sc_kpm.utils.retrieve_utils import _get_first_search_template_result
 
 COMMON_WAIT_TIME = 5
-RREL_PREFIX = "rrel_"
 
 
 def check_action_class(action_class: Union[ScAddr, Idtf], action_node: ScAddr) -> bool:
@@ -82,13 +81,13 @@ def _create_action_with_arguments(arguments: Dict[ScAddr, IsDynamic], concepts: 
     argument: ScAddr
     for index, (argument, is_dynamic) in enumerate(arguments.items(), 1):
         if argument.is_valid():
-            rrel_idtf = keynodes[f"{RREL_PREFIX}{index}"]
+            rrel_i = keynodes[f"rrel_{index}"]
             if is_dynamic:
-                variable = create_node(sc_types.NODE_CONST)  # TODO: var or const?
-                create_role_relation(action_node, variable, rrel_dynamic_arg, rrel_idtf)
-                create_edge(sc_types.EDGE_ACCESS_CONST_POS_TEMP, variable, argument)
+                dynamic_node = create_node(sc_types.NODE_CONST)
+                create_role_relation(action_node, dynamic_node, rrel_dynamic_arg, rrel_i)
+                create_edge(sc_types.EDGE_ACCESS_CONST_POS_TEMP, dynamic_node, argument)
             else:
-                create_role_relation(action_node, argument, rrel_idtf)
+                create_role_relation(action_node, argument, rrel_i)
     return action_node
 
 
@@ -108,10 +107,8 @@ def _create_action(concepts: List[Idtf]) -> ScAddr:
 
 # TODO rewrite to event
 def wait_agent(seconds: int, question_node: ScAddr, reaction_node: ScAddr):
-    start = datetime.now()
-    delta = 0
-    while not check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, reaction_node, question_node) and delta < seconds:
-        delta = (datetime.now() - start).seconds
+    finish = datetime.now() + timedelta(seconds=seconds)
+    while not check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, reaction_node, question_node) and datetime.now() < finish:
         time.sleep(0.1)
 
 

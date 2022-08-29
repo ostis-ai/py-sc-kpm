@@ -27,7 +27,7 @@ A singleton dictionary object which provides the ability
 to cache the identifier and ScAddr of keynodes stored in the KB.
 Create an instance of the ScKeynodes class to get access to the cache:
 
-```pycon
+```python
 from sc_kpm import ScKeynodes
 
 keynodes = ScKeynodes()
@@ -35,14 +35,14 @@ keynodes = ScKeynodes()
 
 Get the provided identifier:
 
-```pycon
+```python
 keynodes["identifier_of_keynode"]  # returns an ScAddr of the given identifier
 keynodes["not_stored_in_kb"]  # returns an invalid ScAddr if an identifier does not exist in the memory
 ```
 
 Use _resolve()_ method to resolve identifiers:
 
-```pycon
+```python
 my_class_node = keynodes.resolve("my_class_node", sc_types.NODE_CONST_CLASS)
 ```
 
@@ -50,7 +50,7 @@ my_class_node = keynodes.resolve("my_class_node", sc_types.NODE_CONST_CLASS)
 
 A class for handling a single ScEvent. Define your agents like this:
 
-```pycon
+```python
 from sc_kpm import ScAgent
 
 
@@ -65,7 +65,7 @@ class ScAgentTest(ScAgent):
 
 A class for registration and handling multiple ScAgent objects. Define your modules like this:
 
-```pycon
+```python
 from sc_kpm import ScModule
 
 
@@ -80,7 +80,7 @@ class ScModuleTest(ScModule):
 
 A class for serving ScModule objects. Initialize and run server like this:
 
-```pycon
+```python
 from sc_kpm import ScServer
 
 SC_SERVER_URL = "ws://localhost:8090/ws_json"
@@ -91,7 +91,7 @@ server.start()
 
 You can register your modules wherever you want. Manage your modules like this:
 
-```pycon
+```python
 module = ScModuleTest()
 server.add_modules(module)
 ...
@@ -101,7 +101,7 @@ server.remove_modules(module)
 
 After stopping server, all modules and agents will be deactivated.
 
-```pycon
+```python
 server.stop()
 ...
 ```
@@ -117,7 +117,7 @@ There are utils to work with basic elements
 
 ### Nodes creating
 
-```pycon
+```python
 def create_node(node_type: ScType, sys_idtf: str = None) -> ScAddr: ...
 def create_nodes(*node_types: ScType) -> List[ScAddr]: ...
 ```
@@ -137,7 +137,7 @@ elements = create_nodes(sc_types.NODE_CONST, sc_types.NODE_VAR)  # [ScAddr(...),
 
 ### Edges creating
 
-```pycon
+```python
 def create_edge(edge_type: ScType, src: ScAddr, trg: ScAddr) -> ScAddr: ...
 ```
 
@@ -155,7 +155,7 @@ assert src.is_valid() and trg.is_valid() and msg_edge.is_valid()
 
 ### Links creating
 
-```pycon
+```python
 def create_link(
     content: Union[str, int],
     content_type: ScLinkContentType = ScLinkContentType.STRING,
@@ -184,7 +184,7 @@ names = create_links("Sam", "Pit")  # [ScAddr(...), ScAddr(...)]
 
 ### Relations creating
 
-```pycon
+```python
 def create_binary_relation(edge_type: ScType, src: ScAddr, trg: ScAddr, *relations: ScAddr) -> ScAddr: ...
 def create_role_relation(src: ScAddr, trg: ScAddr, *rrel_nodes: ScAddr) -> ScAddr: ...
 def create_norole_relation(src: ScAddr, trg: ScAddr, *nrel_nodes: ScAddr) -> ScAddr: ...
@@ -208,7 +208,7 @@ nrel = create_norole_relation(src, trg, create_node(sc_types.NODE_CONST_NOROLE, 
 
 ### Deleting utils
 
-```pycon
+```python
 def delete_elements(*addrs: ScAddr) -> bool: ...
 def delete_edges(source: ScAddr, target: ScAddr, *edge_types: ScType) -> bool: ...
 ```
@@ -232,7 +232,7 @@ delete_edges(src, trg, sc_types.EDGE_ACCESS_CONST_POS_PERM)  # True
 
 _**NOTE: Use VAR type instead of CONST in getting utils**_
 
-```pycon
+```python
 def get_edge(source: ScAddr, target: ScAddr, edge_type: ScType) -> ScAddr: ...
 def get_edges(source: ScAddr, target: ScAddr, *edge_types: ScType) -> List[ScAddr]: ...
 ```
@@ -256,7 +256,7 @@ assert edges == [edge1, edge2]
 
 ### Getting by role relation
 
-```pycon
+```python
 def get_element_by_role_relation(src: ScAddr, rrel_node: ScAddr) -> ScAddr: ...
 ```
 
@@ -277,7 +277,7 @@ assert result == trg
 
 ### Getting link content
 
-```pycon
+```python
 def get_link_content(link: ScAddr) -> Union[str, int]: ...
 ```
 
@@ -291,7 +291,7 @@ content = get_link_content(water)  # "water"
 
 ### Getting system identifier
 
-```pycon
+```python
 def get_system_idtf(addr: ScAddr) -> str: ...
 ```
 
@@ -313,7 +313,7 @@ There are functions to work with sets: create, wrap, etc.
 
 ### Set and structure creating
 
-```pycon
+```python
 def wrap_in_set(set_node: ScAddr, *elements: ScAddr) -> None: ...
 def create_set(set_type: ScType, *elements: ScAddr) -> ScAddr: ...
 def create_structure(*elements: ScAddr) -> ScAddr: ...
@@ -345,7 +345,7 @@ struct_node = create_structure(*elements)  # ScAddr(...)
 
 ### Oriented set creating
 
-```pycon
+```python
 def wrap_in_oriented_set(set_node: ScAddr, start_element: ScAddr, *elements: ScAddr) -> None: ...
 def create_oriented_set(*elements: ScAddr) -> ScAddr: ...
 ```
@@ -372,7 +372,7 @@ There are utils fot searching elements of sets and their power
 
 ### Getting sets elements
 
-```pycon
+```python
 def get_set_elements(set_node: ScAddr) -> List[ScAddr]: ...
 def get_oriented_set_elements(set_node: ScAddr) -> List[ScAddr]: ...
 ```
@@ -398,7 +398,7 @@ assert search_results == elements
 
 ### Getting set power
 
-```pycon
+```python
 def get_set_power(set_node: ScAddr) -> int: ...
 ```
 
@@ -425,7 +425,7 @@ Utils to work with actions, events and agents
 
 ### Check action class
 
-```pycon
+```python
 def check_action_class(action_class: Union[ScAddr, Idtf], action_node: ScAddr) -> bool: ...
 ```
 
@@ -452,7 +452,7 @@ assert check_action_class("some_classification", action_node)  # True
 
 ### Get action answer
 
-```pycon
+```python
 def get_action_answer(action_node: ScAddr) -> ScAddr: ...
 ```
 
@@ -477,7 +477,7 @@ assert result == answer_struct
 
 ### Call and execute agent
 
-```pycon
+```python
 def call_agent(
     arguments: Dict[ScAddr, IsDynamic],
     concepts: List[Idtf],
@@ -503,7 +503,7 @@ Call agent, wait for it some seconds, and return if there is reaction
 
 ### Finish action
 
-```pycon
+```python
 def finish_action(action_node: ScAddr, status: QuestionStatus = QuestionStatus.QUESTION_FINISHED) -> ScAddr: ...
 def finish_action_with_status(action_node: ScAddr, is_success: bool = True) -> None: ...
 ```
