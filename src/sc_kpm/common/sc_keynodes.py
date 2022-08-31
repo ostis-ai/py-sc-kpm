@@ -4,8 +4,6 @@ Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
 
-from typing import Optional
-
 from sc_client import client
 from sc_client.constants.sc_types import ScType
 from sc_client.models import ScAddr, ScIdtfResolveParams
@@ -27,7 +25,7 @@ class ScKeynodes(dict):
             self._instance[identifier] = addr
         return addr
 
-    def resolve(self, identifier: str, sc_type: Optional[ScType] = None) -> ScAddr:
+    def resolve(self, identifier: str, sc_type: ScType = None) -> ScAddr:
         addr = self._instance.get(identifier)
         if addr is None:
             params = ScIdtfResolveParams(idtf=identifier, type=sc_type)
