@@ -67,13 +67,15 @@ A class for registration and handling multiple ScAgent objects. Define your modu
 
 ```python
 from sc_kpm import ScModule
+from sc_kpm.common.sc_module import RegisterParams
+from sc_client.constants.common import ScEventType
 
 
 class ScModuleTest(ScModule):
-    agents = [
-        ScAgentTest(source_node=test_node_idtf, event_type=ScEventType.ADD_OUTGOING_EDGE),
-        ...
+    _reg_params = [
+        RegisterParams(ScAgentTest, "action_node", ScEventType.ADD_OUTGOING_EDGE)
     ]
+
 ```
 
 ### ScServer
@@ -119,6 +121,8 @@ There are utils to work with basic elements
 
 ```python
 def create_node(node_type: ScType, sys_idtf: str = None) -> ScAddr: ...
+
+
 def create_nodes(*node_types: ScType) -> List[ScAddr]: ...
 ```
 
@@ -157,15 +161,16 @@ assert src.is_valid() and trg.is_valid() and msg_edge.is_valid()
 
 ```python
 def create_link(
-    content: Union[str, int],
-    content_type: ScLinkContentType = ScLinkContentType.STRING,
-    link_type: ScType = sc_types.LINK_CONST
+        content: Union[str, int],
+        content_type: ScLinkContentType = ScLinkContentType.STRING,
+        link_type: ScType = sc_types.LINK_CONST
 ) -> ScAddr: ...
 
+
 def create_links(
-    *contents: Union[str, int],
-    content_type: ScLinkContentType = ScLinkContentType.STRING,
-    link_type: ScType = sc_types.LINK_CONST,
+        *contents: Union[str, int],
+        content_type: ScLinkContentType = ScLinkContentType.STRING,
+        link_type: ScType = sc_types.LINK_CONST,
 ) -> List[ScAddr]: ...
 ```
 
@@ -186,7 +191,11 @@ names = create_links("Sam", "Pit")  # [ScAddr(...), ScAddr(...)]
 
 ```python
 def create_binary_relation(edge_type: ScType, src: ScAddr, trg: ScAddr, *relations: ScAddr) -> ScAddr: ...
+
+
 def create_role_relation(src: ScAddr, trg: ScAddr, *rrel_nodes: ScAddr) -> ScAddr: ...
+
+
 def create_norole_relation(src: ScAddr, trg: ScAddr, *nrel_nodes: ScAddr) -> ScAddr: ...
 ```
 
@@ -210,6 +219,8 @@ nrel = create_norole_relation(src, trg, create_node(sc_types.NODE_CONST_NOROLE, 
 
 ```python
 def delete_elements(*addrs: ScAddr) -> bool: ...
+
+
 def delete_edges(source: ScAddr, target: ScAddr, *edge_types: ScType) -> bool: ...
 ```
 
@@ -234,6 +245,8 @@ _**NOTE: Use VAR type instead of CONST in getting utils**_
 
 ```python
 def get_edge(source: ScAddr, target: ScAddr, edge_type: ScType) -> ScAddr: ...
+
+
 def get_edges(source: ScAddr, target: ScAddr, *edge_types: ScType) -> List[ScAddr]: ...
 ```
 
@@ -315,7 +328,11 @@ There are functions to work with sets: create, wrap, etc.
 
 ```python
 def wrap_in_set(set_node: ScAddr, *elements: ScAddr) -> None: ...
+
+
 def create_set(set_type: ScType, *elements: ScAddr) -> ScAddr: ...
+
+
 def create_structure(*elements: ScAddr) -> ScAddr: ...
 ```
 
@@ -347,6 +364,8 @@ struct_node = create_structure(*elements)  # ScAddr(...)
 
 ```python
 def wrap_in_oriented_set(set_node: ScAddr, start_element: ScAddr, *elements: ScAddr) -> None: ...
+
+
 def create_oriented_set(*elements: ScAddr) -> ScAddr: ...
 ```
 
@@ -374,6 +393,8 @@ There are utils fot searching elements of sets and their power
 
 ```python
 def get_set_elements(set_node: ScAddr) -> List[ScAddr]: ...
+
+
 def get_oriented_set_elements(set_node: ScAddr) -> List[ScAddr]: ...
 ```
 
@@ -479,17 +500,18 @@ assert result == answer_struct
 
 ```python
 def call_agent(
-    arguments: Dict[ScAddr, IsDynamic],
-    concepts: List[Idtf],
-    initiation: Idtf = QuestionStatus.QUESTION_INITIATED.value,
+        arguments: Dict[ScAddr, IsDynamic],
+        concepts: List[Idtf],
+        initiation: Idtf = QuestionStatus.QUESTION_INITIATED.value,
 ) -> ScAddr: ...
 
+
 def execute_agent(
-    arguments: Dict[ScAddr, IsDynamic],
-    concepts: List[Idtf],
-    initiation: Idtf = QuestionStatus.QUESTION_INITIATED.value,
-    reaction: QuestionStatus = QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY,
-    wait_time: int = COMMON_WAIT_TIME,
+        arguments: Dict[ScAddr, IsDynamic],
+        concepts: List[Idtf],
+        initiation: Idtf = QuestionStatus.QUESTION_INITIATED.value,
+        reaction: QuestionStatus = QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY,
+        wait_time: int = COMMON_WAIT_TIME,  # 5
 ) -> bool: ...
 ```
 
@@ -498,13 +520,100 @@ Call agent, wait for it some seconds, and return if there is reaction
 ![execute_agent](docs/schemes/png/execute_agent.png)
 
 ```python
-...
+from sc_client.models import ScLinkContentType
+
+from sc_kpm import ScAgent, ScKeynodes, ScModule, ScServer
+from sc_kpm.common.identifiers import CommonIdentifiers, QuestionStatus
+from sc_kpm.common.sc_result import ScResult
+from sc_kpm.utils.action_utils import (
+    ScAddr,
+    call_agent,
+    check_action_class,
+    execute_agent,
+    finish_action_with_status,
+    get_action_answer,
+    wait_agent,
+)
+from sc_kpm.utils.common_utils import (
+    create_link,
+    create_norole_relation,
+    get_element_by_role_relation,
+    get_link_content,
+)
+from sc_kpm.utils.creation_utils import create_structure
+from sc_kpm.utils.retrieve_utils import get_set_elements
+
+logs = []
+
+
+class SumScAgent(ScAgent):
+    ACTION_CLASS_NAME = "sum"
+
+    def __init__(self):
+        self.keynodes = ScKeynodes()
+        self.action_class = self.keynodes.resolve(self.ACTION_CLASS_NAME)
+
+    def on_event(self, class_node: ScAddr, edge: ScAddr, action_node: ScAddr) -> ScResult:
+        logs.append("run agent")
+        if not check_action_class(self.action_class, action_node):
+            return ScResult.SKIP
+        result = self.run(action_node)
+        finish_action_with_status(action_node, is_success=(result == ScResult.OK))
+        return result
+
+    def run(self, action_node: ScAddr) -> ScResult:
+        arg1_link = get_element_by_role_relation(action_node, self.keynodes[CommonIdentifiers.RREL_ONE.value])
+        arg2_link = get_element_by_role_relation(action_node, self.keynodes[CommonIdentifiers.RREL_TWO.value])
+        arg1_content = get_link_content(arg1_link)
+        arg2_content = get_link_content(arg2_link)
+        logs.append([arg1_content, arg2_content, type(arg1_content), type(arg2_content)])
+        if not isinstance(arg1_content, int) or not isinstance(arg2_content, int):
+            return ScResult.ERROR_INVALID_TYPE
+        answer_struct_node = create_structure(create_link(arg1_content + arg2_content, ScLinkContentType.INT))
+        create_norole_relation(action_node, answer_struct_node, self.keynodes[CommonIdentifiers.NREL_ANSWER.value])
+        return ScResult.OK
+
+
+server = ScServer("ws://localhost:8090/ws_json")
+server.start()
+keynodes = ScKeynodes()
+
+module = ScModule()
+module.add_agent(SumScAgent)
+server.add_modules(module)
+
+arg1 = create_link(2, ScLinkContentType.INT)
+arg2 = create_link(3, ScLinkContentType.INT)
+kwargs = {
+    "arguments": {arg1: False, arg2: False},
+    "concepts": [SumScAgent.ACTION_CLASS_NAME, CommonIdentifiers.QUESTION.value],
+}
+
+question, is_successfully = execute_agent(**kwargs)
+assert is_successfully
+# or
+question = call_agent(**kwargs)
+wait_agent(2, question, keynodes[QuestionStatus.QUESTION_FINISHED.value])
+
+answer_struct = get_action_answer(question)
+answer_link = get_set_elements(answer_struct)[0]
+answer_content = get_link_content(answer_link)
+logs.append({"answer_content": answer_content})
+
+print(logs)
+
+module.unregister()
+server.remove_modules(module)
+server.stop()
+
 ```
 
 ### Finish action
 
 ```python
 def finish_action(action_node: ScAddr, status: QuestionStatus = QuestionStatus.QUESTION_FINISHED) -> ScAddr: ...
+
+
 def finish_action_with_status(action_node: ScAddr, is_success: bool = True) -> None: ...
 ```
 
@@ -524,7 +633,7 @@ action_node = create_node(sc_types.NODE_CONST)
 finish_action_with_status(action_node)
 # or
 finish_action_with_status(action_node, True)
-# # or
+# or
 finish_action(action_node, QuestionStatus.QUESTION_FINISHED)
 finish_action(action_node, QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY)
 

@@ -6,7 +6,7 @@ Distributed under the MIT License
 
 import time
 from datetime import datetime, timedelta
-from typing import Dict, List, Union
+from typing import Dict, List, Tuple, Union
 
 from sc_client import client
 from sc_client.constants import sc_types
@@ -54,12 +54,12 @@ def execute_agent(
     initiation: Idtf = QuestionStatus.QUESTION_INITIATED.value,
     reaction: QuestionStatus = QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY,
     wait_time: int = COMMON_WAIT_TIME,
-) -> bool:
+) -> Tuple[ScAddr, bool]:
     keynodes = ScKeynodes()
     question = call_agent(arguments, concepts, initiation)
     wait_agent(wait_time, question, keynodes[QuestionStatus.QUESTION_FINISHED.value])
     result = check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, keynodes[reaction.value], question)
-    return result
+    return question, result
 
 
 def call_agent(

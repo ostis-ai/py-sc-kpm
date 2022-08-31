@@ -13,6 +13,7 @@ from sc_client import client
 from sc_client.constants.common import ScEventType
 from sc_client.models import ScAddr
 
+from sc_kpm.common import QuestionStatus
 from sc_kpm.common.sc_agent import ScAgentAbstract
 
 logger = logging.getLogger(__name__)
@@ -35,13 +36,16 @@ class ScModule(ScModuleAbstract):
     _agents: List[ScAgentAbstract] = []
 
     def add_agent(
-        self, agent: Type[ScAgentAbstract], element: Union[str, ScAddr], event_type: ScEventType
+        self,
+        agent: Type[ScAgentAbstract],
+        element: Union[str, ScAddr] = QuestionStatus.QUESTION_INITIATED.value,
+        event_type: ScEventType = ScEventType.ADD_OUTGOING_EDGE,
     ) -> ScModuleAbstract:
         self._reg_params.append(RegisterParams(agent, element, event_type))
         return self
 
     def try_register(self) -> None:
-        if self._reg_params and not self.is_registred():
+        if self._reg_params and not self.is_registered():
             if client.is_connected():
                 for params in self._reg_params:
                     if not isinstance(params, RegisterParams):
@@ -53,7 +57,7 @@ class ScModule(ScModuleAbstract):
             else:
                 raise RuntimeError("Cannot register agents: connection to the sc-server is not established")
 
-    def is_registred(self) -> bool:
+    def is_registered(self) -> bool:
         return bool(self._agents)
 
     def unregister(self) -> None:

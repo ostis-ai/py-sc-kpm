@@ -4,20 +4,19 @@ Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https:#opensource.org/licenses/MIT)
 """
 
-from enum import Enum
+from enum import IntEnum, auto
 
 
-class ScResult(Enum):
-    # ScResult.ERROR should be 0 anytime
-    ERROR = 0  # unknown error
-    # ScResult.OK should be 1 anytime
-    OK = 1  # no any error
-    ERROR_INVALID_PARAMS = 2  # invalid function parameters error
-    ERROR_INVALID_TYPE = 3  # invalid type error
-    ERROR_IO = 4  # input/output error
-    ERROR_INVALID_STATE = 5  # invalid state of processed object
-    ERROR_NOT_FOUND = 6  # item not found
-    ERROR_NO_WRITE_RIGHTS = 7  # no rights to change or delete object
-    ERROR_NO_READ_RIGHTS = 8  # no rights to read object
-    NO = 9  # no any result
-    UNKNOWN = 10  # result unknown
+class ScResult(IntEnum):
+    ERROR = 0  # unknown error, should be 0 anytime
+    OK = 1  # no errors, should be 1 anytime
+    SKIP = auto()  # skip agent
+    ERROR_INVALID_PARAMS = auto()  # invalid function parameters error
+    ERROR_INVALID_TYPE = auto()  # invalid type error
+    ERROR_IO = auto()  # input/output error
+    ERROR_INVALID_STATE = auto()  # invalid state of processed object
+    ERROR_NOT_FOUND = auto()  # item not found
+    ERROR_NO_WRITE_RIGHTS = auto()  # no rights to change or delete object
+    ERROR_NO_READ_RIGHTS = auto()  # no rights to read object
+    NO = auto()  # no result
+    UNKNOWN = auto()  # result unknown
