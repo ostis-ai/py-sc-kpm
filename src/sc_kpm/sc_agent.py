@@ -13,8 +13,8 @@ from sc_client.constants.common import ScEventType
 from sc_client.constants.exceptions import InvalidValueError
 from sc_client.models import ScAddr, ScEvent, ScEventParams
 
-from sc_kpm.common.sc_keynodes import ScKeynodes
-from sc_kpm.common.sc_result import ScResult
+from sc_kpm.sc_keynodes import ScKeynodes
+from sc_kpm.sc_result import ScResult
 
 logger = logging.getLogger(__name__)
 

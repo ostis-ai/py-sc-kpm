@@ -20,8 +20,7 @@ from sc_client.models import (
 )
 
 from sc_kpm import ScKeynodes
-from sc_kpm.common import CommonIdentifiers, ScAlias
-from sc_kpm.common.identifiers import Idtf
+from sc_kpm.identifiers import CommonIdentifiers, Idtf, ScAlias
 
 
 def create_nodes(*node_types: ScType) -> List[ScAddr]:

@@ -13,8 +13,8 @@ from sc_client import client
 from sc_client.constants.common import ScEventType
 from sc_client.models import ScAddr
 
-from sc_kpm.common import QuestionStatus
-from sc_kpm.common.sc_agent import ScAgentAbstract
+from sc_kpm.identifiers import QuestionStatus
+from sc_kpm.sc_agent import ScAgentAbstract
 
 logger = logging.getLogger(__name__)
 
