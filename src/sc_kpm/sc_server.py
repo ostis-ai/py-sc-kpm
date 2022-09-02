@@ -4,52 +4,50 @@ Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https:#opensource.org/licenses/MIT)
 """
 
-from __future__ import annotations
-
 import threading
 import time
 from abc import ABC, abstractmethod
+from typing import List
 
 from sc_client import client
 
 from sc_kpm import ScModule
 
+PING_FREQ_DEFAULT: int = 1
+
 
 class ScServerAbstract(ABC):
     @abstractmethod
-    def add_modules(self, *modules: ScModule) -> ScServerAbstract:
-        raise NotImplementedError
+    def add_modules(self, *modules: ScModule) -> None:
+        pass
 
     @abstractmethod
-    def remove_modules(self, *modules: ScModule) -> ScServerAbstract:
-        raise NotImplementedError
+    def remove_modules(self, *modules: ScModule) -> None:
+        pass
 
     @abstractmethod
     def start(self) -> None:
-        raise NotImplementedError
+        pass
 
     @abstractmethod
     def stop(self) -> None:
-        raise NotImplementedError
+        pass
 
 
 class ScServer(ScServerAbstract):
-    def __init__(self, sc_server_url: str, ping_freq: int = 1) -> None:
-        self.url = sc_server_url
+    def __init__(self, sc_server_url: str, ping_freq: int = PING_FREQ_DEFAULT) -> None:
         self.ping_freq = ping_freq
-        self.modules: list[ScModule] = []
+        self.modules: List[ScModule] = []
         self.is_active = False
         client.connect(sc_server_url)
 
-    def add_modules(self, *modules: ScModule) -> ScServerAbstract:
+    def add_modules(self, *modules: ScModule) -> None:
         self.modules.extend(modules)
         self._register_sc_modules()
-        return self
 
-    def remove_modules(self, *modules: ScModule) -> ScServerAbstract:
+    def remove_modules(self, *modules: ScModule) -> None:
         for module in modules:
             self.modules.remove(module)
-        return self
 
     def _serve(self):
         while client.is_connected() and self.is_active:
@@ -66,6 +64,8 @@ class ScServer(ScServerAbstract):
         self.is_active = False
 
     def _register_sc_modules(self) -> None:
+        if not client.is_connected():
+            raise ConnectionError("Connection to the sc-server is not established")
         for module in self.modules:
             if not isinstance(module, ScModule):
                 raise TypeError("All elements of the module list must be ScModule instances")

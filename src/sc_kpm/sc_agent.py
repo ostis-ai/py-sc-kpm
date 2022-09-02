@@ -16,36 +16,43 @@ from sc_client.models import ScAddr, ScEvent, ScEventParams
 from sc_kpm.sc_keynodes import ScKeynodes
 from sc_kpm.sc_result import ScResult
 
-logger = logging.getLogger(__name__)
-
 
 class ScAgentAbstract(ABC):
-    _event: ScEvent = None
+    @abstractmethod
+    def register(self, event_node: Union[str, ScAddr], event_type: ScEventType) -> None:
+        pass
 
-    def _register(self, element: Union[str, ScAddr], event_type: ScEventType) -> None:
-        def _callback(addr: ScAddr, edge_addr: ScAddr, other_addr: ScAddr) -> ScResult:
-            return self.on_event(addr, edge_addr, other_addr)
+    @abstractmethod
+    def unregister(self) -> None:
+        pass
 
-        source_node_addr = ScKeynodes()[element] if isinstance(element, str) else element
-        if not source_node_addr:
+    @abstractmethod
+    def on_event(self, class_node: ScAddr, edge: ScAddr, action_node: ScAddr) -> ScResult:
+        pass
+
+
+class ScAgent(ScAgentAbstract, ABC):
+    def __init__(self):
+        self._logger = logging.getLogger(f"{self.__module__}:{self.__class__.__name__}")
+        self._keynodes = ScKeynodes()
+        self._event: ScEvent = None
+
+    def register(self, event_node: Union[str, ScAddr], event_type: ScEventType) -> None:
+        if self._event:
+            self._logger.warning("Agent is almost registered")
+            return
+        if isinstance(event_node, str):
+            event_node = self._keynodes[event_node]
+        if not event_node.is_valid():
             raise InvalidValueError("Element with provided address does not exist.")
-        event_params = ScEventParams(source_node_addr, event_type, _callback)
-        sc_event = client.events_create(event_params)
-        self._event = sc_event[0]
-        logger.debug("%s is registered", self.__class__.__name__)
+        event_params = ScEventParams(event_node, event_type, self.on_event)
+        self._event = client.events_create(event_params)[0]
+        self._logger.info("Agent is registered")
 
-    def _unregister(self) -> None:
+    def unregister(self) -> None:
         if isinstance(self._event, ScEvent):
             client.events_destroy(self._event)
-            logger.debug("%s event is destroyed", self.__class__.__name__)
-        logger.debug("%s is unregistered", self.__class__.__name__)
-
-    @abstractmethod
-    def on_event(self, source_node: ScAddr, edge: ScAddr, target_node: ScAddr) -> ScResult:
-        raise NotImplementedError
-
-
-class ScAgent(ScAgentAbstract):
-    @abstractmethod
-    def on_event(self, source_node: ScAddr, edge: ScAddr, target_node: ScAddr) -> ScResult:
-        raise NotImplementedError
+            self._logger.info("Event is destroyed")
+        else:
+            self._logger.warning("Event is already destroyed or not registered")
+        self._logger.info("Agent is unregistered")

@@ -4,20 +4,24 @@ Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
 
+from __future__ import annotations
+
 from sc_client import client
 from sc_client.constants.sc_types import ScType
 from sc_client.models import ScAddr, ScIdtfResolveParams
+
+Idtf = str
 
 
 class ScKeynodes(dict):
     _instance = {}
 
-    def __new__(cls):
+    def __new__(cls) -> ScKeynodes:
         if not isinstance(cls._instance, cls):
             cls._instance = dict.__new__(cls)
         return cls._instance
 
-    def __getitem__(self, identifier: str) -> ScAddr:
+    def __getitem__(self, identifier: Idtf) -> ScAddr:
         addr = self._instance.get(identifier)
         if addr is None:
             params = ScIdtfResolveParams(idtf=identifier, type=None)
@@ -25,7 +29,7 @@ class ScKeynodes(dict):
             self._instance[identifier] = addr
         return addr
 
-    def resolve(self, identifier: str, sc_type: ScType = None) -> ScAddr:
+    def resolve(self, identifier: Idtf, sc_type: ScType = None) -> ScAddr:
         addr = self._instance.get(identifier)
         if addr is None:
             params = ScIdtfResolveParams(idtf=identifier, type=sc_type)

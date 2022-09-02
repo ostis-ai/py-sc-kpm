@@ -19,8 +19,8 @@ from sc_client.models import (
     ScTemplateResult,
 )
 
-from sc_kpm import ScKeynodes
-from sc_kpm.identifiers import CommonIdentifiers, Idtf, ScAlias
+from sc_kpm.identifiers import CommonIdentifiers, ScAlias
+from sc_kpm.sc_keynodes import Idtf, ScKeynodes
 
 
 def create_nodes(*node_types: ScType) -> List[ScAddr]:

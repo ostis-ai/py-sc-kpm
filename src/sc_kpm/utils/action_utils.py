@@ -12,12 +12,12 @@ from sc_client import client
 from sc_client.constants import sc_types
 from sc_client.models import ScAddr, ScConstruction, ScTemplate
 
-from sc_kpm import ScKeynodes
-from sc_kpm.identifiers import CommonIdentifiers, Idtf, QuestionStatus, ScAlias
+from sc_kpm.identifiers import CommonIdentifiers, QuestionStatus, ScAlias
+from sc_kpm.sc_keynodes import Idtf, ScKeynodes
 from sc_kpm.utils.common_utils import check_edge, create_edge, create_node, create_role_relation
 from sc_kpm.utils.retrieve_utils import _get_first_search_template_result
 
-COMMON_WAIT_TIME = 5
+COMMON_WAIT_TIME: int = 5
 
 
 def check_action_class(action_class: Union[ScAddr, Idtf], action_node: ScAddr) -> bool:

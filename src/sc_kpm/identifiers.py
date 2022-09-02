@@ -6,8 +6,6 @@ Distributed under the MIT License
 
 from enum import Enum
 
-Idtf = str
-
 
 class CommonIdentifiers(Enum):
     QUESTION = "question"
