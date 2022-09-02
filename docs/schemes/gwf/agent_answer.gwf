@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GWF version="2.0">
+    <staticSector>
+        <contour type="contour/const/perm" idtf="py: answer_struct" shapeColor="0" id="34924496" parent="0" left="0" top="0" right="102.875" bottom="23" textColor="164" text_angle="0" text_font="Times New Roman" font_size="10" idtf_pos_x="-52" idtf_pos_y="62">
+            <points>
+                <point x="210" y="435"/>
+                <point x="210" y="555"/>
+                <point x="330" y="555"/>
+                <point x="330" y="435"/>
+            </points>
+        </contour>
+        <node type="node/const/perm/relation" idtf="nrel_answer" shapeColor="0" id="39588656" parent="0" left="0" top="0" right="75.375" bottom="23" textColor="164" text_angle="0" text_font="Times New Roman" font_size="10" x="180" y="375" haveBus="false" idtf_pos="0">
+            <content type="0" mime_type="" content_visibility="false" file_name=""/>
+        </node>
+        <node type="node/const/perm/general" idtf="py: action_node" shapeColor="0" id="36806336" parent="0" left="0" top="0" right="93.5313" bottom="23" textColor="164" text_angle="0" text_font="Times New Roman" font_size="10" x="270" y="330" haveBus="false" idtf_pos="3">
+            <content type="0" mime_type="" content_visibility="false" file_name=""/>
+        </node>
+        <pair type="pair/const/pos/perm/orient/membership" idtf="" shapeColor="0" id="39857424" parent="0" id_b="39588656" id_e="34688672" b_x="180" b_y="375" e_x="0" e_y="0" dotBBalance="0" dotEBalance="0.371728">
+            <points/>
+        </pair>
+        <pair type="pair/const/pos/perm/orient/membership" idtf="" shapeColor="0" id="34688672" parent="0" id_b="36806336" id_e="34924496" b_x="270" b_y="330" e_x="270" e_y="495" dotBBalance="0" dotEBalance="0">
+            <points/>
+        </pair>
+    </staticSector>
+</GWF>
