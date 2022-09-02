@@ -7,7 +7,8 @@ Distributed under the MIT License
 from sc_client import models as sc_models
 from sc_client.constants import sc_types
 
-from sc_kpm.sc_agent import ScAgent
+from sc_kpm.sc_agent import ClassicScAgent, ScAgent
 from sc_kpm.sc_keynodes import ScKeynodes
 from sc_kpm.sc_module import ScModule
+from sc_kpm.sc_result import ScResult
 from sc_kpm.sc_server import ScServer

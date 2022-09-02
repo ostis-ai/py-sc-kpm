@@ -6,21 +6,9 @@ Distributed under the MIT License
 
 import logging
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
-from typing import List, Type, Union
+from typing import List
 
-from sc_client.constants.common import ScEventType
-from sc_client.models import ScAddr
-
-from sc_kpm.identifiers import QuestionStatus
 from sc_kpm.sc_agent import ScAgentAbstract
-
-
-@dataclass
-class RegisterParams:
-    agent: Type[ScAgentAbstract]
-    action_node: Union[str, ScAddr]
-    event_type: ScEventType
 
 
 class ScModuleAbstract(ABC):
@@ -36,31 +24,23 @@ class ScModuleAbstract(ABC):
 class ScModule(ScModuleAbstract):
     def __init__(self):
         self._logger = logging.getLogger(f"{self.__module__}:{self.__class__.__name__}")
-        self._reg_params: List[RegisterParams] = []
+        self._reg_agents: List[ScAgentAbstract] = []
         self._agents: List[ScAgentAbstract] = []
 
-    def add_agent(
-        self,
-        agent: Type[ScAgentAbstract],
-        action_node: Union[str, ScAddr] = QuestionStatus.QUESTION_INITIATED.value,
-        event_type: ScEventType = ScEventType.ADD_OUTGOING_EDGE,
-    ) -> None:
-        self._reg_params.append(RegisterParams(agent, action_node, event_type))
+    def add_agent(self, agent: ScAgentAbstract) -> None:
+        self._reg_agents.append(agent)
 
     def try_register(self) -> None:
-        if not self._reg_params:
+        if not self._reg_agents:
             self._logger.warning("Module failed to register: no register params")
             return
         if self.is_registered():
             self._logger.warning("Module failed to register: module is already registered")
             return
-        for params in self._reg_params:
-            if not isinstance(params, RegisterParams):
-                raise TypeError("All elements of the module params list must be RegisterParams instance")
-            agent = params.agent()
-            agent.register(params.action_node, params.event_type)
+        for agent in self._reg_agents:
+            agent.register()
             self._agents.append(agent)
-        self._reg_params.clear()
+        self._reg_agents.clear()
         self._logger.info("Module is registered")
 
     def is_registered(self) -> bool:

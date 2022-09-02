@@ -8,8 +8,8 @@ from sc_client.constants import sc_types
 from sc_client.constants.sc_types import ScType
 from sc_client.models import ScAddr
 
-from sc_kpm import ScKeynodes
 from sc_kpm.identifiers import CommonIdentifiers
+from sc_kpm.sc_keynodes import ScKeynodes
 from sc_kpm.utils.common_utils import create_edge, create_node, create_norole_relation, create_role_relation
 
 

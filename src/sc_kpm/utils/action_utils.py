@@ -117,9 +117,7 @@ def finish_action(action_node: ScAddr, status: QuestionStatus = QuestionStatus.Q
 
 def finish_action_with_status(action_node: ScAddr, is_success: bool = True) -> None:
     finish_action(action_node, QuestionStatus.QUESTION_FINISHED)
-    finish_action(
-        action_node,
-        QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY
-        if is_success
-        else QuestionStatus.QUESTION_FINISHED_UNSUCCESSFULLY,
+    status = (
+        QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY if is_success else QuestionStatus.QUESTION_FINISHED_UNSUCCESSFULLY
     )
+    finish_action(action_node, status)
