@@ -41,6 +41,13 @@ class ScServer(ScServerAbstract):
         self.is_active = False
         client.connect(sc_server_url)
 
+    def __enter__(self):
+        self.start()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.stop()
+
     def add_modules(self, *modules: ScModule) -> None:
         self.modules.extend(modules)
         self._register_sc_modules()
@@ -57,8 +64,8 @@ class ScServer(ScServerAbstract):
 
     def start(self) -> None:
         server_thread = threading.Thread(target=self._serve, name="sc-server-thread", daemon=True)
-        server_thread.start()
         self.is_active = True
+        server_thread.start()
 
     def stop(self):
         self.is_active = False

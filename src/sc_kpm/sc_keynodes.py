@@ -29,7 +29,7 @@ class ScKeynodes(dict):
             self._instance[identifier] = addr
         return addr
 
-    def resolve(self, identifier: Idtf, sc_type: ScType = None) -> ScAddr:
+    def resolve(self, identifier: Idtf, sc_type: ScType | None) -> ScAddr:
         addr = self._instance.get(identifier)
         if addr is None:
             params = ScIdtfResolveParams(idtf=identifier, type=sc_type)
