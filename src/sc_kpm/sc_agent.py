@@ -23,12 +23,10 @@ from sc_kpm.utils.creation_utils import create_structure
 
 
 class ScAgentAbstract(ABC):
-    _event_class: ScAddr
-    _event_type: ScEventType
-
-    def __init__(self):
+    def __init__(self, event_class: ScAddr, event_type: ScEventType):
         self._logger = logging.getLogger(f"{self.__module__}:{self.__class__.__name__}")
-        self._keynodes = ScKeynodes()
+        self._event_class = event_class
+        self._event_type = event_type
         self._event = None
 
     def register(self) -> None:
@@ -54,20 +52,21 @@ class ScAgentAbstract(ABC):
 
 class ScAgent(ScAgentAbstract, ABC):
     def __init__(self, event_class: Union[Idtf, ScAddr], event_type: ScEventType):
-        super().__init__()
+        self._keynodes = ScKeynodes()
         if isinstance(event_class, Idtf):
             event_class = self._keynodes[event_class]
         if not event_class.is_valid():
             raise InvalidValueError("Element with provided address does not exist.")
-        self._event_class = event_class
-        self._event_type = event_type
+        super().__init__(event_class, event_type)
 
 
 class ClassicScAgent(ScAgentAbstract, ABC):
     def __init__(self, action_class_name: Idtf):
-        super().__init__()
-        self._event_class = self._keynodes[QuestionStatus.QUESTION_INITIATED.value]
-        self._event_type = ScEventType.ADD_OUTGOING_EDGE
+        self._keynodes = ScKeynodes()
+        super().__init__(
+            event_class=self._keynodes[QuestionStatus.QUESTION_INITIATED.value],
+            event_type=ScEventType.ADD_OUTGOING_EDGE,
+        )
         self._action_class = self._keynodes.resolve(action_class_name, sc_types.NODE_CONST_CLASS)
 
     def _confirm_action_class(self, action_node: ScAddr) -> bool:
@@ -83,6 +82,6 @@ class ClassicScAgent(ScAgentAbstract, ABC):
             arguments.append(argument)
         return arguments
 
-    def _create_answer(self, action_node: ScAddr, *elements: ScAddr):
+    def _create_answer(self, action_node: ScAddr, *elements: ScAddr) -> None:
         answer_struct_node = create_structure(*elements)
         create_norole_relation(action_node, answer_struct_node, self._keynodes[CommonIdentifiers.NREL_ANSWER.value])

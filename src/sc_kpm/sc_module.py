@@ -24,10 +24,9 @@ class ScModuleAbstract(ABC):
 class ScModule(ScModuleAbstract):
     def __init__(self, *reg_agents):
         self._logger = logging.getLogger(f"{self.__module__}:{self.__class__.__name__}")
-        self._reg_agents: List[ScAgentAbstract] = []
         self._agents: List[ScAgentAbstract] = []
-        for agent in reg_agents:
-            self.add_agent(agent)
+        self._reg_agents: List[ScAgentAbstract] = []
+        self._reg_agents.extend(reg_agents)
 
     def add_agent(self, agent: ScAgentAbstract) -> None:
         self._reg_agents.append(agent)

@@ -11,7 +11,7 @@ from typing import List
 
 from sc_client import client
 
-from sc_kpm import ScModule
+from sc_kpm.sc_module import ScModule
 
 PING_FREQ_DEFAULT: int = 1
 
@@ -35,7 +35,7 @@ class ScServerAbstract(ABC):
 
 
 class ScServer(ScServerAbstract):
-    def __init__(self, sc_server_url: str, ping_freq: int = PING_FREQ_DEFAULT) -> None:
+    def __init__(self, sc_server_url: str, ping_freq: int = PING_FREQ_DEFAULT):
         self.ping_freq = ping_freq
         self.modules: List[ScModule] = []
         self.is_active = False
@@ -56,18 +56,18 @@ class ScServer(ScServerAbstract):
         for module in modules:
             self.modules.remove(module)
 
-    def _serve(self):
+    def _serve(self) -> None:
         while client.is_connected() and self.is_active:
             time.sleep(self.ping_freq)
         self._unregister_sc_modules()
-        self._clear_modules()
+        self.modules.clear()
 
     def start(self) -> None:
         server_thread = threading.Thread(target=self._serve, name="sc-server-thread", daemon=True)
         self.is_active = True
         server_thread.start()
 
-    def stop(self):
+    def stop(self) -> None:
         self.is_active = False
 
     def _register_sc_modules(self) -> None:
@@ -81,6 +81,3 @@ class ScServer(ScServerAbstract):
     def _unregister_sc_modules(self) -> None:
         for module in self.modules:
             module.unregister()  # pylint: disable=protected-access
-
-    def _clear_modules(self):
-        self.modules = []
