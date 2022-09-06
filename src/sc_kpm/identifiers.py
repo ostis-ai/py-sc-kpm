@@ -10,13 +10,13 @@ from enum import Enum
 class CommonIdentifiers(Enum):
     QUESTION = "question"
     EXACT_VALUE = "exact_value"
-    RREL_DYNAMIC_ARGUMENT = "rrel_dynamic_argument"
+    RREL_DYNAMIC_ARGUMENT = "rrel_dynamic_argument"  # TODO: add to the KB
     RREL_ONE = "rrel_1"
     RREL_TWO = "rrel_2"
     NREL_BASIC_SEQUENCE = "nrel_basic_sequence"
     NREL_SYSTEM_IDENTIFIER = "nrel_system_identifier"
     NREL_ANSWER = "nrel_answer"
-    CONCEPT_FILENAME = "concept_filename"
+    CONCEPT_FILENAME = "concept_filename"  # TODO: add to the KB
 
 
 class QuestionStatus(Enum):

@@ -68,14 +68,16 @@ def call_agent(
 ) -> ScAddr:
     keynodes = ScKeynodes()
     question = _create_action_with_arguments(arguments, concepts)
-    create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, keynodes[initiation], question)
+    initiation_node = keynodes.resolve(initiation, sc_types.NODE_CONST_CLASS)
+    create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, initiation_node, question)
     return question
 
 
 def _create_action_with_arguments(arguments: Dict[ScAddr, IsDynamic], concepts: List[Idtf]) -> ScAddr:
     action_node = _create_action(concepts)
     keynodes = ScKeynodes()
-    rrel_dynamic_arg = keynodes[CommonIdentifiers.RREL_DYNAMIC_ARGUMENT.value]
+    rrel_dynamic_arg = keynodes.resolve(CommonIdentifiers.RREL_DYNAMIC_ARGUMENT.value, sc_types.NODE_CONST_ROLE)
+    # TODO: Change to keynodes[...] when 'rrel_dynamic_argument' will be in the KB
 
     argument: ScAddr
     for index, (argument, is_dynamic) in enumerate(arguments.items(), 1):

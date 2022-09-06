@@ -7,32 +7,42 @@ Distributed under the MIT License
 from __future__ import annotations
 
 from sc_client import client
+from sc_client.constants.exceptions import InvalidValueError
 from sc_client.constants.sc_types import ScType
 from sc_client.models import ScAddr, ScIdtfResolveParams
 
 Idtf = str
 
 
-class ScKeynodes(dict):
-    _instance = {}
+class ScKeynodes:
+    _instance: ScKeynodes = None
+    _dict: dict = {}
 
     def __new__(cls) -> ScKeynodes:
-        if not isinstance(cls._instance, cls):
-            cls._instance = dict.__new__(cls)
+        if cls._instance is None:
+            cls._instance = object.__new__(cls)
         return cls._instance
 
     def __getitem__(self, identifier: Idtf) -> ScAddr:
-        addr = self._instance.get(identifier)
+        """Get keynode, cannot be invalid ScAddr(0)"""
+        addr = self.get(identifier)
+        if not addr.is_valid():
+            raise InvalidValueError("ScAddr is invalid")
+        return addr
+
+    def get(self, identifier: Idtf) -> ScAddr:
+        """Get keynode, can be ScAddr(0)"""
+        addr = self._dict.get(identifier)
         if addr is None:
             params = ScIdtfResolveParams(idtf=identifier, type=None)
             addr = client.resolve_keynodes(params)[0]
-            self._instance[identifier] = addr
+            self._dict[identifier] = addr
         return addr
 
     def resolve(self, identifier: Idtf, sc_type: ScType | None) -> ScAddr:
-        addr = self._instance.get(identifier)
+        addr = self._dict.get(identifier)
         if addr is None:
             params = ScIdtfResolveParams(idtf=identifier, type=sc_type)
             addr = client.resolve_keynodes(params)[0]
-            self._instance[identifier] = addr
+            self._dict[identifier] = addr
         return addr
