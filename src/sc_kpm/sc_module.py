@@ -28,6 +28,9 @@ class ScModule(ScModuleAbstract):
         self._reg_agents: List[ScAgentAbstract] = []
         self._reg_agents.extend(reg_agents)
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}({repr(self._reg_agents)[1:-1]})"
+
     def add_agent(self, agent: ScAgentAbstract) -> None:
         self._reg_agents.append(agent)
 
@@ -42,7 +45,7 @@ class ScModule(ScModuleAbstract):
             agent.register()
             self._agents.append(agent)
         self._reg_agents.clear()
-        self._logger.info("Module is registered")
+        self._logger.info("Module's registered")
 
     def is_registered(self) -> bool:
         return bool(self._agents)
@@ -50,5 +53,6 @@ class ScModule(ScModuleAbstract):
     def unregister(self) -> None:
         for agent in self._agents:
             agent.unregister()
+        self._reg_agents.extend(self._agents)
         self._agents.clear()
-        self._logger.info("Module is unregistered")
+        self._logger.info("Module's unregistered")
