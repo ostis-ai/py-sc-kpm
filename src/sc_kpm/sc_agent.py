@@ -25,19 +25,20 @@ class ScAgentAbstract(ABC):
         self._logger = logging.getLogger(f"{self.__module__}:{self.__class__.__name__}")
         self._event_class = event_class
         self._event_type = event_type
-        self._event = None
+        self._event: ScEvent = None
 
     def register(self) -> None:
-        if self._event:
+        if self._event is not None:
             self._logger.warning("Agent is almost registered")
             return
         event_params = ScEventParams(self._event_class, self._event_type, self.on_event)
         self._event = client.events_create(event_params)[0]
-        self._logger.info("Agent is registered")
+        self._logger.info("Agent is registered with event type: %s", self._event_type)
 
     def unregister(self) -> None:
-        if isinstance(self._event, ScEvent):
+        if self._event is not None:
             client.events_destroy(self._event)
+            self._event = None
             self._logger.info("Event is destroyed")
         else:
             self._logger.warning("Event is already destroyed or not registered")
