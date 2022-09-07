@@ -32,8 +32,8 @@ class ScAgentTest(ScAgent):
 class ScModuleTest(ScModule):
     def __init__(self):
         super().__init__()
-        self.add_agent(ScAgentTest, test_node_idtf, ScEventType.ADD_OUTGOING_EDGE)
-        self.add_agent(ScAgentTest, test_node_idtf, ScEventType.ADD_INGOING_EDGE)
+        self.add_agent(ScAgentTest(test_node_idtf, ScEventType.ADD_OUTGOING_EDGE))
+        self.add_agent(ScAgentTest(test_node_idtf, ScEventType.ADD_INGOING_EDGE))
 
 
 class TestActionUtils(BaseTestCase):

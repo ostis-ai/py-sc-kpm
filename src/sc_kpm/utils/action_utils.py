@@ -14,7 +14,15 @@ from sc_client.models import ScAddr, ScConstruction, ScTemplate
 
 from sc_kpm.identifiers import CommonIdentifiers, QuestionStatus, ScAlias
 from sc_kpm.sc_keynodes import Idtf, ScKeynodes
-from sc_kpm.utils.common_utils import check_edge, create_edge, create_node, create_role_relation
+from sc_kpm.utils.common_utils import (
+    check_edge,
+    create_edge,
+    create_node,
+    create_norole_relation,
+    create_role_relation,
+    get_element_by_role_relation,
+)
+from sc_kpm.utils.creation_utils import create_structure
 from sc_kpm.utils.retrieve_utils import _get_first_search_template_result
 
 COMMON_WAIT_TIME: int = 5
@@ -28,6 +36,21 @@ def check_action_class(action_class: Union[ScAddr, Idtf], action_node: ScAddr) -
     templ.triple(keynodes[CommonIdentifiers.QUESTION.value], sc_types.EDGE_ACCESS_VAR_POS_PERM, action_node)
     search_results = client.template_search(templ)
     return len(search_results) > 0
+
+
+def get_arguments(action_node: ScAddr, count: int) -> List[ScAddr]:
+    keynodes = ScKeynodes()
+    arguments = []
+    for index in range(1, count + 1):
+        rrel_i = keynodes[f"rrel_{index}"]
+        argument = get_element_by_role_relation(action_node, rrel_i)
+        arguments.append(argument)
+    return arguments
+
+
+def create_answer(action_node: ScAddr, *elements: ScAddr) -> None:
+    answer_struct_node = create_structure(*elements)
+    create_norole_relation(action_node, answer_struct_node, ScKeynodes()[CommonIdentifiers.NREL_ANSWER.value])
 
 
 def get_action_answer(action_node: ScAddr) -> ScAddr:

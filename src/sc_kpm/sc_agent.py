@@ -6,7 +6,7 @@ Distributed under the MIT License
 
 import logging
 from abc import ABC, abstractmethod
-from typing import List, Union
+from typing import Union
 
 from sc_client import client
 from sc_client.constants import sc_types
@@ -14,12 +14,10 @@ from sc_client.constants.common import ScEventType
 from sc_client.constants.exceptions import InvalidValueError
 from sc_client.models import ScAddr, ScEvent, ScEventParams
 
-from sc_kpm.identifiers import CommonIdentifiers, QuestionStatus
+from sc_kpm.identifiers import QuestionStatus
 from sc_kpm.sc_keynodes import Idtf, ScKeynodes
 from sc_kpm.sc_result import ScResult
-from sc_kpm.utils import create_norole_relation, get_element_by_role_relation
 from sc_kpm.utils.action_utils import check_action_class
-from sc_kpm.utils.creation_utils import create_structure
 
 
 class ScAgentAbstract(ABC):
@@ -54,34 +52,20 @@ class ScAgent(ScAgentAbstract, ABC):
     def __init__(self, event_class: Union[Idtf, ScAddr], event_type: ScEventType):
         self._keynodes = ScKeynodes()
         if isinstance(event_class, Idtf):
-            event_class = self._keynodes[event_class]
+            event_class = self._keynodes.resolve(event_class, sc_types.NODE_CONST_CLASS)
         if not event_class.is_valid():
             raise InvalidValueError("Element with provided address does not exist.")
         super().__init__(event_class, event_type)
 
 
 class ClassicScAgent(ScAgentAbstract, ABC):
-    def __init__(self, action_class_name: Idtf):
+    def __init__(self, action_class_name: Idtf, event_type: ScEventType = ScEventType.ADD_OUTGOING_EDGE):
         self._keynodes = ScKeynodes()
         super().__init__(
             event_class=self._keynodes[QuestionStatus.QUESTION_INITIATED.value],
-            event_type=ScEventType.ADD_OUTGOING_EDGE,
+            event_type=event_type,
         )
         self._action_class = self._keynodes.resolve(action_class_name, sc_types.NODE_CONST_CLASS)
 
     def _confirm_action_class(self, action_node: ScAddr) -> bool:
         return check_action_class(self._action_class, action_node)
-
-    def _get_arguments(self, action_node: ScAddr, count: int) -> List[ScAddr]:
-        arguments = []
-        for index in range(1, count + 1):
-            rrel_i = self._keynodes[f"rrel_{index}"]
-            argument = get_element_by_role_relation(action_node, rrel_i)
-            if not argument.is_valid():
-                self._logger.warning(f"Argument {index} is empty")
-            arguments.append(argument)
-        return arguments
-
-    def _create_answer(self, action_node: ScAddr, *elements: ScAddr) -> None:
-        answer_struct_node = create_structure(*elements)
-        create_norole_relation(action_node, answer_struct_node, self._keynodes[CommonIdentifiers.NREL_ANSWER.value])
