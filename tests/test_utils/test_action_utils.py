@@ -16,7 +16,7 @@ from sc_kpm.utils.action_utils import check_action_class, execute_agent
 from sc_kpm.utils.common_utils import create_edge, create_node, delete_elements
 from tests.common_tests import BaseTestCase, server
 
-logging.basicConfig(filename="testing.log", filemode="w", level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 test_node_idtf = "test_node"
 

@@ -6,7 +6,7 @@ Distributed under the MIT License
 
 from __future__ import annotations
 
-import threading
+import multiprocessing
 import time
 from abc import ABC, abstractmethod
 
@@ -34,12 +34,11 @@ class ScServerAbstract(ABC):
 
 
 class ScServer(ScServerAbstract):
-    def __init__(self, sc_server_url: str, ping_freq: int = 1) -> None:
+    def __init__(self, sc_server_url: str, ping_freq: float = 0.1) -> None:
         self.url = sc_server_url
         self.ping_freq = ping_freq
         self.modules: list[ScModule] = []
-        self.is_active = False
-        client.connect(sc_server_url)
+        self._server_process = None
 
     def add_modules(self, *modules: ScModule) -> ScServerAbstract:
         self.modules.extend(modules)
@@ -52,18 +51,19 @@ class ScServer(ScServerAbstract):
         return self
 
     def _serve(self):
-        while client.is_connected() and self.is_active:
+        while client.is_connected():
             time.sleep(self.ping_freq)
-        self._unregister_sc_modules()
-        self._clear_modules()
 
     def start(self) -> None:
-        server_thread = threading.Thread(target=self._serve, name="sc-server-thread", daemon=True)
-        server_thread.start()
-        self.is_active = True
+        client.connect(self.url)
+        self._server_process = multiprocessing.Process(target=self._serve)
+        self._server_process.start()
 
     def stop(self):
-        self.is_active = False
+        self._unregister_sc_modules()
+        self._server_process.terminate()
+        client.disconnect()
+        self._clear_modules()
 
     def _register_sc_modules(self) -> None:
         for module in self.modules:

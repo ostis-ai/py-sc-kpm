@@ -13,8 +13,10 @@ server = ScServer(SC_SERVER_URL)
 
 
 class BaseTestCase(TestCase):
-    def setUp(self) -> None:
+    @classmethod
+    def setUpClass(cls) -> None:
         server.start()
 
-    def tearDown(self) -> None:
+    @classmethod
+    def tearDownClass(cls) -> None:
         server.stop()
