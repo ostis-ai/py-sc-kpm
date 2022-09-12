@@ -32,15 +32,15 @@ class ScAgentAbstract(ABC):
     def __repr__(self):
         pass
 
-    def register(self) -> None:
+    def _register(self) -> None:
         if self._event is not None:
             self._logger.warning("Agent's almost registered")
             return
-        event_params = ScEventParams(self._event_class, self._event_type, self.on_event)
+        event_params = ScEventParams(self._event_class, self._event_type, self.callback)
         self._event = client.events_create(event_params)[0]
         self._logger.info("Agent's registered with event type: %s", repr(self._event_type))
 
-    def unregister(self) -> None:
+    def _unregister(self) -> None:
         if self._event is not None:
             client.events_destroy(self._event)
             self._event = None
@@ -48,6 +48,9 @@ class ScAgentAbstract(ABC):
         else:
             self._logger.warning("Event's already destroyed or not registered")
         self._logger.info("Agent's unregistered")
+
+    def callback(self, class_node: ScAddr, edge: ScAddr, action_node: ScAddr) -> ScResult:
+        return self.on_event(class_node, edge, action_node)
 
     @abstractmethod
     def on_event(self, class_node: ScAddr, edge: ScAddr, action_node: ScAddr) -> ScResult:

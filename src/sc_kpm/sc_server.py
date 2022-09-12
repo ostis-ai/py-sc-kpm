@@ -11,6 +11,7 @@ from abc import ABC, abstractmethod
 
 from sc_client import client
 
+from sc_kpm.identifiers import _IdentifiersResolver
 from sc_kpm.sc_module import ScModule
 
 
@@ -54,6 +55,7 @@ class ScServer(ScServerAbstract):
             sc_server_url = self._default_url
         client.connect(sc_server_url)
         self._logger.info("Connect to server by url %s", repr(sc_server_url))
+        _IdentifiersResolver.resolve()
         return self
 
     def disconnect(self):
@@ -104,7 +106,7 @@ class ScServerRegistrator:
         for module in modules:
             if not isinstance(module, ScModule):
                 raise TypeError("All elements of the module list must be ScModule instances")
-            module.try_register()
+            module._try_register()  # pylint: disable=protected-access
 
     @staticmethod
     def unregister_modules(*modules: ScModule):
@@ -112,7 +114,7 @@ class ScServerRegistrator:
             # TODO: How to unregister agents without connection?
             raise ConnectionError("Connection to the sc-server is not established")
         for module in modules:
-            module.unregister()
+            module._unregister()  # pylint: disable=protected-access
 
     def _register(self) -> None:
         self.register_modules(*self._modules)

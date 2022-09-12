@@ -38,7 +38,7 @@ def check_action_class(action_class: Union[ScAddr, Idtf], action_node: ScAddr) -
     return len(search_results) > 0
 
 
-def get_arguments(action_node: ScAddr, count: int) -> List[ScAddr]:
+def get_action_arguments(action_node: ScAddr, count: int) -> List[ScAddr]:
     keynodes = ScKeynodes()
     arguments = []
     for index in range(1, count + 1):
@@ -48,7 +48,7 @@ def get_arguments(action_node: ScAddr, count: int) -> List[ScAddr]:
     return arguments
 
 
-def create_answer(action_node: ScAddr, *elements: ScAddr) -> None:
+def create_action_answer(action_node: ScAddr, *elements: ScAddr) -> None:
     answer_struct_node = create_structure(*elements)
     create_norole_relation(action_node, answer_struct_node, ScKeynodes()[CommonIdentifiers.NREL_ANSWER.value])
 
@@ -99,8 +99,7 @@ def call_agent(
 def _create_action_with_arguments(arguments: Dict[ScAddr, IsDynamic], concepts: List[Idtf]) -> ScAddr:
     action_node = _create_action(concepts)
     keynodes = ScKeynodes()
-    rrel_dynamic_arg = keynodes.resolve(CommonIdentifiers.RREL_DYNAMIC_ARGUMENT.value, sc_types.NODE_CONST_ROLE)
-    # TODO: Change to keynodes[...] when 'rrel_dynamic_argument' will be in the KB
+    rrel_dynamic_arg = keynodes[CommonIdentifiers.RREL_DYNAMIC_ARGUMENT.value]
 
     argument: ScAddr
     for index, (argument, is_dynamic) in enumerate(arguments.items(), 1):
@@ -141,8 +140,8 @@ def finish_action(action_node: ScAddr, status: QuestionStatus = QuestionStatus.Q
 
 
 def finish_action_with_status(action_node: ScAddr, is_success: bool = True) -> None:
-    finish_action(action_node, QuestionStatus.QUESTION_FINISHED)
     status = (
         QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY if is_success else QuestionStatus.QUESTION_FINISHED_UNSUCCESSFULLY
     )
     finish_action(action_node, status)
+    finish_action(action_node, QuestionStatus.QUESTION_FINISHED)
