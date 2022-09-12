@@ -25,7 +25,7 @@ from sc_kpm.utils.common_utils import (
 from sc_kpm.utils.creation_utils import create_structure
 from sc_kpm.utils.retrieve_utils import _get_first_search_template_result
 
-COMMON_WAIT_TIME: int = 5
+COMMON_WAIT_TIME: float = 5
 
 
 def check_action_class(action_class: Union[ScAddr, Idtf], action_node: ScAddr) -> bool:
@@ -75,7 +75,7 @@ def execute_agent(
     concepts: List[Idtf],
     initiation: Idtf = QuestionStatus.QUESTION_INITIATED.value,
     reaction: QuestionStatus = QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY,
-    wait_time: int = COMMON_WAIT_TIME,
+    wait_time: float = COMMON_WAIT_TIME,
 ) -> Tuple[ScAddr, bool]:
     keynodes = ScKeynodes()
     question = call_agent(arguments, concepts, initiation)
@@ -130,7 +130,7 @@ def _create_action(concepts: List[Idtf]) -> ScAddr:
 
 
 # TODO rewrite to event
-def wait_agent(seconds: int, question_node: ScAddr, reaction_node: ScAddr):
+def wait_agent(seconds: float, question_node: ScAddr, reaction_node: ScAddr):
     finish = datetime.now() + timedelta(seconds=seconds)
     while not check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, reaction_node, question_node) and datetime.now() < finish:
         time.sleep(0.1)

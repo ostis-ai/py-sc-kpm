@@ -14,7 +14,7 @@ server = ScServer(SC_SERVER_URL)
 
 class BaseTestCase(TestCase):
     def setUp(self) -> None:
-        server.start()
+        server.connect()
 
     def tearDown(self) -> None:
-        server.stop()
+        server.disconnect()

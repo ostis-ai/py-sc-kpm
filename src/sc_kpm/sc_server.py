@@ -35,10 +35,11 @@ class ScServerAbstract(ABC):
 
 
 class ScServer(ScServerAbstract):
-    def __init__(self):
+    def __init__(self, default_sc_server_url: str = None):
         self._logger = logging.getLogger(f"{self.__module__}:{self.__class__.__name__}")
         self._modules: list[ScModule] = []
         self._register = ScServerRegistrator(self._modules)
+        self._default_url = default_sc_server_url
 
     def __enter__(self):
         pass
@@ -46,7 +47,11 @@ class ScServer(ScServerAbstract):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.disconnect()
 
-    def connect(self, sc_server_url: str):
+    def connect(self, sc_server_url: str = None):
+        if sc_server_url is None:
+            if self._default_url is None:
+                raise ConnectionError("Connection failed: ScServer URL is None")
+            sc_server_url = self._default_url
         client.connect(sc_server_url)
         self._logger.info("Connect to server by url %s", repr(sc_server_url))
         return self
@@ -104,6 +109,7 @@ class ScServerRegistrator:
     @staticmethod
     def unregister_modules(*modules: ScModule):
         if not client.is_connected():
+            # TODO: How to unregister agents without connection?
             raise ConnectionError("Connection to the sc-server is not established")
         for module in modules:
             module.unregister()

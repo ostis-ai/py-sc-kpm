@@ -4,8 +4,9 @@ Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
 
-from sc_client import models as sc_models
 from sc_client.constants import sc_types
+from sc_client.constants.common import ScEventType
+from sc_client.models import ScAddr, ScLinkContentType
 
 from sc_kpm.sc_agent import ClassicScAgent, ScAgent
 from sc_kpm.sc_keynodes import ScKeynodes
