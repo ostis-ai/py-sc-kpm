@@ -36,7 +36,7 @@ class ScAgentAbstract(ABC):
         if self._event is not None:
             self._logger.warning("Agent's almost registered")
             return
-        event_params = ScEventParams(self._event_class, self._event_type, self.callback)
+        event_params = ScEventParams(self._event_class, self._event_type, self._callback)
         self._event = client.events_create(event_params)[0]
         self._logger.info("Agent's registered with event type: %s", repr(self._event_type))
 
@@ -49,7 +49,7 @@ class ScAgentAbstract(ABC):
             self._logger.warning("Event's already destroyed or not registered")
         self._logger.info("Agent's unregistered")
 
-    def callback(self, class_node: ScAddr, edge: ScAddr, action_node: ScAddr) -> ScResult:
+    def _callback(self, class_node: ScAddr, edge: ScAddr, action_node: ScAddr) -> ScResult:
         return self.on_event(class_node, edge, action_node)
 
     @abstractmethod
