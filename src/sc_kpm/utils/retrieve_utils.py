@@ -10,8 +10,8 @@ from sc_client import client
 from sc_client.constants import sc_types
 from sc_client.models import ScAddr, ScTemplate, ScTemplateResult
 
-from sc_kpm import ScKeynodes
-from sc_kpm.common import CommonIdentifiers, ScAlias
+from sc_kpm.identifiers import CommonIdentifiers, ScAlias
+from sc_kpm.sc_keynodes import ScKeynodes
 from sc_kpm.utils.common_utils import search_role_relation_template
 
 
