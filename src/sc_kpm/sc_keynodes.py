@@ -15,8 +15,13 @@ Idtf = str
 
 
 class ScKeynodes:
+    """
+    A singleton dict-like object which provides
+    the ability to cache the identifier and ScAddr of keynodes stored in the KB.
+    """
+
     _instance: ScKeynodes = None
-    _dict: dict = {}
+    _dict: dict[Idtf, ScAddr] = {}
 
     def __new__(cls) -> ScKeynodes:
         if cls._instance is None:
@@ -37,7 +42,7 @@ class ScKeynodes:
     def resolve(self, identifier: Idtf, sc_type: ScType | None) -> ScAddr:
         """Get keynode. If sc_type is valid, an element will be created in the KB"""
         addr = self._dict.get(identifier)
-        if addr is None:
+        if addr is None or not addr.is_valid() and sc_type is not None:
             params = ScIdtfResolveParams(idtf=identifier, type=sc_type)
             addr = client.resolve_keynodes(params)[0]
             self._dict[identifier] = addr

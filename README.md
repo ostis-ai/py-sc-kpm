@@ -23,89 +23,176 @@ There is a list of classes:
 
 ### ScKeynodes
 
-A singleton dictionary object which provides the ability
-to cache the identifier and ScAddr of keynodes stored in the KB.
-Create an instance of the ScKeynodes class to get access to the cache:
+A singleton dict-like object which provides
+the ability to cache the identifier and ScAddr of keynodes stored in the KB.
 
 ```python
-from sc_kpm import ScKeynodes
+from sc_kpm import sc_types, ScKeynodes
 
-keynodes = ScKeynodes()
+keynodes = ScKeynodes()  # Create an instance of the ScKeynodes class to get access to the cache
+
+# Get the provided identifier
+keynodes["identifier_of_keynode"]  # Returns an ScAddr of the given identifier
+
+# Get the unprovided identifier
+keynodes["not_stored_in_kb"]  # Raises InvalidValueError if an identifier doesn't exist in the KB
+keynodes.get("not_stored_in_kb")  # Returns an invalid ScAddr(0) in the same situation
+
+# Resolve identifier
+keynodes.resolve("my_class_node", sc_types.NODE_CONST_CLASS)  # Returns the element if it exists, otherwise creates
+keynodes.resolve("some_node", None)  # The same logic as keynodes.get("some_node")
 ```
 
-Get the provided identifier:
+### ScAgent and ClassicScAgent
+
+A class for handling a single ScEvent.
+Define your agents like this:
 
 ```python
-keynodes["identifier_of_keynode"]  # returns an ScAddr of the given identifier
-keynodes["not_stored_in_kb"]  # returns an invalid ScAddr if an identifier does not exist in the memory
-```
-
-Use _resolve()_ method to resolve identifiers:
-
-```python
-my_class_node = keynodes.resolve("my_class_node", sc_types.NODE_CONST_CLASS)
-```
-
-### ScAgent
-
-A class for handling a single ScEvent. Define your agents like this:
-
-```python
-from sc_kpm import ScAgent
+from sc_kpm import ClassicScAgent, ScAgent, ScResult, ScAddr
 
 
 class ScAgentTest(ScAgent):
-    def on_event(self, _src, _edge, target_node) -> ScResult:
-        logger.info("%s is started", ScAgentTest.__name__)
+    def on_event(self, class_node: ScAddr, edge: ScAddr, action_node: ScAddr) -> ScResult:
+        self._logger.info("Agent's started")
         ...
         return ScResult.OK
+
+
+class ClassicScAgentTest(ClassicScAgent):
+    def on_event(self, class_node: ScAddr, edge: ScAddr, action_node: ScAddr) -> ScResult:
+        self._logger.info("Agent's called")
+        if not self._confirm_action_class(action_node):  # exclusive method for classic agent
+            return ScResult.SKIP
+        self._logger.info("Agent's confirmed")
+        ...
+```
+
+For ScAgent initialization you write event class and event type.
+
+For SumScAgent you write name of action class and event type (default value is ScEventType.ADD_OUTGOING_EDGE).
+Event class here is `question_initiated`. Also, there is method to confirm action class.
+
+```python
+keynodes = ScKeynodes()
+action_class = keynodes.resolve("test_class", sc_types.NODE_CONST_CLASS)
+agent = ScAgentTest(action_class, ScEventType.ADD_OUTGOING_EDGE)
+
+classic_agent = ClassicScAgentTest("classic_test_class")
+classic_agent_ingoing = ClassicScAgentTest("classic_test_class", ScEventType.ADD_INGOING_EDGE)
 ```
 
 ### ScModule
 
-A class for registration and handling multiple ScAgent objects. Define your modules like this:
+A class for handling multiple ScAgent objects.
+
+Define your modules like this:
 
 ```python
-from sc_kpm import ScModule
-from sc_kpm.common.sc_module import RegisterParams
-from sc_client.constants.common import ScEventType
+from sc_kpm import ScEventType, ScModule
 
-
-class ScModuleTest(ScModule):
-    _reg_params = [
-        RegisterParams(ScAgentTest, "action_node", ScEventType.ADD_OUTGOING_EDGE)
-    ]
-
+module = ScModule(
+    agent1,
+    agent2,
+)
+...
+module.add_agent(agent3)
 ```
 
 ### ScServer
 
-A class for serving ScModule objects. Initialize and run server like this:
+A class for serving, register ScModule objects.
+
+Firstly you need connect to server. You can use connect/disconnect methods:
 
 ```python
 from sc_kpm import ScServer
 
 SC_SERVER_URL = "ws://localhost:8090/ws_json"
 server = ScServer(SC_SERVER_URL)
-server.start()
+server.connect()
 ...
+server.disconnect()
 ```
 
-You can register your modules wherever you want. Manage your modules like this:
+Or with-statement. We recommend it because it easier to use, and it's safe:
 
 ```python
-module = ScModuleTest()
-server.add_modules(module)
-...
-server.remove_modules(module)
-...
+from sc_kpm import ScServer
+
+SC_SERVER_URL = "ws://localhost:8090/ws_json"
+server = ScServer(SC_SERVER_URL)
+with server.connect():
+    ...
 ```
 
-After stopping server, all modules and agents will be deactivated.
+After connection, you can add and remove your modules. Manage your modules like this:
 
 ```python
-server.stop()
 ...
+with server.connect():
+    module = ScModule(...)
+    server.add_modules(module)
+    ...
+    server.remove_modules(module)
+```
+
+But the modules are still not registered. For this use register_modules/unregister_modules methods:
+
+```python
+...
+with server.connect():
+    ...
+    server.register_modules()
+    ...
+    server.unregister_modules()
+```
+
+Or one mode with-statement.
+We also recommend to use so because it guarantees a safe agents unregistration if errors occur:
+
+```python
+...
+with server.connect():
+    ...
+    with server.register_modules():
+        ...
+```
+
+Let's summarize and create example.
+We need register some module with test agent and do not unregister until the user stops the process:
+
+```python
+import signal
+import logging
+
+from sc_kpm import ScServer, ScModule, ClassicScAgent, ScAddr, ScResult
+
+
+class TestScAgent(ClassicScAgent):
+    def on_event(self, class_node: ScAddr, edge: ScAddr, action_node: ScAddr) -> ScResult:
+        self._logger.info("Agent's called")
+        if not self._confirm_action_class(action_node):
+            return ScResult.SKIP
+        self._logger.info("Agent's confirmed and started")
+        return ScResult.OK
+
+
+logging.basicConfig(level=logging.INFO)
+SC_SERVER_URL = "ws://localhost:8090/ws_json"
+server = ScServer(SC_SERVER_URL)
+with server.connect():
+    module = ScModule(TestScAgent("sum_action_class"))
+    server.add_modules(module)
+    with server.register_modules():
+        ...
+        signal.signal(signal.SIGINT, lambda *_: logging.info("^C interrupted"))
+        signal.pause()  # Waiting for ^C
+
+        raise ValueError("Oops, we broke something")  # Agents will be deactivated anyway
+
+    # Safe unregistration
+# Safe disconnecting
 ```
 
 ## Utils
