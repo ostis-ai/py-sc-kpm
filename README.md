@@ -217,8 +217,10 @@ def create_node(node_type: ScType, sys_idtf: str = None) -> ScAddr: ...
 def create_nodes(*node_types: ScType) -> List[ScAddr]: ...
 ```
 
-Create one or more nodes with type setting.
-`sys_idtf` is optional name of keynode if you want to add it there.
+Create single or multiple nodes.\
+Pass type as `node_type` argument.
+Argument `sys_idtf` provide the ability to set system identifier for created node.\
+Pass multiple types in a `node_types` argument for creating multiple nodes.
 
 ```python
 from sc_kpm import sc_types, ScKeynodes
@@ -236,7 +238,8 @@ elements = create_nodes(sc_types.NODE_CONST, sc_types.NODE_VAR)  # [ScAddr(...),
 def create_edge(edge_type: ScType, src: ScAddr, trg: ScAddr) -> ScAddr: ...
 ```
 
-Create edge between src and trg with setting its type
+Create the edge from source `src` to target `trg` addr.\
+Set type of the created edge py passing `edge_type` argument.
 
 ```python
 from sc_kpm import sc_types
@@ -265,7 +268,10 @@ def create_links(
 ) -> List[ScAddr]: ...
 ```
 
-Create link with some content, default type: string
+Create a ScLink object with provided content.\
+Pass link content in a `content` argument.\
+Pass link type in a `content_type` argument (Default value is a string type).\
+Set link type in a `link_type` argument (const link should be created by default).
 
 ```python
 from sc_kpm import sc_types, ScLinkContentType
@@ -273,8 +279,8 @@ from sc_kpm.utils import create_link, create_links
 
 msg = create_link("hello")  # ScAddr(...)
 four = create_link(4, ScLinkContentType.INT)  # ScAddr(...)
-water = create_link("water", link_type=sc_types.LINK_VAR)  # ScAddr(...)
-names = create_links("Sam", "Pit")  # [ScAddr(...), ScAddr(...)]
+water = create_link("world", link_type=sc_types.LINK_VAR)  # ScAddr(...)
+names = create_links("Sam", "ple")  # [ScAddr(...), ScAddr(...)]
 ```
 
 ### Relations creating
@@ -289,7 +295,10 @@ def create_role_relation(src: ScAddr, trg: ScAddr, *rrel_nodes: ScAddr) -> ScAdd
 def create_norole_relation(src: ScAddr, trg: ScAddr, *nrel_nodes: ScAddr) -> ScAddr: ...
 ```
 
-Create binary relations with different relations
+Create binary relations construction.\
+Pass relation type in a `edge_type` argument.\
+Pass addreses of source `src` and target `trg` elements.\
+Pass relation node adresses in a `relations` argument.
 
 ```python
 from sc_kpm import sc_types, ScKeynodes
@@ -298,14 +307,14 @@ from sc_kpm.utils import create_node, create_nodes
 from sc_kpm.utils import create_binary_relation, create_role_relation, create_norole_relation
 
 src, trg = create_nodes(*[sc_types.NODE_CONST] * 2)
-increase_relation = create_node(sc_types.NODE_CONST_CLASS, "increase")
+lang_relation = create_node(sc_types.NODE_CONST_ROLE, "lang_ru")
 
-brel = create_binary_relation(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, trg, increase_relation)  # ScAddr(...)
+rel = create_binary_relation(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, trg, lang_relation)  # ScAddr(...)
 rrel = create_role_relation(src, trg, ScKeynodes()[CommonIdentifiers.RREL_ONE.value])  # ScAddr(...)
-nrel = create_norole_relation(src, trg, create_node(sc_types.NODE_CONST_NOROLE, "connection"))  # ScAddr(...)
+nrel = create_norole_relation(src, trg, create_node(sc_types.NODE_CONST_NOROLE, "nrel_idtf"))  # ScAddr(...)
 ```
 
-### Deleting utils
+### Deleting elements
 
 ```python
 def delete_elements(*addrs: ScAddr) -> bool: ...
@@ -314,7 +323,8 @@ def delete_elements(*addrs: ScAddr) -> bool: ...
 def delete_edges(source: ScAddr, target: ScAddr, *edge_types: ScType) -> bool: ...
 ```
 
-Delete elements or all edges between nodes by their type and return success
+Delete elements by provided adresses in a `addrs` argument.\
+Delete every edge from `source` to `target` elements with provided types in a `edge_types` argument
 
 ```python
 from sc_kpm import sc_types
@@ -331,7 +341,7 @@ delete_edges(src, trg, sc_types.EDGE_ACCESS_CONST_POS_PERM)  # True
 
 ### Getting edges
 
-_**NOTE: Use VAR type instead of CONST in getting utils**_
+_**NOTE: Use VAR type instead of CONST in get-functions of common utils**_
 
 ```python
 def get_edge(source: ScAddr, target: ScAddr, edge_type: ScType) -> ScAddr: ...
@@ -340,7 +350,9 @@ def get_edge(source: ScAddr, target: ScAddr, edge_type: ScType) -> ScAddr: ...
 def get_edges(source: ScAddr, target: ScAddr, *edge_types: ScType) -> List[ScAddr]: ...
 ```
 
-Get edge or edges between two nodes
+Get edge or edges addrs between provided elements.\
+Pass addreses of `source` and `target` elements.\
+Pass type of the edge in a `edge_type` argument.\
 
 ```python
 from sc_kpm import sc_types
@@ -357,26 +369,34 @@ edges = get_edges(src, trg, sc_types.EDGE_ACCESS_VAR_POS_PERM, sc_types.EDGE_D_C
 assert edges == [edge1, edge2]
 ```
 
-### Getting by role relation
+### Getting elements by role relation
 
 ```python
 def get_element_by_role_relation(src: ScAddr, rrel_node: ScAddr) -> ScAddr: ...
+
+
+def get_element_by_norole_relation(src: ScAddr, nrel_node: ScAddr) -> ScAddr: ...
 ```
 
-Get target by node and role relation edge
+Get target element by source element and relation.\
+Pass address of the source element in the `src` argument.\
+Pass address of relation in the `rrel_node` or `nrel_node` argument.
 
 ```python
 from sc_kpm import sc_types, ScKeynodes
 from sc_kpm.identifiers import CommonIdentifiers
-from sc_kpm.utils import create_nodes, create_role_relation
-from sc_kpm.utils import get_element_by_role_relation
+from sc_kpm.utils import create_nodes, create_role_relation, create_norole_relation
+from sc_kpm.utils import get_element_by_role_relation, get_element_by_norole_relation
 
 keynodes = ScKeynodes()
-src, trg = create_nodes(*[sc_types.NODE_CONST] * 2)
-rrel = create_role_relation(src, trg, keynodes[CommonIdentifiers.RREL_ONE.value])  # ScAddr(...)
+src, trg1, trg2 = create_nodes(*[sc_types.NODE_CONST] * 3)
+rrel = create_role_relation(src, trg1, keynodes[CommonIdentifiers.RREL_ONE.value])  # ScAddr(...)
+nrel = create_norole_relation(src, trg2, keynodes[CommonIdentifiers.NREL_SYSTEM_IDENTIFIER.value])  # ScAddr(...)
 
-result = get_element_by_role_relation(src, keynodes[CommonIdentifiers.RREL_ONE.value])  # ScAddr(...)
-assert result == trg
+result1 = get_element_by_role_relation(src, keynodes[CommonIdentifiers.RREL_ONE.value])  # ScAddr(...)
+assert result1 == trg1
+result2 = get_element_by_norole_relation(src, keynodes[CommonIdentifiers.NREL_SYSTEM_IDENTIFIER.value])  # ScAddr(...)
+assert result2 == trg2
 ```
 
 ### Getting link content
@@ -385,12 +405,15 @@ assert result == trg
 def get_link_content(link: ScAddr) -> Union[str, int]: ...
 ```
 
+Get content of the link by passing ScLink addr as a `link` argument.
+
 ```python
 from sc_kpm.utils import create_link
 from sc_kpm.utils import get_link_content
 
 water = create_link("water")
 content = get_link_content(water)  # "water"
+assert "water" == content
 ```
 
 ### Getting system identifier
@@ -399,7 +422,7 @@ content = get_link_content(water)  # "water"
 def get_system_idtf(addr: ScAddr) -> str: ...
 ```
 
-Get system identifier of keynode
+Get system identifier of the keynode by passing addr as an `addr` argument.
 
 ```python
 from sc_kpm import sc_types, ScKeynodes
@@ -427,7 +450,7 @@ def create_set(set_type: ScType, *elements: ScAddr) -> ScAddr: ...
 def create_structure(*elements: ScAddr) -> ScAddr: ...
 ```
 
-Set consists of elements and set node that connects them.
+Set construction consists of elements connected with set node by binary oriented relation.
 
 ![set](docs/schemes/png/set.png)
 
