@@ -185,7 +185,6 @@ with server.connect():
     module = ScModule(TestScAgent("sum_action_class"))
     server.add_modules(module)
     with server.register_modules():
-        ...
         signal.signal(signal.SIGINT, lambda *_: logging.info("^C interrupted"))
         signal.pause()  # Waiting for ^C
 
@@ -194,6 +193,9 @@ with server.connect():
     # Safe unregistration
 # Safe disconnecting
 ```
+
+As you see, ScAgent has a logger inside, it logs location of agent.
+Inside logic logs with INFO level. <!--- mb create different logging levels in future -->
 
 ## Utils
 
@@ -705,4 +707,77 @@ question_finished = keynodes[QuestionStatus.QUESTION_FINISHED.value]
 question_finished_successfully = keynodes[QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY.value]
 assert check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, question_finished, action_node)
 assert check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, question_finished_successfully, action_node)
+```
+
+# Use-cases
+
+Script for creating agent to calculate sum of two arguments and confirm result.
+
+```python
+import logging
+
+from sc_kpm import ClassicScAgent, ScAddr, ScKeynodes, ScLinkContentType, ScModule, ScResult, ScServer, sc_types
+from sc_kpm.identifiers import CommonIdentifiers, QuestionStatus
+from sc_kpm.utils import create_link, get_edge, get_link_content
+from sc_kpm.utils.action_utils import (
+    create_action_answer,
+    execute_agent,
+    finish_action_with_status,
+    get_action_answer,
+    get_action_arguments,
+)
+from sc_kpm.utils.retrieve_utils import get_set_elements
+
+
+class SumScAgent(ClassicScAgent):
+    def on_event(self, class_node: ScAddr, edge: ScAddr, action_node: ScAddr) -> ScResult:
+        self._logger.info("Agent's called")
+        if not self._confirm_action_class(action_node):
+            return ScResult.SKIP
+        self._logger.info("Agent's confirmed")
+        result = self.run(action_node)
+        finish_action_with_status(action_node, is_success=(result == ScResult.OK))
+        return result
+
+    def run(self, action_node: ScAddr) -> ScResult:
+        self._logger.info("Agent runs")
+        arg1_link, arg2_link = get_action_arguments(action_node, 2)
+        if not arg1_link or not arg2_link:
+            return ScResult.ERROR_INVALID_PARAMS
+        arg1_content = get_link_content(arg1_link)
+        arg2_content = get_link_content(arg2_link)
+        if not isinstance(arg1_content, int) or not isinstance(arg2_content, int):
+            return ScResult.ERROR_INVALID_TYPE
+        create_action_answer(action_node, create_link(arg1_content + arg2_content, ScLinkContentType.INT))
+        return ScResult.OK
+
+
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s | %(levelname)s | %(name)s | %(message)s", datefmt="[%d-%b-%y %H:%M:%S]"
+)
+
+server = ScServer("ws://localhost:8090/ws_json")
+with server.connect():
+    ACTION_CLASS_NAME = "sum"
+    agent = SumScAgent(ACTION_CLASS_NAME)
+    module = ScModule(agent)
+    server.add_modules(module)
+
+    with server.register_modules():
+        arg1 = create_link(2, ScLinkContentType.STRING)
+        arg2 = create_link(3, ScLinkContentType.STRING)
+        kwargs = {
+            "arguments": {arg1: False, arg2: False},
+            "concepts": [CommonIdentifiers.QUESTION.value, ACTION_CLASS_NAME],
+        }
+
+        question, is_successfully = execute_agent(**kwargs, wait_time=1)
+        assert is_successfully
+        k = ScKeynodes()
+        src = k[QuestionStatus.QUESTION_INITIATED.value]
+        edge_ = get_edge(src, question, sc_types.EDGE_ACCESS_VAR_POS_PERM)
+        answer_struct = get_action_answer(question)
+        answer_link = get_set_elements(answer_struct)[0]
+        answer_content = get_link_content(answer_link)
+        logging.info("answer_content: %s", repr(answer_content))
 ```
