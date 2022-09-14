@@ -50,11 +50,11 @@ class ScAgentAbstract(ABC):
             self._logger.warning("Event's already destroyed or not registered")
         self._logger.info("Agent's unregistered")
 
-    def _callback(self, class_node: ScAddr, edge: ScAddr, action_node: ScAddr) -> ScResult:
-        return self.on_event(class_node, edge, action_node)
+    def _callback(self, init_element: ScAddr, init_edge: ScAddr, action_element: ScAddr) -> ScResult:
+        return self.on_event(init_element, init_edge, action_element)
 
     @abstractmethod
-    def on_event(self, class_node: ScAddr, edge: ScAddr, action_node: ScAddr) -> ScResult:
+    def on_event(self, init_element: ScAddr, init_edge: ScAddr, action_element: ScAddr) -> ScResult:
         pass
 
 
@@ -71,7 +71,7 @@ class ScAgent(ScAgentAbstract, ABC):
         return f"ScAgent(event_class='{get_system_idtf(self._event_class)}', event_type={repr(self._event_type)})"
 
 
-class ClassicScAgent(ScAgentAbstract, ABC):
+class ScAgentClassic(ScAgentAbstract, ABC):
     def __init__(self, action_class_name: Idtf, event_type: ScEventType = ScEventType.ADD_OUTGOING_EDGE):
         self._keynodes = ScKeynodes()
         super().__init__(
@@ -88,3 +88,8 @@ class ClassicScAgent(ScAgentAbstract, ABC):
 
     def _confirm_action_class(self, action_node: ScAddr) -> bool:
         return check_action_class(self._action_class, action_node)
+
+    @abstractmethod
+    def on_event(self, init_element: ScAddr, init_edge: ScAddr, action_node: ScAddr) -> ScResult:
+        # pylint: disable=arguments-renamed
+        pass

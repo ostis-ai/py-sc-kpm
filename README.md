@@ -43,13 +43,12 @@ keynodes.resolve("my_class_node", sc_types.NODE_CONST_CLASS)  # Returns the elem
 keynodes.resolve("some_node", None)  # The same logic as keynodes.get("some_node")
 ```
 
-### ScAgent and ClassicScAgent
+### ScAgent and ScAgentClassic
 
-A class for handling a single ScEvent.
-Define your agents like this:
+A class for handling a single ScEvent. Define your agents like this:
 
 ```python
-from sc_kpm import ClassicScAgent, ScAgent, ScResult, ScAddr
+from sc_kpm import ScAgent, ScAgentClassic, ScResult, ScAddr
 
 
 class ScAgentTest(ScAgent):
@@ -59,7 +58,7 @@ class ScAgentTest(ScAgent):
         return ScResult.OK
 
 
-class ClassicScAgentTest(ClassicScAgent):
+class ScAgentClassicTest(ScAgentClassic):
     def on_event(self, class_node: ScAddr, edge: ScAddr, action_node: ScAddr) -> ScResult:
         self._logger.info("Agent's called")
         if not self._confirm_action_class(action_node):  # exclusive method for classic agent
@@ -70,16 +69,16 @@ class ClassicScAgentTest(ClassicScAgent):
 
 For ScAgent initialization you write event class and event type.
 
-For SumScAgent you write name of action class and event type (default value is ScEventType.ADD_OUTGOING_EDGE).
-Event class here is `question_initiated`. Also, there is method to confirm action class.
+For ScAgentClassic you write name of action class and event type (default value is ScEventType.ADD_OUTGOING_EDGE).
+Event class here is `question_initiated`. There is also method to confirm action class.
 
 ```python
 keynodes = ScKeynodes()
 action_class = keynodes.resolve("test_class", sc_types.NODE_CONST_CLASS)
 agent = ScAgentTest(action_class, ScEventType.ADD_OUTGOING_EDGE)
 
-classic_agent = ClassicScAgentTest("classic_test_class")
-classic_agent_ingoing = ClassicScAgentTest("classic_test_class", ScEventType.ADD_INGOING_EDGE)
+classic_agent = ScAgentClassicTest("classic_test_class")
+classic_agent_ingoing = ScAgentClassicTest("classic_test_class", ScEventType.ADD_INGOING_EDGE)
 ```
 
 ### ScModule
@@ -166,10 +165,10 @@ We need register some module with test agent and do not unregister until the use
 import signal
 import logging
 
-from sc_kpm import ScServer, ScModule, ClassicScAgent, ScAddr, ScResult
+from sc_kpm import ScServer, ScModule, ScAgentClassic, ScAddr, ScResult
 
 
-class TestScAgent(ClassicScAgent):
+class TestScAgent(ScAgentClassic):
     def on_event(self, class_node: ScAddr, edge: ScAddr, action_node: ScAddr) -> ScResult:
         self._logger.info("Agent's called")
         if not self._confirm_action_class(action_node):
@@ -185,8 +184,7 @@ with server.connect():
     module = ScModule(TestScAgent("sum_action_class"))
     server.add_modules(module)
     with server.register_modules():
-        ...
-        signal.signal(signal.SIGINT, lambda *_: logging.info("^C interrupted"))
+        signal.signal(signal.SIGINT, lambda *_: logging.getLogger(__file__).info("^C interrupted"))
         signal.pause()  # Waiting for ^C
 
         raise Exception("Oops, we broke something")  # Agents will be unregistered anyway
@@ -194,6 +192,11 @@ with server.connect():
     # Safe unregistration
 # Safe disconnecting
 ```
+
+[source code](docs/examples/register_and_wait_for_user.py)
+
+As you see, ScAgent has a logger inside, it logs location of agent.
+Inside logic logs with INFO level. <!--- mb create different logging levels in future -->
 
 ## Utils
 
@@ -442,7 +445,7 @@ from sc_kpm.utils.creation_utils import wrap_in_set, create_set, create_structur
 elements = create_nodes(sc_types.NODE_CONST, sc_types.NODE_VAR)
 
 set_node = create_node(sc_types.NODE_CONST_CLASS)
-wrap_in_set(set_node, *elements)  # None
+wrap_in_set(set_node, *elements)
 # or
 set_node = create_set(sc_types.NODE_CONST, *elements)  # ScAddr(...)
 # or
@@ -469,7 +472,7 @@ from sc_kpm.utils.creation_utils import wrap_in_oriented_set, create_oriented_se
 elements = create_nodes(sc_types.NODE_CONST, sc_types.NODE_VAR)
 
 set_node = create_node(sc_types.NODE_CONST_CLASS)
-wrap_in_oriented_set(set_node, *elements)  # None
+wrap_in_oriented_set(set_node, *elements)
 # or
 set_node = create_oriented_set(*elements)  # ScAddr(...)
 ```
@@ -660,12 +663,11 @@ from sc_kpm.utils.action_utils import execute_agent, call_agent, wait_agent
 
 arg1 = create_link(2, ScLinkContentType.STRING)
 arg2 = create_link(3, ScLinkContentType.STRING)
-kwargs = {
-    "arguments": {arg1: False, arg2: False},
-    "concepts": [CommonIdentifiers.QUESTION.value, "some_class_name"],
-}
 
-question = call_agent(**kwargs)  # ScAddr(...)
+question = call_agent(
+    arguments={arg1: False, arg2: False},
+    concepts=[CommonIdentifiers.QUESTION.value, "some_class_name"],
+)  # ScAddr(...)
 wait_agent(3, question, ScKeynodes()[QuestionStatus.QUESTION_FINISHED.value])
 # or
 question, is_successfully = execute_agent(**kwargs, wait_time=3)  # ScAddr(...), True/False
@@ -709,107 +711,10 @@ assert check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, question_finished_successfu
 
 # Use-cases
 
-Script for creating agent to calculate sum of two arguments and confirm result.
-
-```python
-import logging
-
-from sc_kpm import ClassicScAgent, ScAddr, ScKeynodes, ScLinkContentType, ScModule, ScResult, ScServer, sc_types
-from sc_kpm.identifiers import CommonIdentifiers, QuestionStatus
-from sc_kpm.utils import create_link, get_edge, get_link_content
-from sc_kpm.utils.action_utils import (
-    create_action_answer,
-    execute_agent,
-    finish_action_with_status,
-    get_action_answer,
-    get_action_arguments,
-)
-from sc_kpm.utils.retrieve_utils import get_set_elements
-
-
-class SumScAgent(ClassicScAgent):
-    def on_event(self, class_node: ScAddr, edge: ScAddr, action_node: ScAddr) -> ScResult:
-        self._logger.info("Agent's called")
-        if not self._confirm_action_class(action_node):
-            return ScResult.SKIP
-        self._logger.info("Agent's confirmed")
-        result = self.run(action_node)
-        finish_action_with_status(action_node, is_success=(result == ScResult.OK))
-        return result
-
-    def run(self, action_node: ScAddr) -> ScResult:
-        self._logger.info("Agent runs")
-        arg1_link, arg2_link = get_action_arguments(action_node, 2)
-        if not arg1_link or not arg2_link:
-            return ScResult.ERROR_INVALID_PARAMS
-        arg1_content = get_link_content(arg1_link)
-        arg2_content = get_link_content(arg2_link)
-        if not isinstance(arg1_content, int) or not isinstance(arg2_content, int):
-            return ScResult.ERROR_INVALID_TYPE
-        create_action_answer(action_node, create_link(arg1_content + arg2_content, ScLinkContentType.INT))
-        return ScResult.OK
-
-
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s | %(levelname)s | %(name)s | %(message)s", datefmt="[%d-%b-%y %H:%M:%S]"
-)
-
-server = ScServer("ws://localhost:8090/ws_json")
-with server.connect():
-    ACTION_CLASS_NAME = "sum"
-    agent = SumScAgent(ACTION_CLASS_NAME)
-    module = ScModule(agent)
-    server.add_modules(module)
-
-    with server.register_modules():
-        arg1 = create_link(2, ScLinkContentType.STRING)
-        arg2 = create_link(3, ScLinkContentType.STRING)
-        kwargs = {
-            "arguments": {arg1: False, arg2: False},
-            "concepts": [CommonIdentifiers.QUESTION.value, ACTION_CLASS_NAME],
-        }
-
-        question, is_successfully = execute_agent(**kwargs, wait_time=1)
-        assert is_successfully
-        k = ScKeynodes()
-        src = k[QuestionStatus.QUESTION_INITIATED.value]
-        edge_ = get_edge(src, question, sc_types.EDGE_ACCESS_VAR_POS_PERM)
-        answer_struct = get_action_answer(question)
-        answer_link = get_set_elements(answer_struct)[0]
-        answer_content = get_link_content(answer_link)
-        logging.info("answer_content: %s", repr(answer_content))
-```
-
-# Logging
-
-Every logger has name `LOGGER_NAME`, and you can output them separately:
-
-```python
-from sc_kpm import LOGGER_NAME
-import logging.config
-
-logging.config.dictConfig(
-    dict(
-        version=1,
-        disable_existing_loggers=False,
-        handlers={
-            "your_custom_handler": {"class": "logging.StreamHandler", "level": logging.INFO,
-                                    "formatter": "your_formatter"},
-            "your_another_custom_handler": {"class": "logging.FileHandler",
-                                            "level": logging.DEBUG,
-                                            "filename": "./your_path_to_logs.log",
-                                            "formatter": "your_formatter"},
-        },
-        formatters={
-            "your_formatter": {
-                "format": "%(asctime)s | %(levelname)s | %(name)s | %(message)s",
-                "datefmt": "[%d-%b-%y %H:%M:%S]",
-            }
-        },
-        loggers={
-            LOGGER_NAME: {"handlers": ["your_custom_handler", "your_another_custom_handler"],
-                          "level": logging.DEBUG, }
-        },
-    )
-)
-```
+- Script for creating and registration agent until user press ^C:
+    - [based on ScAgentClassic](docs/examples/register_and_wait_for_user.py)
+- Scripts for creating agent to calculate sum of two arguments and confirm result:
+    - [based on ScAgent](docs/examples/sum_agent.py)
+    - [based on ScAgentClassic](docs/examples/sum_agent_classic.py)
+- Logging examples:
+    - [only py-sc-kpm logging](docs/examples/logging_only_kpm.py)
