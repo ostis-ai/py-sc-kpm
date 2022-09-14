@@ -116,21 +116,34 @@ def get_system_idtf(addr: ScAddr) -> Idtf:
     return ""
 
 
-def search_role_relation_template(src: ScAddr, rrel_node: ScAddr) -> Optional[ScTemplateResult]:
+def search_relation_template(src: ScAddr, rel_node: ScAddr, rel_type: ScType) -> Optional[ScTemplateResult]:
     templ = ScTemplate()
     templ.triple_with_relation(
         src,
-        [sc_types.EDGE_ACCESS_VAR_POS_PERM, ScAlias.ACCESS_EDGE.value],
+        [rel_type, ScAlias.ACCESS_EDGE.value],
         [sc_types.UNKNOWN, ScAlias.ELEMENT.value],
         sc_types.EDGE_ACCESS_VAR_POS_PERM,
-        rrel_node,
+        rel_node,
     )
     result = client.template_search(templ)
     return result[0] if result else None
 
 
+def search_role_relation_template(src: ScAddr, rrel_node: ScAddr) -> Optional[ScTemplateResult]:
+    return search_relation_template(src, rrel_node, sc_types.EDGE_ACCESS_VAR_POS_PERM)
+
+
+def search_norole_relation_template(src: ScAddr, nrel_node: ScAddr) -> Optional[ScTemplateResult]:
+    return search_relation_template(src, nrel_node, sc_types.EDGE_D_COMMON_VAR)
+
+
 def get_element_by_role_relation(src: ScAddr, rrel_node: ScAddr) -> ScAddr:
     search_result = search_role_relation_template(src, rrel_node)
+    return search_result.get(ScAlias.ELEMENT.value) if search_result else ScAddr(0)
+
+
+def get_element_by_norole_relation(src: ScAddr, nrel_node: ScAddr) -> ScAddr:
+    search_result = search_norole_relation_template(src, nrel_node)
     return search_result.get(ScAlias.ELEMENT.value) if search_result else ScAddr(0)
 
 
