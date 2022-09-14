@@ -89,7 +89,7 @@ A class for handling multiple ScAgent objects.
 Define your modules like this:
 
 ```python
-from sc_kpm import ScEventType, ScModule
+from sc_kpm import ScModule
 
 module = ScModule(
     agent1,
@@ -188,7 +188,7 @@ with server.connect():
         signal.signal(signal.SIGINT, lambda *_: logging.info("^C interrupted"))
         signal.pause()  # Waiting for ^C
 
-        raise ValueError("Oops, we broke something")  # Agents will be deactivated anyway
+        raise Exception("Oops, we broke something")  # Agents will be unregistered anyway
 
     # Safe unregistration
 # Safe disconnecting
