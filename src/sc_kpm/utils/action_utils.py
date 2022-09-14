@@ -129,7 +129,7 @@ def _create_action(concepts: List[Idtf]) -> ScAddr:
 
 
 # TODO rewrite to event
-def wait_agent(seconds: float, question_node: ScAddr, reaction_node: ScAddr):
+def wait_agent(seconds: float, question_node: ScAddr, reaction_node: ScAddr) -> None:
     finish = datetime.now() + timedelta(seconds=seconds)
     while not check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, reaction_node, question_node) and datetime.now() < finish:
         time.sleep(0.1)
