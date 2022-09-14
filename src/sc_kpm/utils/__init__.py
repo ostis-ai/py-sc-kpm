@@ -18,6 +18,7 @@ from sc_kpm.utils.common_utils import (
     delete_elements,
     get_edge,
     get_edges,
+    get_element_by_norole_relation,
     get_element_by_role_relation,
     get_link_content,
     get_system_idtf,
