@@ -204,6 +204,8 @@ There is also possibility to wrap in set or oriented set.
 
 There are utils to work with basic elements
 
+_You can import these utils from `sc_kpm.utils` or `sc_kpm.utils.common_utils`_
+
 ### Nodes creating
 
 ```python
@@ -236,8 +238,8 @@ Create edge between src and trg with setting its type
 
 ```python
 from sc_kpm import sc_types
-from sc_kpm.utils.common_utils import create_nodes
-from sc_kpm.utils.common_utils import create_edge
+from sc_kpm.utils import create_nodes
+from sc_kpm.utils import create_edge
 
 src, trg = create_nodes(*[sc_types.NODE_CONST] * 2)
 msg_edge = create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, trg)  # ScAddr(...)
@@ -264,12 +266,11 @@ def create_links(
 Create link with some content, default type: string
 
 ```python
-from sc_kpm import sc_types
-# from sc_kpm import sc_models
-from sc_kpm.utils.common_utils import create_link, create_links
+from sc_kpm import sc_types, ScLinkContentType
+from sc_kpm.utils import create_link, create_links
 
 msg = create_link("hello")  # ScAddr(...)
-# four = create_link(4, sc_models.ScLinkContentType.INT)  # ScAddr(...) // idk, mb it ain't work
+four = create_link(4, ScLinkContentType.INT)  # ScAddr(...)
 water = create_link("water", link_type=sc_types.LINK_VAR)  # ScAddr(...)
 names = create_links("Sam", "Pit")  # [ScAddr(...), ScAddr(...)]
 ```
@@ -290,15 +291,15 @@ Create binary relations with different relations
 
 ```python
 from sc_kpm import sc_types, ScKeynodes
-from sc_kpm.common.identifiers import CommonIdentifiers
-from sc_kpm.utils.common_utils import create_node, create_nodes
-from sc_kpm.utils.common_utils import create_binary_relation, create_role_relation, create_norole_relation
+from sc_kpm.identifiers import CommonIdentifiers
+from sc_kpm.utils import create_node, create_nodes
+from sc_kpm.utils import create_binary_relation, create_role_relation, create_norole_relation
 
 src, trg = create_nodes(*[sc_types.NODE_CONST] * 2)
 increase_relation = create_node(sc_types.NODE_CONST_CLASS, "increase")
 
 brel = create_binary_relation(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, trg, increase_relation)  # ScAddr(...)
-rrel = create_role_relation(src, trg, ScKeynodes[CommonIdentifiers.RREL_ONE.value])  # ScAddr(...)
+rrel = create_role_relation(src, trg, ScKeynodes()[CommonIdentifiers.RREL_ONE.value])  # ScAddr(...)
 nrel = create_norole_relation(src, trg, create_node(sc_types.NODE_CONST_NOROLE, "connection"))  # ScAddr(...)
 ```
 
@@ -315,8 +316,8 @@ Delete elements or all edges between nodes by their type and return success
 
 ```python
 from sc_kpm import sc_types
-from sc_kpm.utils.common_utils import create_nodes, create_edge
-from sc_kpm.utils.common_utils import delete_edges, delete_elements
+from sc_kpm.utils import create_nodes, create_edge
+from sc_kpm.utils import delete_edges, delete_elements
 
 elements = create_nodes(*[sc_types.NODE_CONST] * 2)
 delete_elements(*elements)  # True
@@ -341,12 +342,12 @@ Get edge or edges between two nodes
 
 ```python
 from sc_kpm import sc_types
-from sc_kpm.utils.common_utils import create_nodes, create_edge
-from sc_kpm.utils.common_utils import get_edge, get_edges
+from sc_kpm.utils import create_nodes, create_edge
+from sc_kpm.utils import get_edge, get_edges
 
 src, trg = create_nodes(*[sc_types.NODE_CONST] * 2)
 edge1 = create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, trg)
-edge2 = create_edge(sc_types.EDGE_D_COMMON_VAR, src, trg)
+edge2 = create_edge(sc_types.EDGE_D_COMMON_CONST, src, trg)
 
 class_edge = get_edge(src, trg, sc_types.EDGE_ACCESS_VAR_POS_PERM)  # ScAddr(...)
 assert class_edge == edge1
@@ -364,14 +365,15 @@ Get target by node and role relation edge
 
 ```python
 from sc_kpm import sc_types, ScKeynodes
-from sc_kpm.common.identifiers import CommonIdentifiers
-from sc_kpm.utils.common_utils import create_nodes, create_role_relation
-from sc_kpm.utils.common_utils import get_element_by_role_relation
+from sc_kpm.identifiers import CommonIdentifiers
+from sc_kpm.utils import create_nodes, create_role_relation
+from sc_kpm.utils import get_element_by_role_relation
 
+keynodes = ScKeynodes()
 src, trg = create_nodes(*[sc_types.NODE_CONST] * 2)
-rrel = create_role_relation(src, trg, ScKeynodes[CommonIdentifiers.RREL_ONE.value])  # ScAddr(...)
+rrel = create_role_relation(src, trg, keynodes[CommonIdentifiers.RREL_ONE.value])  # ScAddr(...)
 
-result = get_element_by_role_relation(src, ScKeynodes[CommonIdentifiers.RREL_ONE.value])  # ScAddr(...)
+result = get_element_by_role_relation(src, keynodes[CommonIdentifiers.RREL_ONE.value])  # ScAddr(...)
 assert result == trg
 ```
 
@@ -382,8 +384,8 @@ def get_link_content(link: ScAddr) -> Union[str, int]: ...
 ```
 
 ```python
-from sc_kpm.utils.common_utils import create_link
-from sc_kpm.utils.common_utils import get_link_content
+from sc_kpm.utils import create_link
+from sc_kpm.utils import get_link_content
 
 water = create_link("water")
 content = get_link_content(water)  # "water"
@@ -399,15 +401,15 @@ Get system identifier of keynode
 
 ```python
 from sc_kpm import sc_types, ScKeynodes
-from sc_kpm.utils.common_utils import create_node
-from sc_kpm.utils.common_utils import get_system_idtf
+from sc_kpm.utils import create_node
+from sc_kpm.utils import get_system_idtf
 
 lang_en = create_node(sc_types.NODE_CONST_CLASS, "lang_en")  # ScAddr(...)
 idtf = get_system_idtf(lang_en)  # "lang_en"
 assert ScKeynodes()[idtf] == lang_en
 ```
 
-## Generation utils
+## Creating utils
 
 There are functions to work with sets: create, wrap, etc.
 
@@ -434,8 +436,8 @@ In structure sc_type of main node is `sc_types.NODE_CONST_STRUCT`
 
 ```python
 from sc_kpm import sc_types
-from sc_kpm.utils.common_utils import create_node, create_nodes
-from sc_kpm.utils.generation_utils import wrap_in_set, create_set, create_structure
+from sc_kpm.utils import create_node, create_nodes
+from sc_kpm.utils.creation_utils import wrap_in_set, create_set, create_structure
 
 elements = create_nodes(sc_types.NODE_CONST, sc_types.NODE_VAR)
 
@@ -461,8 +463,8 @@ Oriented set is more complex, but is has orientation
 
 ```python
 from sc_kpm import sc_types
-from sc_kpm.utils.common_utils import create_node, create_nodes
-from sc_kpm.utils.generation_utils import wrap_in_oriented_set, create_oriented_set
+from sc_kpm.utils import create_node, create_nodes
+from sc_kpm.utils.creation_utils import wrap_in_oriented_set, create_oriented_set
 
 elements = create_nodes(sc_types.NODE_CONST, sc_types.NODE_VAR)
 
@@ -472,7 +474,7 @@ wrap_in_oriented_set(set_node, *elements)  # None
 set_node = create_oriented_set(*elements)  # ScAddr(...)
 ```
 
-## Search utils
+## Retrieve utils
 
 There are utils fot searching elements of sets and their power
 
@@ -489,9 +491,9 @@ Get elements of set and oriented set by set node
 
 ```python
 from sc_kpm import sc_types
-from sc_kpm.utils.common_utils import create_nodes
-from sc_kpm.utils.generation_utils import create_structure, create_oriented_set
-from sc_kpm.utils.search_utils import get_set_elements, get_oriented_set_elements
+from sc_kpm.utils import create_nodes
+from sc_kpm.utils.creation_utils import create_structure, create_oriented_set
+from sc_kpm.utils.retrieve_utils import get_set_elements, get_oriented_set_elements
 
 elements = create_nodes(sc_types.NODE_CONST, sc_types.NODE_VAR)
 struct_node = create_structure(*elements)
@@ -514,9 +516,9 @@ Get count os elements in set or oriented set
 
 ```python
 from sc_kpm import sc_types
-from sc_kpm.utils.common_utils import create_nodes
-from sc_kpm.utils.generation_utils import create_structure
-from sc_kpm.utils.search_utils import get_set_power
+from sc_kpm.utils import create_nodes
+from sc_kpm.utils.creation_utils import create_structure
+from sc_kpm.utils.retrieve_utils import get_set_power
 
 elements = create_nodes(sc_types.NODE_CONST, sc_types.NODE_VAR)
 struct_node = create_structure(*elements)
@@ -544,8 +546,8 @@ You can use identifier of action class instead of ScAddr
 
 ```python
 from sc_kpm import sc_types, ScKeynodes
-from sc_kpm.common.identifiers import CommonIdentifiers
-from sc_kpm.utils.common_utils import create_node, create_edge
+from sc_kpm.identifiers import CommonIdentifiers
+from sc_kpm.utils import create_node, create_edge
 from sc_kpm.utils.action_utils import check_action_class
 
 action_node = create_node(sc_types.NODE_CONST)
@@ -553,37 +555,73 @@ create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, ScKeynodes()[CommonIdentifiers.
 action_class = create_node(sc_types.NODE_CONST_CLASS, "some_classification")
 create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, action_class, action_node)
 
-assert check_action_class(action_class, action_node)  # True
+assert check_action_class(action_class, action_node)
 # or
-assert check_action_class("some_classification", action_node)  # True
+assert check_action_class("some_classification", action_node)
 ```
 
-### Get action answer
+### Get action arguments
 
 ```python
+def get_action_arguments(action_class: Union[ScAddr, Idtf], count: int) -> List[ScAddr]: ...
+```
+
+Get list of action arguments concatenated by `rrel_[1 -> count]`
+
+![check action class](docs/schemes/png/get_arguments.png)
+
+```python
+from sc_kpm import sc_types, ScKeynodes
+from sc_kpm.identifiers import CommonIdentifiers
+from sc_kpm.utils import create_node, create_edge, create_role_relation
+from sc_kpm.utils.action_utils import get_action_arguments
+
+keynodes = ScKeynodes()
+action_node = create_node(sc_types.NODE_CONST)
+
+# Static argument
+argument1 = create_node(sc_types.NODE_CONST)
+create_role_relation(action_node, argument1, keynodes[CommonIdentifiers.RREL_ONE.value])
+
+# Dynamic argument
+dynamic_node = create_node(sc_types.NODE_CONST)
+rrel_dynamic_arg = keynodes[CommonIdentifiers.RREL_DYNAMIC_ARGUMENT.value]
+create_role_relation(action_node, dynamic_node, rrel_dynamic_arg, keynodes[CommonIdentifiers.RREL_TWO.value])
+argument2 = create_node(sc_types.NODE_CONST)
+create_edge(sc_types.EDGE_ACCESS_CONST_POS_TEMP, dynamic_node, argument2)
+
+arguments = get_action_arguments(action_node, 2)
+assert arguments == [argument1, dynamic_node]
+```
+
+### Create and get action answer
+
+```python
+def create_action_answer(action_node: ScAddr, *elements: ScAddr) -> None: ...
+
+
 def get_action_answer(action_node: ScAddr) -> ScAddr: ...
 ```
 
-Get structure with output of action
+Create and get structure with output of action
 
 ![agent answer](docs/schemes/png/agent_answer.png)
 
 ```python
-from sc_kpm import sc_types, ScKeynodes
-from sc_kpm.common.identifiers import CommonIdentifiers
-from sc_kpm.utils.common_utils import create_node, create_edge
-from sc_kpm.utils.action_utils import get_action_answer
+from sc_kpm import sc_types
+from sc_kpm.utils import create_node
+from sc_kpm.utils.action_utils import create_action_answer, get_action_answer
+from sc_kpm.utils.retrieve_utils import get_set_elements
 
-action_node = create_node(sc_types.NODE_CONST)
-answer_struct = create_node(sc_types.NODE_CONST_STRUCT)
-edge = create_edge(sc_types.EDGE_D_COMMON_CONST, action_node, answer_struct)
-create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, ScKeynodes()[CommonIdentifiers.NREL_ANSWER.value], edge)
-
+action_node = create_node(sc_types.NODE_CONST_STRUCT)
+answer_element = create_node(sc_types.NODE_CONST_STRUCT)
+create_action_answer(action_node, answer_element)
 result = get_action_answer(action_node)
-assert result == answer_struct
+result_elements = get_set_elements(result)
+assert result_elements == [answer_element]
 ```
 
-### Call and execute agent
+### Call, execute and wait agent
 
 ```python
 def call_agent(
@@ -593,106 +631,44 @@ def call_agent(
 ) -> ScAddr: ...
 
 
+def wait_agent(seconds: float, question_node: ScAddr, reaction_node: ScAddr) -> None: ...
+
+
 def execute_agent(
         arguments: Dict[ScAddr, IsDynamic],
         concepts: List[Idtf],
         initiation: Idtf = QuestionStatus.QUESTION_INITIATED.value,
         reaction: QuestionStatus = QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY,
         wait_time: int = COMMON_WAIT_TIME,  # 5
-) -> bool: ...
+) -> Tuple[ScAddr, bool]: ...
 ```
 
-Call agent, wait for it some seconds, and return if there is reaction
+Call agent: creates action node with some arguments, concepts and connects it to node with initiation identifier.
+Returns question node
+
+Wait agent: Wait edge to reaction node some seconds.
+
+Execute agent: calls, waits and return question node and success
 
 ![execute_agent](docs/schemes/png/execute_agent.png)
 
 ```python
-from sc_client.models import ScLinkContentType
+from sc_kpm import ScLinkContentType, ScKeynodes
+from sc_kpm.identifiers import CommonIdentifiers, QuestionStatus
+from sc_kpm.utils import create_link
+from sc_kpm.utils.action_utils import execute_agent, call_agent, wait_agent
 
-from sc_kpm import ScAgent, ScKeynodes, ScModule, ScServer
-from sc_kpm.common.identifiers import CommonIdentifiers, QuestionStatus
-from sc_kpm.common.sc_result import ScResult
-from sc_kpm.utils.action_utils import (
-    ScAddr,
-    call_agent,
-    check_action_class,
-    execute_agent,
-    finish_action_with_status,
-    get_action_answer,
-    wait_agent,
-)
-from sc_kpm.utils.common_utils import (
-    create_link,
-    create_norole_relation,
-    get_element_by_role_relation,
-    get_link_content,
-)
-from sc_kpm.utils.creation_utils import create_structure
-from sc_kpm.utils.retrieve_utils import get_set_elements
-
-logs = []
-
-
-class SumScAgent(ScAgent):
-    ACTION_CLASS_NAME = "sum"
-
-    def __init__(self):
-        self.keynodes = ScKeynodes()
-        self.action_class = self.keynodes.resolve(self.ACTION_CLASS_NAME)
-
-    def on_event(self, class_node: ScAddr, edge: ScAddr, action_node: ScAddr) -> ScResult:
-        logs.append("run agent")
-        if not check_action_class(self.action_class, action_node):
-            return ScResult.SKIP
-        result = self.run(action_node)
-        finish_action_with_status(action_node, is_success=(result == ScResult.OK))
-        return result
-
-    def run(self, action_node: ScAddr) -> ScResult:
-        arg1_link = get_element_by_role_relation(action_node, self.keynodes[CommonIdentifiers.RREL_ONE.value])
-        arg2_link = get_element_by_role_relation(action_node, self.keynodes[CommonIdentifiers.RREL_TWO.value])
-        arg1_content = get_link_content(arg1_link)
-        arg2_content = get_link_content(arg2_link)
-        logs.append([arg1_content, arg2_content, type(arg1_content), type(arg2_content)])
-        if not isinstance(arg1_content, int) or not isinstance(arg2_content, int):
-            return ScResult.ERROR_INVALID_TYPE
-        answer_struct_node = create_structure(create_link(arg1_content + arg2_content, ScLinkContentType.INT))
-        create_norole_relation(action_node, answer_struct_node, self.keynodes[CommonIdentifiers.NREL_ANSWER.value])
-        return ScResult.OK
-
-
-server = ScServer("ws://localhost:8090/ws_json")
-server.start()
-keynodes = ScKeynodes()
-
-module = ScModule()
-module.add_agent(SumScAgent)
-server.add_modules(module)
-
-arg1 = create_link(2, ScLinkContentType.INT)
-arg2 = create_link(3, ScLinkContentType.INT)
+arg1 = create_link(2, ScLinkContentType.STRING)
+arg2 = create_link(3, ScLinkContentType.STRING)
 kwargs = {
     "arguments": {arg1: False, arg2: False},
-    "concepts": [SumScAgent.ACTION_CLASS_NAME, CommonIdentifiers.QUESTION.value],
+    "concepts": [CommonIdentifiers.QUESTION.value, "some_class_name"],
 }
 
-question, is_successfully = execute_agent(**kwargs)
-assert is_successfully
+question = call_agent(**kwargs)  # ScAddr(...)
+wait_agent(3, question, ScKeynodes()[QuestionStatus.QUESTION_FINISHED.value])
 # or
-question = call_agent(**kwargs)
-wait_agent(2, question, keynodes[QuestionStatus.QUESTION_FINISHED.value])
-
-answer_struct = get_action_answer(question)
-answer_link = get_set_elements(answer_struct)[0]
-answer_content = get_link_content(answer_link)
-logs.append({"answer_content": answer_content})
-
-print(logs)
-
-module.unregister()
-server.remove_modules(module)
-server.stop()
-
+question, is_successfully = execute_agent(**kwargs, wait_time=3)  # ScAddr(...), True/False
 ```
 
 ### Finish action
@@ -711,8 +687,8 @@ Function `finish_action` connects status class to action node.
 
 ```python
 from sc_kpm import sc_types, ScKeynodes
-from sc_kpm.common.identifiers import QuestionStatus
-from sc_kpm.utils.common_utils import create_node, check_edge
+from sc_kpm.identifiers import QuestionStatus
+from sc_kpm.utils import create_node, check_edge
 from sc_kpm.utils.action_utils import finish_action, finish_action_with_status
 
 action_node = create_node(sc_types.NODE_CONST)
