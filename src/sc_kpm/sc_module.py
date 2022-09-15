@@ -8,6 +8,7 @@ import logging
 from abc import ABC, abstractmethod
 from typing import List
 
+from sc_kpm.constants import LOGGER_NAME
 from sc_kpm.sc_agent import ScAgentAbstract
 
 
@@ -23,7 +24,7 @@ class ScModuleAbstract(ABC):
 
 class ScModule(ScModuleAbstract):
     def __init__(self, *reg_agents):
-        self._logger = logging.getLogger(f"{self.__module__}:{self.__class__.__name__}")
+        self._logger = logging.getLogger(LOGGER_NAME)
         self._agents: List[ScAgentAbstract] = []
         self._reg_agents: List[ScAgentAbstract] = []
         self._reg_agents.extend(reg_agents)

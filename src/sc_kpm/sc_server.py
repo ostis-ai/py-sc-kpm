@@ -11,6 +11,7 @@ from abc import ABC, abstractmethod
 
 from sc_client import client
 
+from sc_kpm import LOGGER_NAME
 from sc_kpm.identifiers import _IdentifiersResolver
 from sc_kpm.sc_module import ScModule
 
@@ -37,7 +38,7 @@ class ScServerAbstract(ABC):
 
 class ScServer(ScServerAbstract):
     def __init__(self, default_sc_server_url: str = None):
-        self._logger = logging.getLogger(f"{self.__module__}:{self.__class__.__name__}")
+        self._logger = logging.getLogger(LOGGER_NAME)
         self._modules: list[ScModule] = []
         self._register = ScServerRegistrator(self._modules)
         self._default_url = default_sc_server_url
@@ -81,7 +82,7 @@ class ScServerRegistrator:
     """ScServerRegistrator registers and unregisters modules"""
 
     def __init__(self, modules: ScServer):
-        self._logger = logging.getLogger(f"{self.__module__}:{self.__class__.__name__}")
+        self._logger = logging.getLogger(LOGGER_NAME)
         self._modules = modules
         self.is_registered = False
 
