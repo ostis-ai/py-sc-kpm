@@ -14,6 +14,7 @@ from sc_client.constants.common import ScEventType
 from sc_client.constants.exceptions import InvalidValueError
 from sc_client.models import ScAddr, ScEvent, ScEventParams
 
+from sc_kpm.constants import MAIN_LOGGER
 from sc_kpm.identifiers import QuestionStatus
 from sc_kpm.sc_keynodes import Idtf, ScKeynodes
 from sc_kpm.sc_result import ScResult
@@ -23,7 +24,7 @@ from sc_kpm.utils.action_utils import check_action_class
 
 class ScAgentAbstract(ABC):
     def __init__(self, event_class: ScAddr, event_type: ScEventType):
-        self._logger = logging.getLogger(f"{self.__module__}:{self.__class__.__name__}")
+        self._logger = logging.getLogger(MAIN_LOGGER)
         self._event_class = event_class
         self._event_type = event_type
         self._event: ScEvent = None

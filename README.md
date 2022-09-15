@@ -92,4 +92,40 @@ server.stop()
 ```
 
 ## Utils
-...
+### Logging
+You can configurate logs as you want by config.
+
+Example:
+
+```py
+from sc_kpm.constants import MAIN_LOGGER
+import logging.config
+
+logging.config.dictConfig(
+    dict(
+        version=1,
+        disable_existing_loggers=False,
+        handlers={
+            "your_custom_handler": {"class": "logging.StreamHandler", "level": logging.INFO,
+                                    "formatter": "your_formatter"},
+            "your_another_custom_handler": {"class": "logging.FileHandler",
+                                            "level": logging.DEBUG,
+                                            "filename": "./your_path_to_logs.log",
+                                            "formatter": "your_formatter"},
+        },
+        formatters={
+            "your_formatter": {
+                "format": "%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+                "datefmt": "[%d-%b-%y %H:%M:%S]",
+            }
+        },
+        loggers={
+            MAIN_LOGGER: {"handlers": ["your_custom_handler", "your_another_custom_handler"],
+                          "level": logging.DEBUG, }
+        },
+    )
+)
+```
+### Note:
+
+Level of logger must be  the highest of the handlers
