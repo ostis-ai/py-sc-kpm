@@ -98,7 +98,7 @@ You can configurate logs as you want by config.
 Example:
 
 ```py
-from sc_kpm.constants import MAIN_LOGGER
+from sc_kpm.constants import LOGGER_NAME
 import logging.config
 
 logging.config.dictConfig(
@@ -120,12 +120,10 @@ logging.config.dictConfig(
             }
         },
         loggers={
-            MAIN_LOGGER: {"handlers": ["your_custom_handler", "your_another_custom_handler"],
+            LOGGER_NAME: {"handlers": ["your_custom_handler", "your_another_custom_handler"],
                           "level": logging.DEBUG, }
         },
     )
 )
 ```
-### Note:
-
 Level of logger must be  the highest of the handlers

@@ -1,1 +1,1 @@
-MAIN_LOGGER = "main_logger"
+LOGGER_NAME = "py-sc-kpm"
