@@ -98,7 +98,7 @@ You can configurate logs as you want by config.
 Example:
 
 ```py
-from sc_kpm.constants import LOGGER_NAME
+from sc_kpm import LOGGER_NAME
 import logging.config
 
 logging.config.dictConfig(
