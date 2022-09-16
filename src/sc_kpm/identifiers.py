@@ -47,7 +47,7 @@ class _IdentifiersResolver:
     is_resolved = False
 
     @classmethod
-    def resolve(cls):
+    def resolve(cls) -> None:
         if cls.is_resolved:
             return
         types_map = {

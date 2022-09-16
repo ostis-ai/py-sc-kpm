@@ -109,7 +109,7 @@ class ScServerRegistrator:
         self.is_registered = False
         _logger.info("%s unregistered modules successfully", self.__class__.__name__)
 
-    def _register_modules(self, *modules: ScModule):
+    def _register_modules(self, *modules: ScModule) -> None:
         if not client.is_connected():
             _logger.error("%s failed to register: connection lost", self.__class__.__name__)
             raise ConnectionError("Connection lost")
@@ -121,7 +121,7 @@ class ScServerRegistrator:
                 raise TypeError("All elements of the module list must be ScModule instances")
             module._try_register()  # pylint: disable=protected-access
 
-    def _unregister_modules(self, *modules: ScModule):
+    def _unregister_modules(self, *modules: ScModule) -> None:
         if not client.is_connected():
             # TODO: How to unregister agents without connection?
             _logger.error(

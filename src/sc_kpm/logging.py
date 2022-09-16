@@ -9,5 +9,5 @@ import logging
 KPM_LOGGER_NAME = "py-sc-kpm"
 
 
-def get_kpm_logger():
+def get_kpm_logger() -> logging.Logger:
     return logging.getLogger(KPM_LOGGER_NAME)
