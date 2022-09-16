@@ -8,7 +8,7 @@ If you need see not only kpm logs in console, you can remove stream handler and 
 import logging.config
 from pathlib import Path
 
-from sc_kpm import LOGGER_NAME
+from sc_kpm import KPM_LOGGER_NAME
 
 logging.config.dictConfig(
     dict(
@@ -34,7 +34,7 @@ logging.config.dictConfig(
             },
         },
         loggers={
-            LOGGER_NAME: {
+            KPM_LOGGER_NAME: {
                 "handlers": ["stream_handler", "file_handler"],
                 "level": logging.DEBUG,
             }

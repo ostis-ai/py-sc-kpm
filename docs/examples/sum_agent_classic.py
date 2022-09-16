@@ -10,6 +10,7 @@ import logging
 
 from sc_kpm import ScAddr, ScAgentClassic, ScLinkContentType, ScModule, ScResult, ScServer
 from sc_kpm.identifiers import CommonIdentifiers
+from sc_kpm.sc_keynodes import Idtf
 from sc_kpm.utils import create_link, get_link_content
 from sc_kpm.utils.action_utils import (
     create_action_answer,
@@ -26,11 +27,15 @@ logging.basicConfig(
 
 
 class SumAgentClassic(ScAgentClassic):
+    def __init__(self, action_class_name: Idtf):
+        super().__init__(action_class_name)
+        self._logger = logging.getLogger(f"{self.__module__}:{self.__class__.__name__}")
+
     def on_event(self, init_element: ScAddr, init_edge: ScAddr, action_node: ScAddr) -> ScResult:
-        self._logger.info("Agent's called")
+        self._logger.info("Agent was called")
         if not self._confirm_action_class(action_node):
             return ScResult.SKIP
-        self._logger.info("Agent's confirmed")
+        self._logger.info("Agent was confirmed")
         result = self.run(action_node)
         is_successful = result == ScResult.OK
         finish_action_with_status(action_node, is_successful)
@@ -38,7 +43,7 @@ class SumAgentClassic(ScAgentClassic):
         return result
 
     def run(self, action_node: ScAddr) -> ScResult:
-        self._logger.info("Agent runs")
+        self._logger.info("Agent began to run")
         arg1_link, arg2_link = get_action_arguments(action_node, 2)
         if not arg1_link or not arg2_link:
             return ScResult.ERROR_INVALID_PARAMS
@@ -70,7 +75,7 @@ def main():
             answer_struct = get_action_answer(question)
             answer_link = get_set_elements(answer_struct)[0]
             answer_content = get_link_content(answer_link)
-            logging.info("answer_content: %s", repr(answer_content))
+            logging.info("Answer received: %s", repr(answer_content))
 
 
 if __name__ == "__main__":

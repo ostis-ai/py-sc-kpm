@@ -53,17 +53,14 @@ from sc_kpm import ScAgent, ScAgentClassic, ScResult, ScAddr
 
 class ScAgentTest(ScAgent):
     def on_event(self, class_node: ScAddr, edge: ScAddr, action_node: ScAddr) -> ScResult:
-        self._logger.info("Agent's started")
         ...
         return ScResult.OK
 
 
 class ScAgentClassicTest(ScAgentClassic):
     def on_event(self, class_node: ScAddr, edge: ScAddr, action_node: ScAddr) -> ScResult:
-        self._logger.info("Agent's called")
         if not self._confirm_action_class(action_node):  # exclusive method for classic agent
             return ScResult.SKIP
-        self._logger.info("Agent's confirmed")
         ...
 ```
 
@@ -157,46 +154,6 @@ with server.connect():
     with server.register_modules():
         ...
 ```
-
-Let's summarize and create example.
-We need register some module with test agent and do not unregister until the user stops the process:
-
-```python
-import signal
-import logging
-
-from sc_kpm import ScServer, ScModule, ScAgentClassic, ScAddr, ScResult
-
-
-class TestScAgent(ScAgentClassic):
-    def on_event(self, class_node: ScAddr, edge: ScAddr, action_node: ScAddr) -> ScResult:
-        self._logger.info("Agent's called")
-        if not self._confirm_action_class(action_node):
-            return ScResult.SKIP
-        self._logger.info("Agent's confirmed and started")
-        return ScResult.OK
-
-
-logging.basicConfig(level=logging.INFO)
-SC_SERVER_URL = "ws://localhost:8090/ws_json"
-server = ScServer(SC_SERVER_URL)
-with server.connect():
-    module = ScModule(TestScAgent("sum_action_class"))
-    server.add_modules(module)
-    with server.register_modules():
-        signal.signal(signal.SIGINT, lambda *_: logging.getLogger(__file__).info("^C interrupted"))
-        signal.pause()  # Waiting for ^C
-
-        raise Exception("Oops, we broke something")  # Agents will be unregistered anyway
-
-    # Safe unregistration
-# Safe disconnecting
-```
-
-[source code](docs/examples/register_and_wait_for_user.py)
-
-As you see, ScAgent has a logger inside, it logs location of agent.
-Inside logic logs with INFO level. <!--- mb create different logging levels in future -->
 
 ## Utils
 

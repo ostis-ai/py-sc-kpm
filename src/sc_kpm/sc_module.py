@@ -4,12 +4,13 @@ Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
 
-import logging
 from abc import ABC, abstractmethod
 from typing import List
 
-from sc_kpm.constants import LOGGER_NAME
+from sc_kpm.logging import get_kpm_logger
 from sc_kpm.sc_agent import ScAgentAbstract
+
+_logger = get_kpm_logger()
 
 
 class ScModuleAbstract(ABC):
@@ -24,7 +25,6 @@ class ScModuleAbstract(ABC):
 
 class ScModule(ScModuleAbstract):
     def __init__(self, *reg_agents):
-        self._logger = logging.getLogger(LOGGER_NAME)
         self._agents: List[ScAgentAbstract] = []
         self._reg_agents: List[ScAgentAbstract] = []
         self._reg_agents.extend(reg_agents)
@@ -34,22 +34,22 @@ class ScModule(ScModuleAbstract):
 
     def add_agent(self, agent: ScAgentAbstract) -> None:
         if self.is_registered():
-            self._logger.warning("Agent %s wasn't added: module is already registered", repr(agent))
+            _logger.warning("Agent %s was not added: %s is already registered", repr(agent), self.__class__.__name__)
             return
         self._reg_agents.append(agent)
 
     def _try_register(self) -> None:
         if self.is_registered():
-            self._logger.warning("Module failed to register: module is already registered")
+            _logger.warning("%s failed to register: module is already registered", self.__class__.__name__)
             return
         if not self._reg_agents:
-            self._logger.warning("Module failed to register: no register params")
+            _logger.warning("%s failed to register: no register params", self.__class__.__name__)
             return
         for agent in self._reg_agents:
             agent._register()  # pylint: disable=protected-access
             self._agents.append(agent)
         self._reg_agents.clear()
-        self._logger.info("Module's registered")
+        _logger.info("%s was registered", self.__class__.__name__)
 
     def is_registered(self) -> bool:
         return bool(self._agents)
@@ -59,4 +59,4 @@ class ScModule(ScModuleAbstract):
             agent._unregister()  # pylint: disable=protected-access
         self._reg_agents.extend(self._agents)
         self._agents.clear()
-        self._logger.info("Module's unregistered")
+        _logger.info("%s was unregistered", self.__class__.__name__)
