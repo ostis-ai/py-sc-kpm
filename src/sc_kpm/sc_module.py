@@ -38,6 +38,12 @@ class ScModule(ScModuleAbstract):
             return
         self._reg_agents.append(agent)
 
+    def remove_agent(self, agent: ScAgentAbstract) -> None:
+        if self.is_registered():
+            _logger.warning("Agent %s was not removed: %s is already registered", repr(agent), self.__class__.__name__)
+            return
+        self._reg_agents.remove(agent)
+
     def _try_register(self) -> None:
         if self.is_registered():
             _logger.warning("%s failed to register: module is already registered", self.__class__.__name__)
