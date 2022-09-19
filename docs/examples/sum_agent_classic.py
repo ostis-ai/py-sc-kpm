@@ -10,7 +10,6 @@ import logging
 
 from sc_kpm import ScAddr, ScAgentClassic, ScLinkContentType, ScModule, ScResult, ScServer
 from sc_kpm.identifiers import CommonIdentifiers
-from sc_kpm.sc_keynodes import Idtf
 from sc_kpm.utils import create_link, get_link_content
 from sc_kpm.utils.action_utils import (
     create_action_answer,
@@ -27,18 +26,18 @@ logging.basicConfig(
 
 
 class SumAgentClassic(ScAgentClassic):
-    def __init__(self, action_class_name: Idtf):
-        super().__init__(action_class_name)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._logger = logging.getLogger(f"{self.__module__}:{self.__class__.__name__}")
 
-    def on_event(self, init_element: ScAddr, init_edge: ScAddr, action_node: ScAddr) -> ScResult:
+    def on_event(self, init_element: ScAddr, init_edge: ScAddr, action_element: ScAddr) -> ScResult:
         self._logger.info("Agent was called")
-        if not self._confirm_action_class(action_node):
+        if not self._confirm_action_class(action_element):
             return ScResult.SKIP
         self._logger.info("Agent was confirmed")
-        result = self.run(action_node)
+        result = self.run(action_element)
         is_successful = result == ScResult.OK
-        finish_action_with_status(action_node, is_successful)
+        finish_action_with_status(action_element, is_successful)
         self._logger.info("Agent finished %s", "successfully" if is_successful else "unsuccessfully")
         return result
 

@@ -30,7 +30,7 @@ class ScModule(ScModuleAbstract):
         self._reg_agents.extend(reg_agents)
 
     def __repr__(self):
-        return f"{self.__class__.__name__}({repr(self._reg_agents)[1:-1]})"
+        return f"{self.__class__.__name__}({', '.join(map(repr, self._reg_agents))})"
 
     def add_agent(self, agent: ScAgentAbstract) -> None:
         if self.is_registered():

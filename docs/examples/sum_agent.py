@@ -2,15 +2,14 @@
 This code creates agent, executes and confirms the result.
 Agent is based on ScAgent and calculates sum of two static arguments.
 
-As you see, ScAgent is less comfortable than SumAgentClassic, but you can customize it in more details.
+As you see, ScAgent does the same logic as SumAgentClassic, but there is more code.
+A counterweight you can customize it in more details.
 """
 
 import logging
-from typing import Union
 
 from sc_kpm import ScAddr, ScAgent, ScEventType, ScLinkContentType, ScModule, ScResult, ScServer
 from sc_kpm.identifiers import CommonIdentifiers, QuestionStatus
-from sc_kpm.sc_keynodes import Idtf
 from sc_kpm.utils import create_link, get_link_content
 from sc_kpm.utils.action_utils import (
     check_action_class,
@@ -28,8 +27,8 @@ logging.basicConfig(
 
 
 class SumAgent(ScAgent):
-    def __init__(self, event_class: Union[Idtf, ScAddr], event_type: ScEventType, action_class_name: ScAddr):
-        super().__init__(event_class, event_type)
+    def __init__(self, action_class_name: ScAddr, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._action_class_name = action_class_name
         self._logger = logging.getLogger(f"{self.__module__}:{self.__class__.__name__}")
 
@@ -62,9 +61,9 @@ def main():
     with server.connect():
         ACTION_CLASS_NAME = "sum"
         agent = SumAgent(
-            QuestionStatus.QUESTION_INITIATED.value,
-            ScEventType.ADD_OUTGOING_EDGE,
             ACTION_CLASS_NAME,
+            event_class=QuestionStatus.QUESTION_INITIATED.value,
+            event_type=ScEventType.ADD_OUTGOING_EDGE,
         )
         module = ScModule(agent)
         server.add_modules(module)

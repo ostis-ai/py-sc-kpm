@@ -61,14 +61,14 @@ class ScServer(ScServerAbstract):
 
     def add_modules(self, *modules: ScModule) -> None:
         self._modules.extend(modules)
-        _logger.info("%s added modules %s", self.__class__.__name__, repr(modules))
+        _logger.info("%s added modules %s", self.__class__.__name__, ", ".join(map(repr, modules)))
         if self._registrator.is_registered:
             self._registrator._register_modules(*modules)  # pylint: disable=protected-access
 
     def remove_modules(self, *modules: ScModule) -> None:
         if self._registrator.is_registered:
             self._registrator._unregister_modules(*modules)  # pylint: disable=protected-access
-        _logger.info("%s removed modules %s", self.__class__.__name__, repr(modules))
+        _logger.info("%s removed modules %s", self.__class__.__name__, ", ".join(map(repr, modules)))
 
     def register_modules(self) -> ScServerRegistrator:
         self._registrator.register()

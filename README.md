@@ -45,7 +45,7 @@ keynodes.resolve("some_node", None)  # The same logic as keynodes.get("some_node
 
 ### ScAgent and ScAgentClassic
 
-A class for handling a single ScEvent. Define your agents like this:
+A classes for handling a single ScEvent. Define your agents like this:
 
 ```python
 from sc_kpm import ScAgent, ScAgentClassic, ScResult, ScAddr
@@ -64,10 +64,13 @@ class ScAgentClassicTest(ScAgentClassic):
         ...
 ```
 
-For ScAgent initialization you write event class and event type.
+#### Initialisation
 
-For ScAgentClassic you write name of action class and event type (default value is ScEventType.ADD_OUTGOING_EDGE).
-Event class here is `question_initiated`. There is also method to confirm action class.
+For ScAgent initialisation you write event class and event type.
+
+For ScAgentClassic initialisation you write name of action class (it isn't event class) and args of ScAgent.
+Default `event_class` is `question_initiated`, event_type is `ScEventType.ADD_OUTGOING_EDGE`
+There is also method to confirm action class.
 
 ```python
 keynodes = ScKeynodes()
@@ -81,14 +84,13 @@ classic_agent_ingoing = ScAgentClassicTest("classic_test_class", ScEventType.ADD
 ### ScModule
 
 A class for handling multiple ScAgent objects.
-
 Define your modules like this:
 
 ```python
 from sc_kpm import ScModule
 
 module = ScModule(
-    agent1,
+    agent1,  # initialised agents
     agent2,
 )
 ...

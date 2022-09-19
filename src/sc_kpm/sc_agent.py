@@ -72,25 +72,24 @@ class ScAgent(ScAgentAbstract, ABC):
         return f"ScAgent(event_class='{get_system_idtf(self._event_class)}', event_type={repr(self._event_type)})"
 
 
-class ScAgentClassic(ScAgentAbstract, ABC):
-    def __init__(self, action_class_name: Idtf, event_type: ScEventType = ScEventType.ADD_OUTGOING_EDGE):
-        self._keynodes = ScKeynodes()
-        super().__init__(
-            event_class=self._keynodes[QuestionStatus.QUESTION_INITIATED.value],
-            event_type=event_type,
-        )
+class ScAgentClassic(ScAgent, ABC):
+    def __init__(
+        self,
+        action_class_name: Idtf,
+        event_class: Union[Idtf, ScAddr] = QuestionStatus.QUESTION_INITIATED.value,
+        event_type: ScEventType = ScEventType.ADD_OUTGOING_EDGE,
+    ):
+        super().__init__(event_class, event_type)
+        self._action_class_name = action_class_name
         self._action_class = self._keynodes.resolve(action_class_name, sc_types.NODE_CONST_CLASS)
 
     def __repr__(self):
-        event_type_repr = (
-            "" if self._event_type == ScEventType.ADD_OUTGOING_EDGE else f", event_type={repr(self._event_type)}"
-        )
-        return f"ClassicScAgent(action_class_name='{get_system_idtf(self._event_class)}{event_type_repr}')"
+        description = f"ClassicScAgent(action_class_name={repr(self._action_class_name)}"
+        if self._event_class != self._keynodes.get(QuestionStatus.QUESTION_INITIATED.value):
+            description = f"{description}, event_class={repr(get_system_idtf(self._event_class))}"
+        if self._event_type != ScEventType.ADD_OUTGOING_EDGE:
+            description = f"{description}, event_type={repr(self._event_type)}"
+        return description + ")"
 
-    def _confirm_action_class(self, action_node: ScAddr) -> bool:
-        return check_action_class(self._action_class, action_node)
-
-    @abstractmethod
-    def on_event(self, init_element: ScAddr, init_edge: ScAddr, action_node: ScAddr) -> ScResult:
-        # pylint: disable=arguments-renamed
-        pass
+    def _confirm_action_class(self, action_element: ScAddr) -> bool:
+        return check_action_class(self._action_class, action_element)

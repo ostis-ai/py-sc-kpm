@@ -13,9 +13,9 @@ logger = logging.getLogger(__name__)
 
 
 class TestScAgent(ScAgentClassic):
-    def on_event(self, init_element: ScAddr, init_edge: ScAddr, action_node: ScAddr) -> ScResult:
+    def on_event(self, init_element: ScAddr, init_edge: ScAddr, action_element: ScAddr) -> ScResult:
         logger.info("Agent's called")
-        if not self._confirm_action_class(action_node):
+        if not self._confirm_action_class(action_element):
             return ScResult.SKIP
         logger.info("Agent's confirmed and started")
         return ScResult.OK
