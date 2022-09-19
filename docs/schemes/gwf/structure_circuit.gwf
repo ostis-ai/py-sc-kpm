@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GWF version="2.0">
+    <staticSector>
+        <node type="node/const/perm/general" idtf="" shapeColor="0" id="26516912" parent="30548736" x="450" y="495" haveBus="false" idtf_pos="0">
+            <content type="0" mime_type="" content_visibility="false" file_name=""/>
+        </node>
+        <node type="node/const/perm/general" idtf="" shapeColor="0" id="34351536" parent="30548736" x="450" y="405" haveBus="false" idtf_pos="0">
+            <content type="0" mime_type="" content_visibility="false" file_name=""/>
+        </node>
+        <node type="node/const/perm/general" idtf="py: *elements" shapeColor="0" id="34233120" parent="30548736" left="0" top="0" right="81.2344" bottom="23" textColor="164" text_angle="0" text_font="Times New Roman" font_size="10" x="450" y="315" haveBus="false" idtf_pos="0">
+            <content type="0" mime_type="" content_visibility="false" file_name=""/>
+        </node>
+        <contour type="contour/const/perm" idtf="" shapeColor="0" id="30548736" parent="0">
+            <points>
+                <point x="405" y="285"/>
+                <point x="405" y="555"/>
+                <point x="555" y="555"/>
+                <point x="555" y="285"/>
+            </points>
+        </contour>
+    </staticSector>
+</GWF>

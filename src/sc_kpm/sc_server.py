@@ -11,7 +11,7 @@ from abc import ABC, abstractmethod
 
 from sc_client import client
 
-from sc_kpm import LOGGER_NAME
+from sc_kpm.constants import LOGGER_NAME
 from sc_kpm.identifiers import _IdentifiersResolver
 from sc_kpm.sc_module import ScModule
 
@@ -20,7 +20,7 @@ class ScServerAbstract(ABC):
     """ScServer connects to server and stores"""
 
     @abstractmethod
-    def connect(self, sc_server_url: str) -> None:
+    def connect(self) -> None:
         """Connect to server"""
 
     @abstractmethod
@@ -37,11 +37,11 @@ class ScServerAbstract(ABC):
 
 
 class ScServer(ScServerAbstract):
-    def __init__(self, default_sc_server_url: str = None):
+    def __init__(self, sc_server_url: str):
         self._logger = logging.getLogger(LOGGER_NAME)
         self._modules: list[ScModule] = []
-        self._register = ScServerRegistrator(self._modules)
-        self._default_url = default_sc_server_url
+        self._registrator = ScServerRegistrator(self._modules)
+        self._url: str = sc_server_url
 
     def __enter__(self):
         pass
@@ -49,13 +49,9 @@ class ScServer(ScServerAbstract):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.disconnect()
 
-    def connect(self, sc_server_url: str = None):
-        if sc_server_url is None:
-            if self._default_url is None:
-                raise ConnectionError("Connection failed: ScServer URL is None")
-            sc_server_url = self._default_url
-        client.connect(sc_server_url)
-        self._logger.info("Connect to server by url %s", repr(sc_server_url))
+    def connect(self):
+        client.connect(self._url)
+        self._logger.info("Connect to server by url %s", repr(self._url))
         _IdentifiersResolver.resolve()
         return self
 
@@ -66,16 +62,20 @@ class ScServer(ScServerAbstract):
     def add_modules(self, *modules: ScModule) -> None:
         self._modules.extend(modules)
         self._logger.info("Add modules %s", repr(modules))
-        if self._register.is_registered:
-            self._register.register_modules(*modules)
+        if self._registrator.is_registered:
+            self._registrator._register_modules(*modules)  # pylint: disable=protected-access
 
     def remove_modules(self, *modules: ScModule) -> None:
-        if self._register.is_registered:
-            self._register.unregister_modules(*modules)
+        if self._registrator.is_registered:
+            self._registrator._unregister_modules(*modules)  # pylint: disable=protected-access
         self._logger.info("Remove modules %s", repr(modules))
 
     def register_modules(self) -> ScServerRegistrator:
-        return self._register
+        self._registrator.register()
+        return self._registrator
+
+    def unregister_modules(self) -> None:
+        self._registrator.unregister()
 
 
 class ScServerRegistrator:
@@ -87,21 +87,29 @@ class ScServerRegistrator:
         self.is_registered = False
 
     def __enter__(self):
-        self.start()
+        pass
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.stop()
+        if exc_val is not None:
+            self._logger.error("Raised error %s, unregistration agents", repr(exc_val))
+        self.unregister()
 
-    def start(self) -> None:
+    def register(self) -> None:
+        if self.is_registered:
+            self._logger.warning("Modules are already registered")
+            return
+        self._register_modules(*self._modules)
         self.is_registered = True
-        self._register()
 
-    def stop(self) -> None:
+    def unregister(self) -> None:
+        if not self.is_registered:
+            self._logger.warning("Modules are already unregistered")
+            return
+        self._unregister_modules(*self._modules)
         self.is_registered = False
-        self._unregister()
 
     @staticmethod
-    def register_modules(*modules: ScModule):
+    def _register_modules(*modules: ScModule):
         if not client.is_connected():
             raise ConnectionError("Connection to the sc-server is not established")
         for module in modules:
@@ -110,15 +118,9 @@ class ScServerRegistrator:
             module._try_register()  # pylint: disable=protected-access
 
     @staticmethod
-    def unregister_modules(*modules: ScModule):
+    def _unregister_modules(*modules: ScModule):
         if not client.is_connected():
             # TODO: How to unregister agents without connection?
             raise ConnectionError("Connection to the sc-server is not established")
         for module in modules:
             module._unregister()  # pylint: disable=protected-access
-
-    def _register(self) -> None:
-        self.register_modules(*self._modules)
-
-    def _unregister(self) -> None:
-        self.unregister_modules(*self._modules)
