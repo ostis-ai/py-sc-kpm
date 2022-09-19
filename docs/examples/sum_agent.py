@@ -27,24 +27,20 @@ logging.basicConfig(
 
 
 class SumAgent(ScAgent):
-    def __init__(self, action_class_name: ScAddr, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._action_class_name = action_class_name
         self._logger = logging.getLogger(f"{self.__module__}:{self.__class__.__name__}")
 
     def on_event(self, init_element: ScAddr, init_edge: ScAddr, action_element: ScAddr) -> ScResult:
-        self._logger.info("Agent was called")
-        if not check_action_class(self._action_class_name, action_element):
-            return ScResult.SKIP
-        self._logger.info("Agent was confirmed")
+        self._logger.info("SumAgent was called")
         result = self.run(action_element)
         is_successful = result == ScResult.OK
         finish_action_with_status(action_element, is_successful)
-        self._logger.info("Agent finished %s", "successfully" if is_successful else "unsuccessfully")
+        self._logger.info("SumAgent finished %s", "successfully" if is_successful else "unsuccessfully")
         return result
 
     def run(self, action_node: ScAddr) -> ScResult:
-        self._logger.info("Agent began to run")
+        self._logger.info("SumAgent began to run")
         arg1_link, arg2_link = get_action_arguments(action_node, 2)
         if not arg1_link or not arg2_link:
             return ScResult.ERROR_INVALID_PARAMS
@@ -61,8 +57,7 @@ def main():
     with server.connect():
         ACTION_CLASS_NAME = "sum"
         agent = SumAgent(
-            ACTION_CLASS_NAME,
-            event_class=QuestionStatus.QUESTION_INITIATED.value,
+            event_class=ACTION_CLASS_NAME,
             event_type=ScEventType.ADD_OUTGOING_EDGE,
         )
         module = ScModule(agent)
@@ -73,7 +68,8 @@ def main():
                     create_link(2, ScLinkContentType.INT): False,
                     create_link(3, ScLinkContentType.INT): False,
                 },
-                concepts=[CommonIdentifiers.QUESTION.value, ACTION_CLASS_NAME],
+                concepts=[],
+                initiation=ACTION_CLASS_NAME,
                 wait_time=1,
             )
             assert is_successful
