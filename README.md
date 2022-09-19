@@ -64,13 +64,12 @@ class ScAgentClassicTest(ScAgentClassic):
         ...
 ```
 
-#### Initialisation
+For the ScAgent initialization you should define the sc-element and the type of the ScEvent.
 
-For ScAgent initialisation you write event class and event type.
-
-For ScAgentClassic initialisation you write name of action class (it isn't event class) and args of ScAgent.
-Default `event_class` is `question_initiated`, event_type is `ScEventType.ADD_OUTGOING_EDGE`
-There is also method to confirm action class.
+For the ScAgentClassic initialization
+you should define the identifier of the action class node and arguments of the ScAgent.
+`event_class` is set to the `question_initiated` keynode by default.
+`event_type` is set to the `ScEventType.ADD_OUTGOING_EDGE` type by default.
 
 ```python
 keynodes = ScKeynodes()
@@ -90,11 +89,13 @@ Define your modules like this:
 from sc_kpm import ScModule
 
 module = ScModule(
-    agent1,  # initialised agents
+    agent1,
     agent2,
 )
 ...
 module.add_agent(agent3)
+...
+module.remove_agent(agent3)
 ```
 
 ### ScServer
