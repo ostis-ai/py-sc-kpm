@@ -45,7 +45,7 @@ keynodes.resolve("some_node", None)  # The same logic as keynodes.get("some_node
 
 ### ScAgent and ScAgentClassic
 
-A class for handling a single ScEvent. Define your agents like this:
+A classes for handling a single ScEvent. Define your agents like this:
 
 ```python
 from sc_kpm import ScAgent, ScAgentClassic, ScResult, ScAddr
@@ -53,24 +53,23 @@ from sc_kpm import ScAgent, ScAgentClassic, ScResult, ScAddr
 
 class ScAgentTest(ScAgent):
     def on_event(self, class_node: ScAddr, edge: ScAddr, action_node: ScAddr) -> ScResult:
-        self._logger.info("Agent's started")
         ...
         return ScResult.OK
 
 
 class ScAgentClassicTest(ScAgentClassic):
     def on_event(self, class_node: ScAddr, edge: ScAddr, action_node: ScAddr) -> ScResult:
-        self._logger.info("Agent's called")
         if not self._confirm_action_class(action_node):  # exclusive method for classic agent
             return ScResult.SKIP
-        self._logger.info("Agent's confirmed")
         ...
 ```
 
-For ScAgent initialization you write event class and event type.
+For the ScAgent initialization you should define the sc-element and the type of the ScEvent.
 
-For ScAgentClassic you write name of action class and event type (default value is ScEventType.ADD_OUTGOING_EDGE).
-Event class here is `question_initiated`. There is also method to confirm action class.
+For the ScAgentClassic initialization
+you should define the identifier of the action class node and arguments of the ScAgent.
+`event_class` is set to the `question_initiated` keynode by default.
+`event_type` is set to the `ScEventType.ADD_OUTGOING_EDGE` type by default.
 
 ```python
 keynodes = ScKeynodes()
@@ -84,7 +83,6 @@ classic_agent_ingoing = ScAgentClassicTest("classic_test_class", ScEventType.ADD
 ### ScModule
 
 A class for handling multiple ScAgent objects.
-
 Define your modules like this:
 
 ```python
@@ -96,6 +94,8 @@ module = ScModule(
 )
 ...
 module.add_agent(agent3)
+...
+module.remove_agent(agent3)
 ```
 
 ### ScServer
@@ -157,46 +157,6 @@ with server.connect():
     with server.register_modules():
         ...
 ```
-
-Let's summarize and create example.
-We need register some module with test agent and do not unregister until the user stops the process:
-
-```python
-import signal
-import logging
-
-from sc_kpm import ScServer, ScModule, ScAgentClassic, ScAddr, ScResult
-
-
-class TestScAgent(ScAgentClassic):
-    def on_event(self, class_node: ScAddr, edge: ScAddr, action_node: ScAddr) -> ScResult:
-        self._logger.info("Agent's called")
-        if not self._confirm_action_class(action_node):
-            return ScResult.SKIP
-        self._logger.info("Agent's confirmed and started")
-        return ScResult.OK
-
-
-logging.basicConfig(level=logging.INFO)
-SC_SERVER_URL = "ws://localhost:8090/ws_json"
-server = ScServer(SC_SERVER_URL)
-with server.connect():
-    module = ScModule(TestScAgent("sum_action_class"))
-    server.add_modules(module)
-    with server.register_modules():
-        signal.signal(signal.SIGINT, lambda *_: logging.getLogger(__file__).info("^C interrupted"))
-        signal.pause()  # Waiting for ^C
-
-        raise Exception("Oops, we broke something")  # Agents will be unregistered anyway
-
-    # Safe unregistration
-# Safe disconnecting
-```
-
-[source code](docs/examples/register_and_wait_for_user.py)
-
-As you see, ScAgent has a logger inside, it logs location of agent.
-Inside logic logs with INFO level. <!--- mb create different logging levels in future -->
 
 ## Utils
 

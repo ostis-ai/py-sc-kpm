@@ -8,7 +8,7 @@ from sc_client.constants import sc_types
 from sc_client.constants.common import ScEventType
 from sc_client.models import ScAddr, ScLinkContentType
 
-from sc_kpm.constants import LOGGER_NAME
+from sc_kpm.logging import KPM_LOGGER_NAME
 from sc_kpm.sc_agent import ScAgent, ScAgentClassic
 from sc_kpm.sc_keynodes import ScKeynodes
 from sc_kpm.sc_module import ScModule
