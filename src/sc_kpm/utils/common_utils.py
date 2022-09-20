@@ -9,15 +9,7 @@ from typing import List, Optional, Union
 from sc_client import client
 from sc_client.constants import sc_types
 from sc_client.constants.sc_types import ScType
-from sc_client.models import (
-    ScAddr,
-    ScConstruction,
-    ScIdtfResolveParams,
-    ScLinkContent,
-    ScLinkContentType,
-    ScTemplate,
-    ScTemplateResult,
-)
+from sc_client.models import ScAddr, ScConstruction, ScLinkContent, ScLinkContentType, ScTemplate, ScTemplateResult
 
 from sc_kpm.identifiers import CommonIdentifiers, ScAlias
 from sc_kpm.sc_keynodes import Idtf, ScKeynodes
@@ -32,8 +24,7 @@ def create_nodes(*node_types: ScType) -> List[ScAddr]:
 
 def create_node(node_type: ScType, sys_idtf: str = None) -> ScAddr:
     if sys_idtf:
-        params = ScIdtfResolveParams(idtf=sys_idtf, type=node_type)
-        return client.resolve_keynodes(params)[0]
+        return ScKeynodes().resolve(sys_idtf, node_type)
     return create_nodes(node_type)[0]
 
 

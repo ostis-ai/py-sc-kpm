@@ -9,12 +9,12 @@ from unittest import TestCase
 from sc_kpm import ScServer
 
 SC_SERVER_URL = "ws://localhost:8090/ws_json"
-server = ScServer(SC_SERVER_URL)
 
 
 class BaseTestCase(TestCase):
     def setUp(self) -> None:
-        server.connect()
+        self.server = ScServer(SC_SERVER_URL)
+        self.server.connect()
 
     def tearDown(self) -> None:
-        server.disconnect()
+        self.server.disconnect()
