@@ -13,7 +13,7 @@ from sc_client import client
 
 from sc_kpm.identifiers import _IdentifiersResolver
 from sc_kpm.logging import get_kpm_logger
-from sc_kpm.sc_module import ScModule
+from sc_kpm.sc_module import ScModuleAbstract
 
 _logger = get_kpm_logger()
 
@@ -30,17 +30,17 @@ class ScServerAbstract(ABC):
         """Disconnect from the server"""
 
     @abstractmethod
-    def remove_modules(self, *modules: ScModule) -> None:
+    def remove_modules(self, *modules: ScModuleAbstract) -> None:
         """Remove modules"""
 
     @abstractmethod
-    def add_modules(self, *modules: ScModule) -> None:
+    def add_modules(self, *modules: ScModuleAbstract) -> None:
         """Add modules"""
 
 
 class ScServer(ScServerAbstract):
     def __init__(self, sc_server_url: str):
-        self._modules: list[ScModule] = []
+        self._modules: list[ScModuleAbstract] = []
         self._registrator = ScServerRegistrator(self._modules)
         self._url: str = sc_server_url
 
@@ -60,13 +60,13 @@ class ScServer(ScServerAbstract):
         client.disconnect()
         _logger.info("%s disconnected", self.__class__.__name__)
 
-    def add_modules(self, *modules: ScModule) -> None:
+    def add_modules(self, *modules: ScModuleAbstract) -> None:
         self._modules.extend(modules)
         _logger.info("%s added modules %s", self.__class__.__name__, ", ".join(map(repr, modules)))
         if self._registrator.is_registered:
             self._registrator._register_modules(*modules)  # pylint: disable=protected-access
 
-    def remove_modules(self, *modules: ScModule) -> None:
+    def remove_modules(self, *modules: ScModuleAbstract) -> None:
         if self._registrator.is_registered:
             self._registrator._unregister_modules(*modules)  # pylint: disable=protected-access
         _logger.info("%s removed modules %s", self.__class__.__name__, ", ".join(map(repr, modules)))
@@ -89,7 +89,7 @@ class ScServer(ScServerAbstract):
 class ScServerRegistrator:
     """ScServerRegistrator registers and unregisters modules"""
 
-    def __init__(self, modules: ScServer):
+    def __init__(self, modules: list[ScModuleAbstract]):
         self._modules = modules
         self.is_registered = False
 
@@ -117,19 +117,19 @@ class ScServerRegistrator:
         self.is_registered = False
         _logger.info("%s unregistered modules successfully", self.__class__.__name__)
 
-    def _register_modules(self, *modules: ScModule) -> None:
+    def _register_modules(self, *modules: ScModuleAbstract) -> None:
         if not client.is_connected():
             _logger.error("%s failed to register: connection lost", self.__class__.__name__)
             raise ConnectionError("Connection lost")
         for module in modules:
-            if not isinstance(module, ScModule):
+            if not isinstance(module, ScModuleAbstract):
                 _logger.error(
                     "%s failed to register: type error: %s is not module", self.__class__.__name__, repr(module)
                 )
                 raise TypeError("All elements of the module list must be ScModule instances")
-            module._try_register()  # pylint: disable=protected-access
+            module._register()  # pylint: disable=protected-access
 
-    def _unregister_modules(self, *modules: ScModule) -> None:
+    def _unregister_modules(self, *modules: ScModuleAbstract) -> None:
         if not client.is_connected():
             # TODO: How to unregister agents without connection?
             _logger.error(

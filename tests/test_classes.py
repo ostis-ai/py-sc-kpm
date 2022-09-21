@@ -84,7 +84,6 @@ class CommonTests(BaseTestCase):
         self.server.add_modules(module1)
         module1.add_agent(agent3)
         with self.server.register_modules():
-            module1.add_agent(agent2)
             self.assertTrue(is_executing_successful(1))
             self.assertFalse(is_executing_successful(2))
             self.assertTrue(is_executing_successful(3))
