@@ -134,9 +134,8 @@ class CommonTests(BaseTestCase):
             self.assertFalse(is_executing_successful())
 
         with self.server.register_modules():
-            signal.signal(signal.SIGINT, lambda *_: ...)
             thread = threading.Thread(target=execute_and_send_sigint, daemon=True)
             thread.start()
-            signal.pause()
+            self.server.wait_for_sigint()
 
         self.server.remove_modules(module)

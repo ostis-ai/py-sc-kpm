@@ -4,7 +4,6 @@ For this we wait for SIGINT.
 """
 
 import logging
-import signal
 
 from sc_kpm import ScAddr, ScAgentClassic, ScModule, ScResult, ScServer
 
@@ -27,5 +26,4 @@ with server.connect():
     module = ScModule(TestScAgent("sum_action_class"))
     server.add_modules(module)
     with server.register_modules():
-        signal.signal(signal.SIGINT, lambda *_: logger.info("^C interrupted"))
-        signal.pause()  # Waiting for ^C
+        server.wait_for_sigint()

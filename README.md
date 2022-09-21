@@ -158,6 +158,18 @@ with server.connect():
         ...
 ```
 
+There is also method for stopping program until a SIGINT signal (or ^C, or terminate in IDE) is received.
+So you can leave agents registered for a long time:
+
+```python
+...
+with server.connect():
+    # Creating some agents
+    with server.register_modules():
+        # Registration some agents
+        server.wait_for_sigint()  # Agents will be active until ^C
+```
+
 ## Utils
 
 There are some functions for working with nodes, edges, links: create them, search, get content, delete, etc.

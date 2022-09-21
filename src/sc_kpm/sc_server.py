@@ -6,6 +6,7 @@ Distributed under the MIT License
 
 from __future__ import annotations
 
+import signal
 from abc import ABC, abstractmethod
 
 from sc_client import client
@@ -76,6 +77,13 @@ class ScServer(ScServerAbstract):
 
     def unregister_modules(self) -> None:
         self._registrator.unregister()
+
+    @staticmethod
+    def wait_for_sigint():
+        """Stop the program until a SIGINT signal (^C, or stop in IDE) is received"""
+
+        signal.signal(signal.SIGINT, lambda *_: _logger.info("^C SIGINT was interrupted"))
+        signal.pause()
 
 
 class ScServerRegistrator:
