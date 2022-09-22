@@ -11,7 +11,11 @@ from sc_client.constants.exceptions import InvalidValueError
 from sc_client.constants.sc_types import ScType
 from sc_client.models import ScAddr, ScIdtfResolveParams
 
+from sc_kpm.logging import get_kpm_logger
+
 Idtf = str
+
+_logger = get_kpm_logger()
 
 
 class ScKeynodes:
@@ -32,7 +36,8 @@ class ScKeynodes:
         """Get keynode, cannot be invalid ScAddr(0)"""
         addr = self.get(identifier)
         if not addr.is_valid():
-            raise InvalidValueError("ScAddr is invalid")
+            _logger.error("Failed to get ScAddr by %s keynode: ScAddr is invalid", identifier)
+            raise InvalidValueError(f"ScAddr of {identifier} is invalid")
         return addr
 
     def get(self, identifier: Idtf) -> ScAddr:
@@ -42,8 +47,9 @@ class ScKeynodes:
     def resolve(self, identifier: Idtf, sc_type: ScType | None) -> ScAddr:
         """Get keynode. If sc_type is valid, an element will be created in the KB"""
         addr = self._dict.get(identifier)
-        if addr is None or not addr.is_valid() and sc_type is not None:
+        if addr is None or (not addr.is_valid() and sc_type is not None):
             params = ScIdtfResolveParams(idtf=identifier, type=sc_type)
             addr = client.resolve_keynodes(params)[0]
             self._dict[identifier] = addr
+        _logger.debug("Resolved %s identifier with type %s", repr(identifier), repr(sc_type))
         return addr
