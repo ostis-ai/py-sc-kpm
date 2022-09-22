@@ -23,7 +23,7 @@ class CommonTests(BaseTestCase):
             def __init__(self):
                 super().__init__(self.ACTION_CLASS_NAME, ScEventType.ADD_OUTGOING_EDGE)
 
-            def on_event(self, init_element: ScAddr, init_edge: ScAddr, action_element: ScAddr) -> ScResult:
+            def on_event(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
                 finish_action_with_status(action_element, True)
                 return ScResult.OK
 
@@ -33,7 +33,7 @@ class CommonTests(BaseTestCase):
             def __init__(self):
                 super().__init__(self.ACTION_CLASS_NAME)
 
-            def on_event(self, init_element: ScAddr, init_edge: ScAddr, action_element: ScAddr) -> ScResult:
+            def on_event(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
                 if not self._confirm_action_class(action_element):
                     return ScResult.SKIP
                 finish_action_with_status(action_element, True)
@@ -49,7 +49,7 @@ class CommonTests(BaseTestCase):
         )
         kwargs_classic = dict(
             arguments={},
-            concepts=[CommonIdentifiers.QUESTION.value, AgentClassic.ACTION_CLASS_NAME],
+            concepts=[CommonIdentifiers.QUESTION, AgentClassic.ACTION_CLASS_NAME],
             wait_time=WAIT_TIME,
         )
         self.assertFalse(execute_agent(**kwargs)[1])
@@ -63,7 +63,7 @@ class CommonTests(BaseTestCase):
 
     def test_sc_module(self):
         class TestAgent(ScAgent):
-            def on_event(self, init_element: ScAddr, init_edge: ScAddr, action_element: ScAddr) -> ScResult:
+            def on_event(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
                 finish_action_with_status(action_element, True)
                 return ScResult.OK
 
@@ -84,7 +84,6 @@ class CommonTests(BaseTestCase):
         self.server.add_modules(module1)
         module1.add_agent(agent3)
         with self.server.register_modules():
-            module1.add_agent(agent2)
             self.assertTrue(is_executing_successful(1))
             self.assertFalse(is_executing_successful(2))
             self.assertTrue(is_executing_successful(3))
@@ -92,9 +91,7 @@ class CommonTests(BaseTestCase):
             self.server.add_modules(module2)
             self.assertTrue(is_executing_successful(2))
 
-            self.server.remove_modules(module1)
             module1.remove_agent(agent3)
-            self.server.add_modules(module1)
             self.assertTrue(is_executing_successful(1))
             self.assertFalse(is_executing_successful(3))
             self.server.remove_modules(module1, module2)
@@ -106,7 +103,7 @@ class CommonTests(BaseTestCase):
             def __init__(self):
                 super().__init__(self.ACTION_CLASS_NAME, ScEventType.ADD_OUTGOING_EDGE)
 
-            def on_event(self, init_element: ScAddr, init_edge: ScAddr, action_element: ScAddr) -> ScResult:
+            def on_event(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
                 finish_action_with_status(action_element, True)
                 return ScResult.OK
 
@@ -134,9 +131,8 @@ class CommonTests(BaseTestCase):
             self.assertFalse(is_executing_successful())
 
         with self.server.register_modules():
-            signal.signal(signal.SIGINT, lambda *_: ...)
             thread = threading.Thread(target=execute_and_send_sigint, daemon=True)
             thread.start()
-            signal.pause()
+            self.server.wait_for_sigint()
 
         self.server.remove_modules(module)

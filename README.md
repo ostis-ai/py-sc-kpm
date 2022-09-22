@@ -158,6 +158,29 @@ with server.connect():
         ...
 ```
 
+If you needn't separate connecting and registration, you can do it all using one command:
+
+```python
+with server.start():
+    ...
+# or
+server.start()
+...
+server.stop()
+```
+
+There is also method for stopping program until a SIGINT signal (or ^C, or terminate in IDE) is received.
+So you can leave agents registered for a long time:
+
+```python
+...
+with server.connect():
+    # Creating some agents
+    with server.register_modules():
+        # Registration some agents
+        server.wait_for_sigint()  # Agents will be active until ^C
+```
+
 ## Utils
 
 There are some functions for working with nodes, edges, links: create them, search, get content, delete, etc.
@@ -262,7 +285,7 @@ src, trg = create_nodes(*[sc_types.NODE_CONST] * 2)
 increase_relation = create_node(sc_types.NODE_CONST_CLASS, "increase")
 
 brel = create_binary_relation(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, trg, increase_relation)  # ScAddr(...)
-rrel = create_role_relation(src, trg, ScKeynodes()[CommonIdentifiers.RREL_ONE.value])  # ScAddr(...)
+rrel = create_role_relation(src, trg, ScKeynodes()[CommonIdentifiers.RREL_ONE])  # ScAddr(...)
 nrel = create_norole_relation(src, trg, create_node(sc_types.NODE_CONST_NOROLE, "connection"))  # ScAddr(...)
 ```
 
@@ -334,9 +357,9 @@ from sc_kpm.utils import get_element_by_role_relation
 
 keynodes = ScKeynodes()
 src, trg = create_nodes(*[sc_types.NODE_CONST] * 2)
-rrel = create_role_relation(src, trg, keynodes[CommonIdentifiers.RREL_ONE.value])  # ScAddr(...)
+rrel = create_role_relation(src, trg, keynodes[CommonIdentifiers.RREL_ONE])  # ScAddr(...)
 
-result = get_element_by_role_relation(src, keynodes[CommonIdentifiers.RREL_ONE.value])  # ScAddr(...)
+result = get_element_by_role_relation(src, keynodes[CommonIdentifiers.RREL_ONE])  # ScAddr(...)
 assert result == trg
 ```
 
@@ -514,7 +537,7 @@ from sc_kpm.utils import create_node, create_edge
 from sc_kpm.utils.action_utils import check_action_class
 
 action_node = create_node(sc_types.NODE_CONST)
-create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, ScKeynodes()[CommonIdentifiers.QUESTION.value], action_node)
+create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, ScKeynodes()[CommonIdentifiers.QUESTION], action_node)
 action_class = create_node(sc_types.NODE_CONST_CLASS, "some_classification")
 create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, action_class, action_node)
 
@@ -544,12 +567,12 @@ action_node = create_node(sc_types.NODE_CONST)
 
 # Static argument
 argument1 = create_node(sc_types.NODE_CONST)
-create_role_relation(action_node, argument1, keynodes[CommonIdentifiers.RREL_ONE.value])
+create_role_relation(action_node, argument1, keynodes[CommonIdentifiers.RREL_ONE])
 
 # Dynamic argument
 dynamic_node = create_node(sc_types.NODE_CONST)
-rrel_dynamic_arg = keynodes[CommonIdentifiers.RREL_DYNAMIC_ARGUMENT.value]
-create_role_relation(action_node, dynamic_node, rrel_dynamic_arg, keynodes[CommonIdentifiers.RREL_TWO.value])
+rrel_dynamic_arg = keynodes[CommonIdentifiers.RREL_DYNAMIC_ARGUMENT]
+create_role_relation(action_node, dynamic_node, rrel_dynamic_arg, keynodes[CommonIdentifiers.RREL_TWO])
 argument2 = create_node(sc_types.NODE_CONST)
 create_edge(sc_types.EDGE_ACCESS_CONST_POS_TEMP, dynamic_node, argument2)
 
@@ -590,7 +613,7 @@ assert result_elements == [answer_element]
 def call_agent(
         arguments: Dict[ScAddr, IsDynamic],
         concepts: List[Idtf],
-        initiation: Idtf = QuestionStatus.QUESTION_INITIATED.value,
+        initiation: Idtf = QuestionStatus.QUESTION_INITIATED,
 ) -> ScAddr: ...
 
 
@@ -600,8 +623,8 @@ def wait_agent(seconds: float, question_node: ScAddr, reaction_node: ScAddr) -> 
 def execute_agent(
         arguments: Dict[ScAddr, IsDynamic],
         concepts: List[Idtf],
-        initiation: Idtf = QuestionStatus.QUESTION_INITIATED.value,
-        reaction: QuestionStatus = QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY,
+        initiation: Idtf = QuestionStatus.QUESTION_INITIATED,
+        reaction: Idtf = QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY,
         wait_time: int = COMMON_WAIT_TIME,  # 5
 ) -> Tuple[ScAddr, bool]: ...
 ```
@@ -626,9 +649,9 @@ arg2 = create_link(3, ScLinkContentType.STRING)
 
 question = call_agent(
     arguments={arg1: False, arg2: False},
-    concepts=[CommonIdentifiers.QUESTION.value, "some_class_name"],
+    concepts=[CommonIdentifiers.QUESTION, "some_class_name"],
 )  # ScAddr(...)
-wait_agent(3, question, ScKeynodes()[QuestionStatus.QUESTION_FINISHED.value])
+wait_agent(3, question, ScKeynodes()[QuestionStatus.QUESTION_FINISHED])
 # or
 question, is_successfully = execute_agent(**kwargs, wait_time=3)  # ScAddr(...), True/False
 ```
@@ -636,7 +659,7 @@ question, is_successfully = execute_agent(**kwargs, wait_time=3)  # ScAddr(...),
 ### Finish action
 
 ```python
-def finish_action(action_node: ScAddr, status: QuestionStatus = QuestionStatus.QUESTION_FINISHED) -> ScAddr: ...
+def finish_action(action_node: ScAddr, status: Idtf = QuestionStatus.QUESTION_FINISHED) -> ScAddr: ...
 
 
 def finish_action_with_status(action_node: ScAddr, is_success: bool = True) -> None: ...
@@ -663,8 +686,8 @@ finish_action(action_node, QuestionStatus.QUESTION_FINISHED)
 finish_action(action_node, QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY)
 
 keynodes = ScKeynodes()
-question_finished = keynodes[QuestionStatus.QUESTION_FINISHED.value]
-question_finished_successfully = keynodes[QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY.value]
+question_finished = keynodes[QuestionStatus.QUESTION_FINISHED]
+question_finished_successfully = keynodes[QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY]
 assert check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, question_finished, action_node)
 assert check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, question_finished_successfully, action_node)
 ```

@@ -14,55 +14,64 @@ _logger = get_kpm_logger()
 
 
 class ScModuleAbstract(ABC):
+    """
+    ScModule is a container for handling multiple ScAgent objects.
+    You can add and remove agents while module is registered or unregistered.
+    """
+
     @abstractmethod
-    def _try_register(self) -> None:
+    def __repr__(self) -> str:
         pass
+
+    @abstractmethod
+    def add_agent(self, agent: ScAgentAbstract) -> None:
+        """Add agent to the module and register it if module is registered"""
+
+    @abstractmethod
+    def remove_agent(self, agent: ScAgentAbstract) -> None:
+        """Remove agent from the module and unregister it if module is registered"""
+
+    @abstractmethod
+    def _register(self) -> None:
+        """Register all agents in the module"""
 
     @abstractmethod
     def _unregister(self) -> None:
-        pass
+        """Unregister all agents from the module"""
 
 
 class ScModule(ScModuleAbstract):
-    def __init__(self, *reg_agents):
+    def __init__(self, *agents: ScAgentAbstract) -> None:
         self._agents: List[ScAgentAbstract] = []
-        self._reg_agents: List[ScAgentAbstract] = []
-        self._reg_agents.extend(reg_agents)
+        self._agents.extend(agents)
+        self._is_registered: bool = False
 
-    def __repr__(self):
-        return f"{self.__class__.__name__}({', '.join(map(repr, self._reg_agents))})"
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({', '.join(map(repr, self._agents))})"
 
     def add_agent(self, agent: ScAgentAbstract) -> None:
-        if self.is_registered():
-            _logger.warning("Agent %s was not added: %s is already registered", repr(agent), self.__class__.__name__)
-            return
-        self._reg_agents.append(agent)
+        if self._is_registered:
+            agent._register()  # pylint: disable=protected-access
+        self._agents.append(agent)
 
     def remove_agent(self, agent: ScAgentAbstract) -> None:
-        if self.is_registered():
-            _logger.warning("Agent %s was not removed: %s is already registered", repr(agent), self.__class__.__name__)
-            return
-        self._reg_agents.remove(agent)
+        if self._is_registered:
+            agent._unregister()  # pylint: disable=protected-access
+        self._agents.remove(agent)
 
-    def _try_register(self) -> None:
-        if self.is_registered():
+    def _register(self) -> None:
+        if self._is_registered:
             _logger.warning("%s failed to register: module is already registered", self.__class__.__name__)
             return
-        if not self._reg_agents:
-            _logger.warning("%s failed to register: no register params", self.__class__.__name__)
-            return
-        for agent in self._reg_agents:
+        if not self._agents:
+            _logger.warning("No agents to register in %s", self.__class__.__name__)
+        for agent in self._agents:
             agent._register()  # pylint: disable=protected-access
-            self._agents.append(agent)
-        self._reg_agents.clear()
+        self._is_registered = True
         _logger.info("%s was registered", self.__class__.__name__)
-
-    def is_registered(self) -> bool:
-        return bool(self._agents)
 
     def _unregister(self) -> None:
         for agent in self._agents:
             agent._unregister()  # pylint: disable=protected-access
-        self._reg_agents.extend(self._agents)
-        self._agents.clear()
+        self._is_registered = False
         _logger.info("%s was unregistered", self.__class__.__name__)

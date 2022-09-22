@@ -30,7 +30,7 @@ class SumAgentClassic(ScAgentClassic):
         super().__init__(*args, **kwargs)
         self._logger = logging.getLogger(f"{self.__module__}:{self.__class__.__name__}")
 
-    def on_event(self, init_element: ScAddr, init_edge: ScAddr, action_element: ScAddr) -> ScResult:
+    def on_event(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
         self._logger.info("Agent was called")
         if not self._confirm_action_class(action_element):
             return ScResult.SKIP
@@ -56,25 +56,24 @@ class SumAgentClassic(ScAgentClassic):
 
 def main():
     server = ScServer("ws://localhost:8090/ws_json")
-    with server.connect():
-        ACTION_CLASS_NAME = "sum"
-        agent = SumAgentClassic(ACTION_CLASS_NAME)
+    with server.start():
+        action_class_name = "sum"
+        agent = SumAgentClassic(action_class_name)
         module = ScModule(agent)
         server.add_modules(module)
-        with server.register_modules():
-            question, is_successful = execute_agent(
-                arguments={
-                    create_link(2, ScLinkContentType.INT): False,
-                    create_link(3, ScLinkContentType.INT): False,
-                },
-                concepts=[CommonIdentifiers.QUESTION.value, ACTION_CLASS_NAME],
-                wait_time=1,
-            )
-            assert is_successful
-            answer_struct = get_action_answer(question)
-            answer_link = get_set_elements(answer_struct)[0]
-            answer_content = get_link_content(answer_link)
-            logging.info("Answer received: %s", repr(answer_content))
+        question, is_successful = execute_agent(
+            arguments={
+                create_link(2, ScLinkContentType.INT): False,
+                create_link(3, ScLinkContentType.INT): False,
+            },
+            concepts=[CommonIdentifiers.QUESTION, action_class_name],
+            wait_time=1,
+        )
+        assert is_successful
+        answer_struct = get_action_answer(question)
+        answer_link = get_set_elements(answer_struct)[0]
+        answer_content = get_link_content(answer_link)
+        logging.info("Answer received: %s", repr(answer_content))
 
 
 if __name__ == "__main__":
