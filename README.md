@@ -158,6 +158,17 @@ with server.connect():
         ...
 ```
 
+If you needn't separate connecting and registration, you can do it all using one command:
+
+```python
+with server.start():
+    ...
+# or
+server.start()
+...
+server.stop()
+```
+
 There is also method for stopping program until a SIGINT signal (or ^C, or terminate in IDE) is received.
 So you can leave agents registered for a long time:
 

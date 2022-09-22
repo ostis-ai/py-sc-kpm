@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import signal
 from abc import ABC, abstractmethod
+from typing import Callable
 
 from sc_client import client
 
@@ -22,7 +23,7 @@ class ScServerAbstract(ABC):
     """ScServer connects to server and stores"""
 
     @abstractmethod
-    def connect(self) -> None:
+    def connect(self) -> _Finisher:
         """Connect to server"""
 
     @abstractmethod
@@ -37,11 +38,17 @@ class ScServerAbstract(ABC):
     def remove_modules(self, *modules: ScModuleAbstract) -> None:
         """Remove modules from the server and unregister them if server is registered"""
 
-    def register_modules(self) -> _ScServerDisconnector:
+    def register_modules(self) -> _Finisher:
         """Register all modules in the server"""
 
     def unregister_modules(self) -> None:
         """Unregister all modules from the server"""
+
+    def start(self) -> _Finisher:
+        """Connect and register modules"""
+
+    def stop(self) -> None:
+        """Disconnect and unregister modules"""
 
 
 class ScServer(ScServerAbstract):
@@ -50,17 +57,14 @@ class ScServer(ScServerAbstract):
         self._modules: list[ScModuleAbstract] = []
         self.is_registered = False
 
-    def __enter__(self) -> None:
-        pass  # Interaction through the register method (with server.register_modules(): ...)
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({', '.join(map(repr, self._modules))})"
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
-        self.unregister_modules()
-
-    def connect(self) -> _ScServerDisconnector:
+    def connect(self) -> _Finisher:
         client.connect(self._url)
         _logger.info("%s connected by url %s", self.__class__.__name__, repr(self._url))
         _IdentifiersResolver.resolve()
-        return _ScServerDisconnector(self)
+        return _Finisher(self.disconnect)
 
     def disconnect(self) -> None:
         client.disconnect()
@@ -77,14 +81,14 @@ class ScServer(ScServerAbstract):
             self._unregister(*modules)
         _logger.info("%s removed modules %s", self.__class__.__name__, ", ".join(map(repr, modules)))
 
-    def register_modules(self) -> ScServer:
+    def register_modules(self) -> _Finisher:
         if self.is_registered:
             _logger.warning("%s failed to register: modules are already registered", self.__class__.__name__)
         else:
             self._register(*self._modules)
             self.is_registered = True
             _logger.info("%s registered modules successfully", self.__class__.__name__)
-        return self
+        return _Finisher(self.unregister_modules)
 
     def unregister_modules(self) -> None:
         if not self.is_registered:
@@ -93,6 +97,15 @@ class ScServer(ScServerAbstract):
         self._unregister(*self._modules)
         self.is_registered = False
         _logger.info("%s unregistered modules successfully", self.__class__.__name__)
+
+    def start(self) -> _Finisher:
+        self.connect()
+        self.register_modules()
+        return _Finisher(self.stop)
+
+    def stop(self) -> None:
+        self.unregister_modules()
+        self.disconnect()
 
     def _register(self, *modules: ScModuleAbstract) -> None:
         if not client.is_connected():
@@ -121,16 +134,16 @@ class ScServer(ScServerAbstract):
         signal.pause()
 
 
-class _ScServerDisconnector:
-    """Class for calling server.disconnect() in with-statement"""
+class _Finisher:
+    """Class for calling finish method in with-statement"""
 
-    def __init__(self, server: ScServer) -> None:
-        self._server = server
+    def __init__(self, finish_method: Callable[[], None]) -> None:
+        self._finish_method = finish_method
 
     def __enter__(self) -> None:
-        pass  # Interaction through the connect method (with server.connect(): ...)
+        pass  # Interaction through the beginning method (with server.start_method(): ...)
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         if exc_val is not None:
-            _logger.error("Raised error %s, unregistration agents", repr(exc_val))
-        self._server.disconnect()
+            _logger.error("Raised error %s, ending", repr(exc_val))
+        self._finish_method()
