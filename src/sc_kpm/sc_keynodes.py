@@ -51,5 +51,5 @@ class ScKeynodes:
             params = ScIdtfResolveParams(idtf=identifier, type=sc_type)
             addr = client.resolve_keynodes(params)[0]
             self._dict[identifier] = addr
-        _logger.debug("Resolved %s identifier with type %s", repr(identifier), repr(sc_type))
+        _logger.debug("Resolved %s identifier with type %s: %s", repr(identifier), repr(sc_type), repr(addr))
         return addr

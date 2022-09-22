@@ -9,10 +9,8 @@ A counterweight you can customize it in more details.
 import logging
 
 from sc_kpm import ScAddr, ScAgent, ScEventType, ScLinkContentType, ScModule, ScResult, ScServer
-from sc_kpm.identifiers import CommonIdentifiers, QuestionStatus
 from sc_kpm.utils import create_link, get_link_content
 from sc_kpm.utils.action_utils import (
-    check_action_class,
     create_action_answer,
     execute_agent,
     finish_action_with_status,
@@ -56,10 +54,7 @@ def main():
     server = ScServer("ws://localhost:8090/ws_json")
     with server.connect():
         action_class_name = "sum"
-        agent = SumAgent(
-            event_class=action_class_name,
-            event_type=ScEventType.ADD_OUTGOING_EDGE,
-        )
+        agent = SumAgent(action_class_name, ScEventType.ADD_OUTGOING_EDGE)
         module = ScModule(agent)
         server.add_modules(module)
         with server.register_modules():
