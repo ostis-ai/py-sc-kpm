@@ -31,7 +31,7 @@ class SumAgent(ScAgent):
         super().__init__(*args, **kwargs)
         self._logger = logging.getLogger(f"{self.__module__}:{self.__class__.__name__}")
 
-    def on_event(self, init_element: ScAddr, init_edge: ScAddr, action_element: ScAddr) -> ScResult:
+    def on_event(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
         self._logger.info("SumAgent was called")
         result = self.run(action_element)
         is_successful = result == ScResult.OK
@@ -55,9 +55,9 @@ class SumAgent(ScAgent):
 def main():
     server = ScServer("ws://localhost:8090/ws_json")
     with server.connect():
-        ACTION_CLASS_NAME = "sum"
+        action_class_name = "sum"
         agent = SumAgent(
-            event_class=ACTION_CLASS_NAME,
+            event_class=action_class_name,
             event_type=ScEventType.ADD_OUTGOING_EDGE,
         )
         module = ScModule(agent)
@@ -69,7 +69,7 @@ def main():
                     create_link(3, ScLinkContentType.INT): False,
                 },
                 concepts=[],
-                initiation=ACTION_CLASS_NAME,
+                initiation=action_class_name,
                 wait_time=1,
             )
             assert is_successful

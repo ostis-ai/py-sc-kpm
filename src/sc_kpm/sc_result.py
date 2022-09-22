@@ -10,7 +10,6 @@ from enum import IntEnum, auto
 class ScResult(IntEnum):
     ERROR = 0  # unknown error, should be 0 anytime
     OK = 1  # no errors, should be 1 anytime
-    SKIP = auto()  # skip agent
     ERROR_INVALID_PARAMS = auto()  # invalid function parameters error
     ERROR_INVALID_TYPE = auto()  # invalid type error
     ERROR_IO = auto()  # input/output error
@@ -20,3 +19,4 @@ class ScResult(IntEnum):
     ERROR_NO_READ_RIGHTS = auto()  # no rights to read object
     NO = auto()  # no result
     UNKNOWN = auto()  # result unknown
+    SKIP = auto()  # skip agent
