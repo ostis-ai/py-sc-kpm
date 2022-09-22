@@ -56,9 +56,9 @@ def create_edge(edge_type: ScType, src: ScAddr, trg: ScAddr) -> ScAddr:
 
 def create_binary_relation(edge_type: ScType, src: ScAddr, trg: ScAddr, *relations: ScAddr) -> ScAddr:
     construction = ScConstruction()
-    construction.create_edge(edge_type, src, trg, ScAlias.RELATION_EDGE.value)
+    construction.create_edge(edge_type, src, trg, ScAlias.RELATION_EDGE)
     for relation in relations:
-        construction.create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, relation, ScAlias.RELATION_EDGE.value)
+        construction.create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, relation, ScAlias.RELATION_EDGE)
     return client.create_elements(construction)[0]
 
 
@@ -91,19 +91,19 @@ def get_edge(source: ScAddr, target: ScAddr, edge_type: ScType) -> ScAddr:
 
 def get_system_idtf(addr: ScAddr) -> Idtf:
     keynodes = ScKeynodes()
-    nrel_system_idtf = keynodes[CommonIdentifiers.NREL_SYSTEM_IDENTIFIER.value]
+    nrel_system_idtf = keynodes[CommonIdentifiers.NREL_SYSTEM_IDENTIFIER]
 
     templ = ScTemplate()
     templ.triple_with_relation(
         addr,
         sc_types.EDGE_D_COMMON_VAR,
-        [sc_types.LINK_VAR, ScAlias.LINK.value],
+        [sc_types.LINK_VAR, ScAlias.LINK],
         sc_types.EDGE_ACCESS_VAR_POS_PERM,
         nrel_system_idtf,
     )
     result = client.template_search(templ)
     if result:
-        return get_link_content(result[0].get(ScAlias.LINK.value))
+        return get_link_content(result[0].get(ScAlias.LINK))
     return ""
 
 
@@ -111,8 +111,8 @@ def search_role_relation_template(src: ScAddr, rrel_node: ScAddr) -> Optional[Sc
     templ = ScTemplate()
     templ.triple_with_relation(
         src,
-        [sc_types.EDGE_ACCESS_VAR_POS_PERM, ScAlias.ACCESS_EDGE.value],
-        [sc_types.UNKNOWN, ScAlias.ELEMENT.value],
+        [sc_types.EDGE_ACCESS_VAR_POS_PERM, ScAlias.ACCESS_EDGE],
+        [sc_types.UNKNOWN, ScAlias.ELEMENT],
         sc_types.EDGE_ACCESS_VAR_POS_PERM,
         rrel_node,
     )
@@ -122,7 +122,7 @@ def search_role_relation_template(src: ScAddr, rrel_node: ScAddr) -> Optional[Sc
 
 def get_element_by_role_relation(src: ScAddr, rrel_node: ScAddr) -> ScAddr:
     search_result = search_role_relation_template(src, rrel_node)
-    return search_result.get(ScAlias.ELEMENT.value) if search_result else ScAddr(0)
+    return search_result.get(ScAlias.ELEMENT) if search_result else ScAddr(0)
 
 
 def get_link_content(link: ScAddr) -> Union[str, int]:

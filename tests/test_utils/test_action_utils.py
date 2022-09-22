@@ -39,7 +39,7 @@ class ScModuleTest(ScModule):
 class TestActionUtils(BaseTestCase):
     def test_validate_action(self):
         action_class = "test_action_class"
-        question = ScKeynodes()[CommonIdentifiers.QUESTION.value]
+        question = ScKeynodes()[CommonIdentifiers.QUESTION]
         test_node = create_node(sc_types.NODE_CONST)
         action_class_node = create_node(sc_types.NODE_CONST, action_class)
         assert check_action_class(action_class_node, test_node) is False

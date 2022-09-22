@@ -66,7 +66,7 @@ def main():
                 create_link(2, ScLinkContentType.INT): False,
                 create_link(3, ScLinkContentType.INT): False,
             },
-            concepts=[CommonIdentifiers.QUESTION.value, action_class_name],
+            concepts=[CommonIdentifiers.QUESTION, action_class_name],
             wait_time=1,
         )
         assert is_successful

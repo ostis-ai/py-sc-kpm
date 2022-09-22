@@ -3,39 +3,41 @@ This source file is part of an OSTIS project. For the latest info, see https://g
 Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
-
-from enum import Enum
+from dataclasses import dataclass
 
 from sc_client.constants import sc_types
 
-from sc_kpm.sc_keynodes import ScKeynodes
+from sc_kpm.sc_keynodes import Idtf, ScKeynodes
 
 
-class CommonIdentifiers(Enum):
-    QUESTION = "question"
-    EXACT_VALUE = "exact_value"
-    RREL_DYNAMIC_ARGUMENT = "rrel_dynamic_argument"
-    RREL_ONE = "rrel_1"
-    RREL_TWO = "rrel_2"
-    NREL_BASIC_SEQUENCE = "nrel_basic_sequence"
-    NREL_SYSTEM_IDENTIFIER = "nrel_system_identifier"
-    NREL_ANSWER = "nrel_answer"
-    CONCEPT_FILENAME = "concept_filename"
+@dataclass(frozen=True)
+class CommonIdentifiers:
+    QUESTION: Idtf = "question"
+    EXACT_VALUE: Idtf = "exact_value"
+    RREL_DYNAMIC_ARGUMENT: Idtf = "rrel_dynamic_argument"
+    RREL_ONE: Idtf = "rrel_1"
+    RREL_TWO: Idtf = "rrel_2"
+    NREL_BASIC_SEQUENCE: Idtf = "nrel_basic_sequence"
+    NREL_SYSTEM_IDENTIFIER: Idtf = "nrel_system_identifier"
+    NREL_ANSWER: Idtf = "nrel_answer"
+    CONCEPT_FILENAME: Idtf = "concept_filename"
 
 
-class QuestionStatus(Enum):
-    QUESTION_INITIATED = "question_initiated"
-    QUESTION_FINISHED = "question_finished"
-    QUESTION_FINISHED_SUCCESSFULLY = "question_finished_successfully"
-    QUESTION_FINISHED_UNSUCCESSFULLY = "question_finished_unsuccessfully"
+@dataclass(frozen=True)
+class QuestionStatus:
+    QUESTION_INITIATED: Idtf = "question_initiated"
+    QUESTION_FINISHED: Idtf = "question_finished"
+    QUESTION_FINISHED_SUCCESSFULLY: Idtf = "question_finished_successfully"
+    QUESTION_FINISHED_UNSUCCESSFULLY: Idtf = "question_finished_unsuccessfully"
 
 
-class ScAlias(Enum):
-    ACTION_NODE = "_action_node"
-    RELATION_EDGE = "_relation_edge"
-    ACCESS_EDGE = "_access_edge"
-    ELEMENT = "_element"
-    LINK = "_link"
+@dataclass(frozen=True)
+class ScAlias:
+    ACTION_NODE: str = "_action_node"
+    RELATION_EDGE: str = "_relation_edge"
+    ACCESS_EDGE: str = "_access_edge"
+    ELEMENT: str = "_element"
+    LINK: str = "_link"
 
 
 class _IdentifiersResolver:
@@ -68,6 +70,6 @@ class _IdentifiersResolver:
 
         keynodes = ScKeynodes()
         for idtf, sc_type in types_map.items():
-            keynodes.resolve(idtf.value, sc_type)
+            keynodes.resolve(idtf, sc_type)
 
         cls.is_resolved = True

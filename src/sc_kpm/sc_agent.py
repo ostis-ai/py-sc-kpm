@@ -75,7 +75,7 @@ class ScAgentClassic(ScAgent, ABC):
     def __init__(
         self,
         action_class_name: Idtf,
-        event_element: Union[Idtf, ScAddr] = QuestionStatus.QUESTION_INITIATED.value,
+        event_element: Union[Idtf, ScAddr] = QuestionStatus.QUESTION_INITIATED,
         event_type: ScEventType = ScEventType.ADD_OUTGOING_EDGE,
     ) -> None:
         super().__init__(event_element, event_type)
@@ -84,7 +84,7 @@ class ScAgentClassic(ScAgent, ABC):
 
     def __repr__(self) -> str:
         description = f"ClassicScAgent(action_class_name={repr(self._action_class_name)}"
-        if self._event_element != self._keynodes.get(QuestionStatus.QUESTION_INITIATED.value):
+        if self._event_element != self._keynodes.get(QuestionStatus.QUESTION_INITIATED):
             description = f"{description}, event_class={repr(self._event_element)}"
         if self._event_type != ScEventType.ADD_OUTGOING_EDGE:
             description = f"{description}, event_type={repr(self._event_type)}"

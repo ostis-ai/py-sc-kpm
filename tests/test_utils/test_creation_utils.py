@@ -64,8 +64,8 @@ class TestGenerationUtils(BaseTestCase):
 
 def _get_oriented_set_template(set_node: ScAddr, start_element: ScAddr, other_element: ScAddr) -> ScTemplate:
     keynodes = ScKeynodes()
-    rrel_one = keynodes[CommonIdentifiers.RREL_ONE.value]
-    nrel_sequence = keynodes[CommonIdentifiers.NREL_BASIC_SEQUENCE.value]
+    rrel_one = keynodes[CommonIdentifiers.RREL_ONE]
+    nrel_sequence = keynodes[CommonIdentifiers.NREL_BASIC_SEQUENCE]
 
     template = ScTemplate()
     template.triple_with_relation(

@@ -44,11 +44,11 @@ def _get_next_element(set_node: ScAddr, elements: List[ScAddr], access_edge: ScA
         elem_search_result = _search_next_element_template(set_node, access_edge)
     else:
         keynodes = ScKeynodes()
-        elem_search_result = search_role_relation_template(set_node, keynodes[CommonIdentifiers.RREL_ONE.value])
+        elem_search_result = search_role_relation_template(set_node, keynodes[CommonIdentifiers.RREL_ONE])
     if elem_search_result is None:
         return None
-    elements.append(elem_search_result.get(ScAlias.ELEMENT.value))
-    return elem_search_result.get(ScAlias.ACCESS_EDGE.value)
+    elements.append(elem_search_result.get(ScAlias.ELEMENT))
+    return elem_search_result.get(ScAlias.ACCESS_EDGE)
 
 
 def _search_next_element_template(set_node: ScAddr, cur_element_edge: ScAddr) -> Optional[ScTemplateResult]:
@@ -57,11 +57,11 @@ def _search_next_element_template(set_node: ScAddr, cur_element_edge: ScAddr) ->
     templ.triple_with_relation(
         cur_element_edge,
         sc_types.EDGE_D_COMMON_VAR,
-        [sc_types.EDGE_ACCESS_VAR_POS_PERM, ScAlias.ACCESS_EDGE.value],
+        [sc_types.EDGE_ACCESS_VAR_POS_PERM, ScAlias.ACCESS_EDGE],
         sc_types.EDGE_ACCESS_VAR_POS_PERM,
-        keynodes[CommonIdentifiers.NREL_BASIC_SEQUENCE.value],
+        keynodes[CommonIdentifiers.NREL_BASIC_SEQUENCE],
     )
-    templ.triple(set_node, ScAlias.ACCESS_EDGE.value, [sc_types.UNKNOWN, ScAlias.ELEMENT.value])
+    templ.triple(set_node, ScAlias.ACCESS_EDGE, [sc_types.UNKNOWN, ScAlias.ELEMENT])
     return _get_first_search_template_result(templ)
 
 
