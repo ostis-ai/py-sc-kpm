@@ -38,6 +38,10 @@ class ScServerAbstract(ABC):
     def remove_modules(self, *modules: ScModuleAbstract) -> None:
         """Remove modules from the server and unregister them if server is registered"""
 
+    @abstractmethod
+    def clear_modules(self) -> None:
+        """Remove all modules from the server and unregister them if server is registered"""
+
     def register_modules(self) -> _Finisher:
         """Register all modules in the server"""
 
@@ -54,7 +58,7 @@ class ScServerAbstract(ABC):
 class ScServer(ScServerAbstract):
     def __init__(self, sc_server_url: str) -> None:
         self._url: str = sc_server_url
-        self._modules: list[ScModuleAbstract] = []
+        self._modules: set[ScModuleAbstract] = set()
         self.is_registered = False
 
     def __repr__(self) -> str:
@@ -73,13 +77,20 @@ class ScServer(ScServerAbstract):
     def add_modules(self, *modules: ScModuleAbstract) -> None:
         if self.is_registered:
             self._register(*modules)
-        self._modules.extend(modules)
+        self._modules |= {*modules}
         _logger.info("%s added modules %s", self.__class__.__name__, ", ".join(map(repr, modules)))
 
     def remove_modules(self, *modules: ScModuleAbstract) -> None:
         if self.is_registered:
             self._unregister(*modules)
+        self._modules -= {*modules}
         _logger.info("%s removed modules %s", self.__class__.__name__, ", ".join(map(repr, modules)))
+
+    def clear_modules(self) -> None:
+        if self.is_registered:
+            self._unregister(*self._modules)
+        _logger.info("%s removed all modules %s", self.__class__.__name__, ", ".join(map(repr, self._modules)))
+        self._modules.clear()
 
     def register_modules(self) -> _Finisher:
         if self.is_registered:
