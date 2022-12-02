@@ -7,7 +7,10 @@ import os
 import signal
 import threading
 
-from sc_kpm import ScAddr, ScAgent, ScAgentClassic, ScEventType, ScModule, ScResult
+from sc_client.constants.common import ScEventType
+from sc_client.models import ScAddr
+
+from sc_kpm import ScAgent, ScAgentClassic, ScModule, ScResult
 from sc_kpm.identifiers import CommonIdentifiers
 from sc_kpm.utils.action_utils import execute_agent, finish_action_with_status
 from tests.common_tests import BaseTestCase

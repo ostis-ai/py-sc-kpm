@@ -8,7 +8,10 @@ A counterweight you can customize it in more details.
 
 import logging
 
-from sc_kpm import ScAddr, ScAgent, ScEventType, ScLinkContentType, ScModule, ScResult, ScServer
+from sc_client.constants.common import ScEventType
+from sc_client.models import ScAddr, ScLinkContentType
+
+from sc_kpm import ScAgent, ScModule, ScResult, ScServer
 from sc_kpm.utils import create_link, get_link_content
 from sc_kpm.utils.action_utils import (
     create_action_answer,

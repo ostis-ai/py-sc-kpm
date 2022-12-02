@@ -32,7 +32,8 @@ A singleton dict-like object which provides
 the ability to cache the identifier and ScAddr of keynodes stored in the KB.
 
 ```python
-from sc_kpm import sc_types, ScKeynodes
+from sc_client.constants import sc_types
+from sc_kpm import ScKeynodes
 
 keynodes = ScKeynodes()  # Create an instance of the ScKeynodes class to get access to the cache
 
@@ -53,7 +54,8 @@ keynodes.resolve("some_node", None)  # Returns the element if it exists, otherwi
 A classes for handling a single ScEvent. Define your agents like this:
 
 ```python
-from sc_kpm import ScAgent, ScAgentClassic, ScResult, ScAddr
+from sc_client.models import ScAddr
+from sc_kpm import ScAgent, ScAgentClassic, ScResult
 
 
 class ScAgentTest(ScAgent):
@@ -79,6 +81,10 @@ you should define the identifier of the action class node and arguments of the S
 **ClassicScAgent checks its action element automatically and doesn't run `on_event` method if checking fails.**
 
 ```python
+from sc_client.constants import sc_types
+from sc_client.constants.common import ScEventType
+from sc_kpm import ScKeynodes
+
 keynodes = ScKeynodes()
 action_class = keynodes.resolve("test_class", sc_types.NODE_CONST_CLASS)
 agent = ScAgentTest(action_class, ScEventType.ADD_OUTGOING_EDGE)
@@ -215,7 +221,8 @@ def create_nodes(*node_types: ScType) -> List[ScAddr]: ...
 `sys_idtf` is optional name of keynode if you want to add it there.
 
 ```python
-from sc_kpm import sc_types, ScKeynodes
+from sc_client.constants import sc_types
+from sc_kpm import ScKeynodes
 from sc_kpm.utils.common_utils import create_node, create_nodes
 
 lang = create_node(sc_types.NODE_CONST_CLASS)  # ScAddr(...)
@@ -233,7 +240,7 @@ def create_edge(edge_type: ScType, src: ScAddr, trg: ScAddr) -> ScAddr: ...
 ```
 
 ```python
-from sc_kpm import sc_types
+from sc_client.constants import sc_types
 from sc_kpm.utils import create_nodes
 from sc_kpm.utils import create_edge
 
@@ -266,7 +273,8 @@ def create_links(
 You may use **ScLinkContentType.STRING** and **ScLinkContentType.INT** types for content of created links.
 
 ```python
-from sc_kpm import sc_types, ScLinkContentType
+from sc_client.constants import sc_types
+from sc_client.models import ScLinkContentType
 from sc_kpm.utils import create_link, create_links
 
 msg = create_link("hello")  # ScAddr(...)
@@ -290,7 +298,8 @@ def create_norole_relation(src: ScAddr, trg: ScAddr, *nrel_nodes: ScAddr) -> ScA
 ```
 
 ```python
-from sc_kpm import sc_types, ScKeynodes
+from sc_client.constants import sc_types
+from sc_kpm import ScKeynodes
 from sc_kpm.identifiers import CommonIdentifiers
 from sc_kpm.utils import create_node, create_nodes
 from sc_kpm.utils import create_binary_relation, create_role_relation, create_norole_relation
@@ -320,7 +329,7 @@ def delete_edges(source: ScAddr, target: ScAddr, *edge_types: ScType) -> bool: .
 These two functions return **True** if operations was successful and **False** otherwise.
 
 ```python
-from sc_kpm import sc_types
+from sc_client.constants import sc_types
 from sc_kpm.utils import create_nodes, create_edge
 from sc_kpm.utils import delete_edges, delete_elements
 
@@ -346,7 +355,7 @@ def get_edges(source: ScAddr, target: ScAddr, *edge_types: ScType) -> List[ScAdd
 _**NOTE: Use VAR type instead of CONST in getting utils**_
 
 ```python
-from sc_kpm import sc_types
+from sc_client.constants import sc_types
 from sc_kpm.utils import create_nodes, create_edge
 from sc_kpm.utils import get_edge, get_edges
 
@@ -372,7 +381,8 @@ def get_element_by_norole_relation(src: ScAddr, nrel_node: ScAddr) -> ScAddr: ..
 ```
 
 ```python
-from sc_kpm import sc_types, ScKeynodes
+from sc_client.constants import sc_types
+from sc_kpm import ScKeynodes
 from sc_kpm.identifiers import CommonIdentifiers
 from sc_kpm.utils import create_nodes, create_role_relation, create_norole_relation
 from sc_kpm.utils import get_element_by_role_relation, get_element_by_norole_relation
@@ -413,7 +423,8 @@ def get_system_idtf(addr: ScAddr) -> str: ...
 ```
 
 ```python
-from sc_kpm import sc_types, ScKeynodes
+from sc_client.constants import sc_types
+from sc_kpm import ScKeynodes
 from sc_kpm.utils import create_node
 from sc_kpm.utils import get_system_idtf
 
@@ -460,7 +471,7 @@ Next two pictures show equivalent presentations of structures in SCg-code:
 In structure sc_type of **main node** is `sc_types.NODE_CONST_STRUCT`
 
 ```python
-from sc_kpm import sc_types
+from sc_client.constants import sc_types
 from sc_kpm.utils import create_node, create_nodes
 from sc_kpm.utils.creation_utils import wrap_in_set, create_set, create_structure
 
@@ -493,7 +504,7 @@ On an oriented set, the order of nodes is given:
 ![oriented set](docs/schemes/png/oriented_set.png)
 
 ```python
-from sc_kpm import sc_types
+from sc_client.constants import sc_types
 from sc_kpm.utils import create_node, create_nodes
 from sc_kpm.utils.creation_utils import wrap_in_oriented_set, create_oriented_set
 
@@ -521,7 +532,7 @@ def get_oriented_set_elements(set_node: ScAddr) -> List[ScAddr]: ...
 ```
 
 ```python
-from sc_kpm import sc_types
+from sc_client.constants import sc_types
 from sc_kpm.utils import create_nodes
 from sc_kpm.utils.creation_utils import create_structure, create_oriented_set
 from sc_kpm.utils.retrieve_utils import get_set_elements, get_oriented_set_elements
@@ -546,7 +557,7 @@ def get_set_power(set_node: ScAddr) -> int: ...
 ```
 
 ```python
-from sc_kpm import sc_types
+from sc_client.constants import sc_types
 from sc_kpm.utils import create_nodes
 from sc_kpm.utils.creation_utils import create_structure
 from sc_kpm.utils.retrieve_utils import get_set_power
@@ -577,7 +588,8 @@ This function should not be used in the ScAgentClassic.
 ![check action class](docs/schemes/png/check_action_class.png)
 
 ```python
-from sc_kpm import sc_types, ScKeynodes
+from sc_client.constants import sc_types
+from sc_kpm import ScKeynodes
 from sc_kpm.identifiers import CommonIdentifiers
 from sc_kpm.utils import create_node, create_edge
 from sc_kpm.utils.action_utils import check_action_class
@@ -603,7 +615,8 @@ def get_action_arguments(action_class: Union[ScAddr, Idtf], count: int) -> List[
 ![check action class](docs/schemes/png/get_arguments.png)
 
 ```python
-from sc_kpm import sc_types, ScKeynodes
+from sc_client.constants import sc_types
+from sc_kpm import ScKeynodes
 from sc_kpm.identifiers import CommonIdentifiers
 from sc_kpm.utils import create_node, create_edge, create_role_relation
 from sc_kpm.utils.action_utils import get_action_arguments
@@ -640,7 +653,7 @@ Create and get structure with output of action
 ![agent answer](docs/schemes/png/agent_answer.png)
 
 ```python
-from sc_kpm import sc_types
+from sc_client.constants import sc_types
 from sc_kpm.utils import create_node
 from sc_kpm.utils.action_utils import create_action_answer, get_action_answer
 from sc_kpm.utils.retrieve_utils import get_set_elements
@@ -688,7 +701,8 @@ def execute_agent(
 ![execute_agent](docs/schemes/png/execute_agent.png)
 
 ```python
-from sc_kpm import ScLinkContentType, ScKeynodes
+from sc_client.models import ScLinkContentType
+from sc_kpm import ScKeynodes
 from sc_kpm.identifiers import CommonIdentifiers, QuestionStatus
 from sc_kpm.utils import create_link
 from sc_kpm.utils.action_utils import execute_agent, call_agent, wait_agent
@@ -696,13 +710,15 @@ from sc_kpm.utils.action_utils import execute_agent, call_agent, wait_agent
 arg1 = create_link(2, ScLinkContentType.INT)
 arg2 = create_link(3, ScLinkContentType.INT)
 
-question = call_agent(
+kwargs = dict(
     arguments={arg1: False, arg2: False},
     concepts=[CommonIdentifiers.QUESTION, "some_class_name"],
-)  # ScAddr(...)
+)
+
+question = call_agent(**kwargs)  # ScAddr(...)
 wait_agent(3, question, ScKeynodes()[QuestionStatus.QUESTION_FINISHED])
 # or
-question, is_successfully = execute_agent(**kwargs, wait_time=3)  # ScAddr(...), True/False
+question, is_successfully = execute_agent(**kwargs, wait_time=3)  # ScAddr(...), bool
 ```
 
 ### Finish action
@@ -722,7 +738,8 @@ def finish_action_with_status(action_node: ScAddr, is_success: bool = True) -> N
 ![finish_action](docs/schemes/png/finish_action.png)
 
 ```python
-from sc_kpm import sc_types, ScKeynodes
+from sc_client.constants import sc_types
+from sc_kpm import ScKeynodes
 from sc_kpm.identifiers import QuestionStatus
 from sc_kpm.utils import create_node, check_edge
 from sc_kpm.utils.action_utils import finish_action, finish_action_with_status
