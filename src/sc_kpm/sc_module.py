@@ -5,7 +5,7 @@ Distributed under the MIT License
 """
 
 from abc import ABC, abstractmethod
-from typing import List
+from typing import Set
 
 from sc_kpm.logging import get_kpm_logger
 from sc_kpm.sc_agent import ScAgentAbstract
@@ -42,8 +42,7 @@ class ScModuleAbstract(ABC):
 
 class ScModule(ScModuleAbstract):
     def __init__(self, *agents: ScAgentAbstract) -> None:
-        self._agents: List[ScAgentAbstract] = []
-        self._agents.extend(agents)
+        self._agents: Set[ScAgentAbstract] = {*agents}
         self._is_registered: bool = False
 
     def __repr__(self) -> str:
@@ -52,7 +51,7 @@ class ScModule(ScModuleAbstract):
     def add_agent(self, agent: ScAgentAbstract) -> None:
         if self._is_registered:
             agent._register()  # pylint: disable=protected-access
-        self._agents.append(agent)
+        self._agents.add(agent)
 
     def remove_agent(self, agent: ScAgentAbstract) -> None:
         if self._is_registered:
