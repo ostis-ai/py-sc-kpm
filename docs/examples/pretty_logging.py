@@ -8,36 +8,41 @@ If you need see not only kpm logs in console, you can remove stream handler and 
 import logging.config
 from pathlib import Path
 
-from sc_kpm import KPM_LOGGER_NAME
+PROJECT_NAME = __name__
 
 logging.config.dictConfig(
-    dict(
-        version=1,
-        disable_existing_loggers=False,
-        formatters={
+    {
+        "version": 1,
+        "formatters": {
             "common_formatter": {
                 "format": "%(asctime)s | %(levelname)s | %(name)s | %(message)s",
                 "datefmt": "[%d-%b-%y %H:%M:%S]",
             }
         },
-        handlers={
+        "handlers": {
             "stream_handler": {
                 "class": "logging.StreamHandler",
-                "level": logging.INFO,
+                "level": logging.DEBUG,
                 "formatter": "common_formatter",
             },
             "file_handler": {
-                "class": "logging.FileHandler",
+                "class": "logging.handlers.RotatingFileHandler",
+                "maxBytes": 1_000_000,
+                "backupCount": 3,
                 "level": logging.DEBUG,
-                "filename": Path(__file__).resolve().parent.joinpath("py_sc_kpm.log"),
+                "filename": Path(__file__).resolve().parent.joinpath("root.log"),
                 "formatter": "common_formatter",
             },
         },
-        loggers={
-            KPM_LOGGER_NAME: {
-                "handlers": ["stream_handler", "file_handler"],
-                "level": logging.DEBUG,
-            }
+        "root": {
+            "handlers": ["file_handler"],
+            "level": logging.DEBUG,
         },
-    )
+        "loggers": {
+            PROJECT_NAME: {
+                "handlers": ["stream_handler"],
+                "level": logging.INFO,
+            },
+        },
+    }
 )

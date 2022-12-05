@@ -25,20 +25,16 @@ logging.basicConfig(
 
 
 class SumAgent(ScAgent):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._logger = logging.getLogger(f"{self.__module__}:{self.__class__.__name__}")
-
     def on_event(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
-        self._logger.info("SumAgent was called")
+        self.logger.info("SumAgent was called")
         result = self.run(action_element)
         is_successful = result == ScResult.OK
         finish_action_with_status(action_element, is_successful)
-        self._logger.info("SumAgent finished %s", "successfully" if is_successful else "unsuccessfully")
+        self.logger.info("SumAgent finished %s", "successfully" if is_successful else "unsuccessfully")
         return result
 
     def run(self, action_node: ScAddr) -> ScResult:
-        self._logger.info("SumAgent began to run")
+        self.logger.info("SumAgent began to run")
         arg1_link, arg2_link = get_action_arguments(action_node, 2)
         if not arg1_link or not arg2_link:
             return ScResult.ERROR_INVALID_PARAMS

@@ -21,6 +21,7 @@ env/
 .pytest_cache/
 .vscode/
 .eggs/
+*.log
 
 .workon
 
