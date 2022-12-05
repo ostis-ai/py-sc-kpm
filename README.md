@@ -59,9 +59,9 @@ class ScAgentTest(ScAgent):
 
 class ScAgentClassicTest(ScAgentClassic):
     def on_event(self, class_node: ScAddr, edge: ScAddr, action_node: ScAddr) -> ScResult:
-        if not self._confirm_action_class(action_node):  # exclusive method for classic agent
-            return ScResult.SKIP
-        ...
+      # ScAgentClassic automatically checks its action
+      ...
+      return ScResult.OK
 ```
 
 For the ScAgent initialization you should define the sc-element and the type of the ScEvent.
@@ -70,6 +70,8 @@ For the ScAgentClassic initialization
 you should define the identifier of the action class node and arguments of the ScAgent.
 `event_class` is set to the `question_initiated` keynode by default.
 `event_type` is set to the `ScEventType.ADD_OUTGOING_EDGE` type by default.
+
+**ClassicScAgent checks its action element automatically and doesn't run `on_event` method if checking fails.**
 
 ```python
 keynodes = ScKeynodes()
@@ -97,6 +99,8 @@ module.add_agent(agent3)
 ...
 module.remove_agent(agent3)
 ```
+
+_Note: you don't need remove agents in the end of program._
 
 ### ScServer
 

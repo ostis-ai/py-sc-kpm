@@ -12,10 +12,6 @@ logging.basicConfig(level=logging.INFO)
 
 class TestScAgent(ScAgentClassic):
     def on_event(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
-        self.logger.info("Agent's called")
-        if not self._confirm_action_class(action_element):
-            return ScResult.SKIP
-        self.logger.info("Agent's confirmed and started")
         return ScResult.OK
 
 

@@ -88,5 +88,8 @@ class ScAgentClassic(ScAgent, ABC):
             description = f"{description}, event_type={repr(self._event_type)}"
         return description + ")"
 
-    def _confirm_action_class(self, action_element: ScAddr) -> bool:
-        return check_action_class(self._action_class, action_element)
+    def _callback(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
+        if not check_action_class(self._action_class, action_element):
+            return ScResult.SKIP
+        self.logger.info("Confirmed action class")
+        return self.on_event(event_element, event_edge, action_element)

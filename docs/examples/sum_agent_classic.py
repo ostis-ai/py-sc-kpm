@@ -27,10 +27,6 @@ logging.basicConfig(
 
 class SumAgentClassic(ScAgentClassic):
     def on_event(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
-        self.logger.info("Agent was called")
-        if not self._confirm_action_class(action_element):
-            return ScResult.SKIP
-        self.logger.info("Agent was confirmed")
         result = self.run(action_element)
         is_successful = result == ScResult.OK
         finish_action_with_status(action_element, is_successful)
