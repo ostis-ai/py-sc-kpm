@@ -6,8 +6,6 @@ Distributed under the MIT License
 
 import logging
 
-KPM_LOGGER_NAME = "py-sc-kpm"
 
-
-def get_kpm_logger() -> logging.Logger:
-    return logging.getLogger(KPM_LOGGER_NAME)
+def set_root_config(root_name: str) -> None:
+    logging.getLogger(root_name).addHandler(logging.NullHandler())

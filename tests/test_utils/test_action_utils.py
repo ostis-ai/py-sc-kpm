@@ -4,8 +4,6 @@ Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
 
-import logging
-
 from sc_client.constants import sc_types
 from sc_client.constants.common import ScEventType
 
@@ -16,14 +14,12 @@ from sc_kpm.utils.action_utils import check_action_class, execute_agent, finish_
 from sc_kpm.utils.common_utils import create_edge, create_node, delete_elements
 from tests.common_tests import BaseTestCase
 
-logging.basicConfig(filename="testing.log", filemode="w", level=logging.DEBUG)
-logger = logging.getLogger(__name__)
 test_node_idtf = "test_node"
 
 
 class ScAgentTest(ScAgent):
     def on_event(self, _src, _edge, target_node) -> ScResult:
-        logger.info(f"{self.__class__.__name__} is started")
+        self.logger.info(f"Agent's started")
         finish_action_with_status(target_node)
         return ScResult.OK
 

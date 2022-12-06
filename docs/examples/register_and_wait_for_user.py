@@ -8,15 +8,14 @@ import logging
 from sc_kpm import ScAddr, ScAgentClassic, ScModule, ScResult, ScServer
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 class TestScAgent(ScAgentClassic):
     def on_event(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
-        logger.info("Agent's called")
+        self.logger.info("Agent's called")
         if not self._confirm_action_class(action_element):
             return ScResult.SKIP
-        logger.info("Agent's confirmed and started")
+        self.logger.info("Agent's confirmed and started")
         return ScResult.OK
 
 

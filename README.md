@@ -700,4 +700,4 @@ assert check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, question_finished_successfu
     - [based on ScAgent](docs/examples/sum_agent.py)
     - [based on ScAgentClassic](docs/examples/sum_agent_classic.py)
 - Logging examples:
-    - [only py-sc-kpm logging](docs/examples/logging_only_kpm.py)
+    - [pretty project logging](docs/examples/pretty_logging.py)

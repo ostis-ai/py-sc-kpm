@@ -8,15 +8,13 @@ from __future__ import annotations
 
 import signal
 from abc import ABC, abstractmethod
+from logging import Logger, getLogger
 from typing import Callable
 
 from sc_client import client
 
 from sc_kpm.identifiers import _IdentifiersResolver
-from sc_kpm.logging import get_kpm_logger
 from sc_kpm.sc_module import ScModuleAbstract
-
-_logger = get_kpm_logger()
 
 
 class ScServerAbstract(ABC):
@@ -60,59 +58,60 @@ class ScServer(ScServerAbstract):
         self._url: str = sc_server_url
         self._modules: set[ScModuleAbstract] = set()
         self.is_registered = False
+        self.logger = getLogger(f"{self.__module__}.{self.__class__.__name__}")
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({', '.join(map(repr, self._modules))})"
 
     def connect(self) -> _Finisher:
         client.connect(self._url)
-        _logger.info("%s connected by url %s", self.__class__.__name__, repr(self._url))
+        self.logger.info("Connected by url: %s", repr(self._url))
         _IdentifiersResolver.resolve()
-        return _Finisher(self.disconnect)
+        return _Finisher(self.disconnect, self.logger)
 
     def disconnect(self) -> None:
         client.disconnect()
-        _logger.info("%s disconnected", self.__class__.__name__)
+        self.logger.info("Disconnected from url: %s", repr(self._url))
 
     def add_modules(self, *modules: ScModuleAbstract) -> None:
         if self.is_registered:
             self._register(*modules)
         self._modules |= {*modules}
-        _logger.info("%s added modules %s", self.__class__.__name__, ", ".join(map(repr, modules)))
+        self.logger.info("Added modules: %s", ", ".join(map(repr, modules)))
 
     def remove_modules(self, *modules: ScModuleAbstract) -> None:
         if self.is_registered:
             self._unregister(*modules)
         self._modules -= {*modules}
-        _logger.info("%s removed modules %s", self.__class__.__name__, ", ".join(map(repr, modules)))
+        self.logger.info("Removed modules: %s", ", ".join(map(repr, modules)))
 
     def clear_modules(self) -> None:
         if self.is_registered:
             self._unregister(*self._modules)
-        _logger.info("%s removed all modules %s", self.__class__.__name__, ", ".join(map(repr, self._modules)))
+        self.logger.info("Removed all modules: %s", ", ".join(map(repr, self._modules)))
         self._modules.clear()
 
     def register_modules(self) -> _Finisher:
         if self.is_registered:
-            _logger.warning("%s failed to register: modules are already registered", self.__class__.__name__)
+            self.logger.warning("Modules are already registered")
         else:
             self._register(*self._modules)
             self.is_registered = True
-            _logger.info("%s registered modules successfully", self.__class__.__name__)
-        return _Finisher(self.unregister_modules)
+            self.logger.info("Registered modules successfully")
+        return _Finisher(self.unregister_modules, self.logger)
 
     def unregister_modules(self) -> None:
         if not self.is_registered:
-            _logger.warning("%s failed to unregister: modules are already unregistered", self.__class__.__name__)
+            self.logger.warning("Modules are already unregistered")
             return
         self._unregister(*self._modules)
         self.is_registered = False
-        _logger.info("%s unregistered modules successfully", self.__class__.__name__)
+        self.logger.info("Unregistered modules successfully")
 
     def start(self) -> _Finisher:
         self.connect()
         self.register_modules()
-        return _Finisher(self.stop)
+        return _Finisher(self.stop, self.logger)
 
     def stop(self) -> None:
         self.unregister_modules()
@@ -120,41 +119,39 @@ class ScServer(ScServerAbstract):
 
     def _register(self, *modules: ScModuleAbstract) -> None:
         if not client.is_connected():
-            _logger.error("%s failed to register: connection lost", self.__class__.__name__)
-            raise ConnectionError("Connection lost")
+            self.logger.error("Failed to register: connection lost")
+            raise ConnectionError(f"Connection to url {repr(self._url)} lost")
         for module in modules:
             if not isinstance(module, ScModuleAbstract):
-                _logger.error(
-                    "%s failed to register: type of %s is not ScModule", self.__class__.__name__, repr(module)
-                )
-                raise TypeError("All elements of the module list must be ScModule instances")
+                self.logger.error("Failed to register: type of %s is not ScModule", repr(module))
+                raise TypeError(f"{repr(module)} is not ScModule")
             module._register()  # pylint: disable=protected-access
 
     def _unregister(self, *modules: ScModuleAbstract) -> None:
         if not client.is_connected():
-            _logger.error("%s failed to unregister: connection lost", self.__class__.__name__)
-            raise ConnectionError("Connection lost")
+            self.logger.error("Failed to unregister: connection to %s lost", repr(self._url))
+            raise ConnectionError(f"Connection to {repr(self._url)} lost")
         for module in modules:
             module._unregister()  # pylint: disable=protected-access
 
-    @staticmethod
-    def wait_for_sigint() -> None:
+    def wait_for_sigint(self) -> None:
         """Stop the program until a SIGINT signal (^C, or stop in IDE) is received"""
 
-        signal.signal(signal.SIGINT, lambda *_: _logger.info("^C SIGINT was interrupted"))
+        signal.signal(signal.SIGINT, lambda *_: self.logger.info("^C SIGINT was interrupted"))
         signal.pause()
 
 
 class _Finisher:
     """Class for calling finish method in with-statement"""
 
-    def __init__(self, finish_method: Callable[[], None]) -> None:
+    def __init__(self, finish_method: Callable[[], None], logger: Logger) -> None:
         self._finish_method = finish_method
+        self._logger = logger
 
     def __enter__(self) -> None:
         pass  # Interaction through the beginning method (with server.start_method(): ...)
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         if exc_val is not None:
-            _logger.error("Raised error %s, ending", repr(exc_val))
+            self._logger.error("Raised error %s, finishing", repr(exc_val))
         self._finish_method()

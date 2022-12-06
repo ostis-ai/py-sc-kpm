@@ -5,12 +5,10 @@ Distributed under the MIT License
 """
 
 from abc import ABC, abstractmethod
+from logging import getLogger
 from typing import Set
 
-from sc_kpm.logging import get_kpm_logger
 from sc_kpm.sc_agent import ScAgentAbstract
-
-_logger = get_kpm_logger()
 
 
 class ScModuleAbstract(ABC):
@@ -44,6 +42,7 @@ class ScModule(ScModuleAbstract):
     def __init__(self, *agents: ScAgentAbstract) -> None:
         self._agents: Set[ScAgentAbstract] = {*agents}
         self._is_registered: bool = False
+        self.logger = getLogger(f"{self.__module__}.{self.__class__.__name__}")
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({', '.join(map(repr, self._agents))})"
@@ -60,17 +59,17 @@ class ScModule(ScModuleAbstract):
 
     def _register(self) -> None:
         if self._is_registered:
-            _logger.warning("%s failed to register: module is already registered", self.__class__.__name__)
+            self.logger.warning("Already registered")
             return
         if not self._agents:
-            _logger.warning("No agents to register in %s", self.__class__.__name__)
+            self.logger.warning("No agents to register")
         for agent in self._agents:
             agent._register()  # pylint: disable=protected-access
         self._is_registered = True
-        _logger.info("%s was registered", self.__class__.__name__)
+        self.logger.info("Registered")
 
     def _unregister(self) -> None:
         for agent in self._agents:
             agent._unregister()  # pylint: disable=protected-access
         self._is_registered = False
-        _logger.info("%s was unregistered", self.__class__.__name__)
+        self.logger.info("Unregistered")

@@ -5,6 +5,7 @@ Distributed under the MIT License
 """
 
 from abc import ABC, abstractmethod
+from logging import getLogger
 from typing import Optional, Union
 
 from sc_client import client
@@ -14,12 +15,9 @@ from sc_client.constants.exceptions import InvalidValueError
 from sc_client.models import ScAddr, ScEvent, ScEventParams
 
 from sc_kpm.identifiers import QuestionStatus
-from sc_kpm.logging import get_kpm_logger
 from sc_kpm.sc_keynodes import Idtf, ScKeynodes
 from sc_kpm.sc_result import ScResult
 from sc_kpm.utils.action_utils import check_action_class
-
-_logger = get_kpm_logger()
 
 
 class ScAgentAbstract(ABC):
@@ -27,6 +25,7 @@ class ScAgentAbstract(ABC):
         self._event_element = event_element
         self._event_type = event_type
         self._event: Optional[ScEvent] = None
+        self.logger = getLogger(f"{self.__module__}.{self.__class__.__name__}")
 
     @abstractmethod
     def __repr__(self) -> str:
@@ -34,20 +33,19 @@ class ScAgentAbstract(ABC):
 
     def _register(self) -> None:
         if self._event is not None:
-            _logger.warning("%s is almost registered", self.__class__.__name__)
+            self.logger.warning("Almost registered")
             return
         event_params = ScEventParams(self._event_element, self._event_type, self._callback)
         self._event = client.events_create(event_params)[0]
-        _logger.info("ScEvent of %s was registered, %s", self.__class__.__name__, repr(self._event_type))
+        self.logger.info("Registered with ScEvent: %s - %s", repr(self._event_element), repr(self._event_type))
 
     def _unregister(self) -> None:
-        if self._event is not None:
-            client.events_destroy(self._event)
-            self._event = None
-            _logger.info("ScEvent of %s was destroyed", self.__class__.__name__)
-        else:
-            _logger.warning("ScEvent of %s is already destroyed or not registered", self.__class__.__name__)
-        _logger.info("%s was unregistered", self.__class__.__name__)
+        if self._event is None:
+            self.logger.warning("ScEvent was already destroyed or not registered")
+            return
+        client.events_destroy(self._event)
+        self._event = None
+        self.logger.info("Unregistered ScEvent: %s - %s", repr(self._event_element), repr(self._event_type))
 
     def _callback(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
         return self.on_event(event_element, event_edge, action_element)
@@ -63,7 +61,7 @@ class ScAgent(ScAgentAbstract, ABC):
         if isinstance(event_element, Idtf):
             event_element = self._keynodes.resolve(event_element, sc_types.NODE_CONST_CLASS)
         if not event_element.is_valid():
-            _logger.error("%s failed to create: event_class is invalid", self.__class__.__name__)
+            self.logger.error("Failed to initialize ScAgent: event_class is invalid")
             raise InvalidValueError(f"event_class of {self.__class__.__name__} is invalid")
         super().__init__(event_element, event_type)
 
