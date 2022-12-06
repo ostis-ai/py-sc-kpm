@@ -34,8 +34,6 @@ class CommonTests(BaseTestCase):
                 super().__init__(self.ACTION_CLASS_NAME)
 
             def on_event(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
-                if not self._confirm_action_class(action_element):
-                    return ScResult.SKIP
                 finish_action_with_status(action_element, True)
                 return ScResult.OK
 
