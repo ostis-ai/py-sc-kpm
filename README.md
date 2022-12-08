@@ -10,16 +10,21 @@ of [OSTIS Technology platform](https://github.com/ostis-ai/ostis-web-platform).
 
 # API Reference
 
+1. [Classes](#classes) 
+   + [ScKeynodes](#sckeynodes)
+   + [ScAgent](#scagent-and-scagentclassic)
+   + [ScModule](#scmodule)
+   + [ScServer](#scserver)
+2. [Utils](#utils) 
+   + [Common utils](#common-utils)
+   + [Creating utils](#creating-utils)
+   + [Retrieve utils](#retrieve-utils)
+   + [Action utils](#action-utils)
+3. [Use-cases](#use-cases) 
+
 ## Classes
 
 The library contains the python implementation of useful classes and functions to work with the sc-memory.
-
-There is a list of classes:
-
-- ScKeynodes
-- ScAgent
-- ScModule
-- ScServer
 
 ### ScKeynodes
 
@@ -40,7 +45,7 @@ keynodes.get("not_stored_in_kb")  # Returns an invalid ScAddr(0) in the same sit
 
 # Resolve identifier
 keynodes.resolve("my_class_node", sc_types.NODE_CONST_CLASS)  # Returns the element if it exists, otherwise creates
-keynodes.resolve("some_node", None)  # The same logic as keynodes.get("some_node")
+keynodes.resolve("some_node", None)  # Returns the element if it exists, otherwise returns an invalid ScAddr(0)
 ```
 
 ### ScAgent and ScAgentClassic
@@ -59,9 +64,9 @@ class ScAgentTest(ScAgent):
 
 class ScAgentClassicTest(ScAgentClassic):
     def on_event(self, class_node: ScAddr, edge: ScAddr, action_node: ScAddr) -> ScResult:
-      # ScAgentClassic automatically checks its action
-      ...
-      return ScResult.OK
+        if not self._confirm_action_class(action_node):  # exclusive method for classic agent
+            return ScResult.SKIP
+        ...
 ```
 
 For the ScAgent initialization you should define the sc-element and the type of the ScEvent.
@@ -70,8 +75,6 @@ For the ScAgentClassic initialization
 you should define the identifier of the action class node and arguments of the ScAgent.
 `event_class` is set to the `question_initiated` keynode by default.
 `event_type` is set to the `ScEventType.ADD_OUTGOING_EDGE` type by default.
-
-**ClassicScAgent checks its action element automatically and doesn't run `on_event` method if checking fails.**
 
 ```python
 keynodes = ScKeynodes()
@@ -99,8 +102,6 @@ module.add_agent(agent3)
 ...
 module.remove_agent(agent3)
 ```
-
-_Note: you don't need remove agents in the end of program._
 
 ### ScServer
 
@@ -194,9 +195,11 @@ There is also possibility to wrap in set or oriented set.
 
 There are utils to work with basic elements
 
-_You can import these utils from `sc_kpm.utils` or `sc_kpm.utils.common_utils`_
+_You can import these utils from `sc_kpm.utils`_
 
 ### Nodes creating
+
+If you want to create one or more nodes use these functions with type setting argument:
 
 ```python
 def create_node(node_type: ScType, sys_idtf: str = None) -> ScAddr: ...
@@ -205,7 +208,6 @@ def create_node(node_type: ScType, sys_idtf: str = None) -> ScAddr: ...
 def create_nodes(*node_types: ScType) -> List[ScAddr]: ...
 ```
 
-Create one or more nodes with type setting.
 `sys_idtf` is optional name of keynode if you want to add it there.
 
 ```python
@@ -220,11 +222,11 @@ elements = create_nodes(sc_types.NODE_CONST, sc_types.NODE_VAR)  # [ScAddr(...),
 
 ### Edges creating
 
+For creating edge between **src** and **trg** with setting its type use **create_edge** function:
+
 ```python
 def create_edge(edge_type: ScType, src: ScAddr, trg: ScAddr) -> ScAddr: ...
 ```
-
-Create edge between src and trg with setting its type
 
 ```python
 from sc_kpm import sc_types
@@ -236,7 +238,11 @@ msg_edge = create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, trg)  # ScAddr(
 assert src.is_valid() and trg.is_valid() and msg_edge.is_valid()
 ```
 
+Function **is_valid()** is used for validation addresses of nodes or edges.
+
 ### Links creating
+
+For creating links with string type content (by default) use these functions:
 
 ```python
 def create_link(
@@ -253,7 +259,7 @@ def create_links(
 ) -> List[ScAddr]: ...
 ```
 
-Create link with some content, default type: string
+You may use **ScLinkContentType.STRING** and **ScLinkContentType.INT** types for content of created links.
 
 ```python
 from sc_kpm import sc_types, ScLinkContentType
@@ -267,6 +273,8 @@ names = create_links("Sam", "Pit")  # [ScAddr(...), ScAddr(...)]
 
 ### Relations creating
 
+Create different binary relations with these functions:
+
 ```python
 def create_binary_relation(edge_type: ScType, src: ScAddr, trg: ScAddr, *relations: ScAddr) -> ScAddr: ...
 
@@ -276,8 +284,6 @@ def create_role_relation(src: ScAddr, trg: ScAddr, *rrel_nodes: ScAddr) -> ScAdd
 
 def create_norole_relation(src: ScAddr, trg: ScAddr, *nrel_nodes: ScAddr) -> ScAddr: ...
 ```
-
-Create binary relations with different relations
 
 ```python
 from sc_kpm import sc_types, ScKeynodes
@@ -295,14 +301,19 @@ nrel = create_norole_relation(src, trg, create_node(sc_types.NODE_CONST_NOROLE, 
 
 ### Deleting utils
 
+If you want remove elements (nodes, edges) use function:
+
 ```python
 def delete_elements(*addrs: ScAddr) -> bool: ...
+```
 
+If you want to remove all edges between two nodes, which define by their type use
 
+```python
 def delete_edges(source: ScAddr, target: ScAddr, *edge_types: ScType) -> bool: ...
 ```
 
-Delete elements or all edges between nodes by their type and return success
+These two functions return **True** if operations was successfully and **False** otherwise.
 
 ```python
 from sc_kpm import sc_types
@@ -319,7 +330,7 @@ delete_edges(src, trg, sc_types.EDGE_ACCESS_CONST_POS_PERM)  # True
 
 ### Getting edges
 
-_**NOTE: Use VAR type instead of CONST in getting utils**_
+For getting edge or edges between two nodes use:
 
 ```python
 def get_edge(source: ScAddr, target: ScAddr, edge_type: ScType) -> ScAddr: ...
@@ -328,7 +339,7 @@ def get_edge(source: ScAddr, target: ScAddr, edge_type: ScType) -> ScAddr: ...
 def get_edges(source: ScAddr, target: ScAddr, *edge_types: ScType) -> List[ScAddr]: ...
 ```
 
-Get edge or edges between two nodes
+_**NOTE: Use VAR type instead of CONST in getting utils**_
 
 ```python
 from sc_kpm import sc_types
@@ -347,11 +358,11 @@ assert edges == [edge1, edge2]
 
 ### Getting by role relation
 
+For getting element by address and role relation edge use:
+
 ```python
 def get_element_by_role_relation(src: ScAddr, rrel_node: ScAddr) -> ScAddr: ...
 ```
-
-Get target by node and role relation edge
 
 ```python
 from sc_kpm import sc_types, ScKeynodes
@@ -383,11 +394,11 @@ content = get_link_content(water)  # "water"
 
 ### Getting system identifier
 
+For getting system identifier of keynode use:
+
 ```python
 def get_system_idtf(addr: ScAddr) -> str: ...
 ```
-
-Get system identifier of keynode
 
 ```python
 from sc_kpm import sc_types, ScKeynodes
@@ -405,24 +416,36 @@ There are functions to work with sets: create, wrap, etc.
 
 ### Set and structure creating
 
+For wrapping some elements to set use next functions:
+
 ```python
 def wrap_in_set(set_node: ScAddr, *elements: ScAddr) -> None: ...
+```
 
+**set_node** connects other elements.
 
+If you want to create new set without existed set_node use: 
+
+```python
 def create_set(set_type: ScType, *elements: ScAddr) -> ScAddr: ...
+```
 
+For creating structure from existed nodes use next function:
 
+```python
 def create_structure(*elements: ScAddr) -> ScAddr: ...
 ```
 
-Set consists of elements and set node that connects them.
+This is a presentation of set in SCg-code:
 
 ![set](docs/schemes/png/set.png)
 
-In structure sc_type of main node is `sc_types.NODE_CONST_STRUCT`
+Next two pictures show equivalent presentations of structures in SCg-code:
 
 ![structure](docs/schemes/png/structure.png)
 ![structure2](docs/schemes/png/structure_circuit.png)
+
+In structure sc_type of **main node** is `sc_types.NODE_CONST_STRUCT`
 
 ```python
 from sc_kpm import sc_types
@@ -441,14 +464,20 @@ struct_node = create_structure(*elements)  # ScAddr(...)
 
 ### Oriented set creating
 
+For wrapping nodes to oriented set use next function:
+
 ```python
 def wrap_in_oriented_set(set_node: ScAddr, start_element: ScAddr, *elements: ScAddr) -> None: ...
+```
 
+For creating oriented set without explicitly **set_node** use:
 
+```python
 def create_oriented_set(*elements: ScAddr) -> ScAddr: ...
 ```
 
-Oriented set is more complex, but is has orientation
+On an oriented set, the order of nodes is given:
+
 ![oriented set](docs/schemes/png/oriented_set.png)
 
 ```python
@@ -466,9 +495,11 @@ set_node = create_oriented_set(*elements)  # ScAddr(...)
 
 ## Retrieve utils
 
-There are utils fot searching elements of sets and their power
+There are utils for searching elements of sets and getting their power
 
 ### Getting sets elements
+
+If you want to get elements of set or oriented set by **set node** use:
 
 ```python
 def get_set_elements(set_node: ScAddr) -> List[ScAddr]: ...
@@ -476,8 +507,6 @@ def get_set_elements(set_node: ScAddr) -> List[ScAddr]: ...
 
 def get_oriented_set_elements(set_node: ScAddr) -> List[ScAddr]: ...
 ```
-
-Get elements of set and oriented set by set node
 
 ```python
 from sc_kpm import sc_types
@@ -498,11 +527,11 @@ assert search_results == elements
 
 ### Getting set power
 
+For getting count of elements in set or oriented set use:
+
 ```python
 def get_set_power(set_node: ScAddr) -> int: ...
 ```
-
-Get count os elements in set or oriented set
 
 ```python
 from sc_kpm import sc_types
@@ -613,17 +642,26 @@ assert result_elements == [answer_element]
 
 ### Call, execute and wait agent
 
+Call agent function: creates **action node** with some arguments, concepts and connects it to the node with initiation identifier.
+Returns **question node**
+
 ```python
 def call_agent(
         arguments: Dict[ScAddr, IsDynamic],
         concepts: List[Idtf],
         initiation: Idtf = QuestionStatus.QUESTION_INITIATED,
 ) -> ScAddr: ...
+```
 
+Wait agent function: Waits edge to reaction node for some seconds.
 
+```python
 def wait_agent(seconds: float, question_node: ScAddr, reaction_node: ScAddr) -> None: ...
+```
 
+Execute agent function: combines two previous functions -- calls, waits and returns question node and **True** if success
 
+```python
 def execute_agent(
         arguments: Dict[ScAddr, IsDynamic],
         concepts: List[Idtf],
@@ -633,12 +671,6 @@ def execute_agent(
 ) -> Tuple[ScAddr, bool]: ...
 ```
 
-Call agent: creates action node with some arguments, concepts and connects it to node with initiation identifier.
-Returns question node
-
-Wait agent: Wait edge to reaction node some seconds.
-
-Execute agent: calls, waits and return question node and success
 
 ![execute_agent](docs/schemes/png/execute_agent.png)
 
@@ -648,8 +680,8 @@ from sc_kpm.identifiers import CommonIdentifiers, QuestionStatus
 from sc_kpm.utils import create_link
 from sc_kpm.utils.action_utils import execute_agent, call_agent, wait_agent
 
-arg1 = create_link(2, ScLinkContentType.STRING)
-arg2 = create_link(3, ScLinkContentType.STRING)
+arg1 = create_link(2, ScLinkContentType.INT)
+arg2 = create_link(3, ScLinkContentType.INT)
 
 question = call_agent(
     arguments={arg1: False, arg2: False},
@@ -662,15 +694,17 @@ question, is_successfully = execute_agent(**kwargs, wait_time=3)  # ScAddr(...),
 
 ### Finish action
 
+Function `finish_action` connects status class to action node:
+
 ```python
 def finish_action(action_node: ScAddr, status: Idtf = QuestionStatus.QUESTION_FINISHED) -> ScAddr: ...
-
-
-def finish_action_with_status(action_node: ScAddr, is_success: bool = True) -> None: ...
 ```
 
-Function `finish_action` connects status class to action node.
-`finish_action_with_status` connects `question_finished` and `question_finished_(un)successfully` statuses to it.
+Function `finish_action_with_status` connects `question_finished` and `question_finished_(un)successfully` statuses to it:
+
+```python
+def finish_action_with_status(action_node: ScAddr, is_success: bool = True) -> None: ...
+```
 
 ![finish_action](docs/schemes/png/finish_action.png)
 
@@ -696,7 +730,7 @@ assert check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, question_finished, action_n
 assert check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, question_finished_successfully, action_node)
 ```
 
-# Use-cases
+# Use-cases 
 
 - Script for creating and registration agent until user press ^C:
     - [based on ScAgentClassic](docs/examples/register_and_wait_for_user.py)
@@ -705,3 +739,4 @@ assert check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, question_finished_successfu
     - [based on ScAgentClassic](docs/examples/sum_agent_classic.py)
 - Logging examples:
     - [pretty project logging](docs/examples/pretty_logging.py)
+
