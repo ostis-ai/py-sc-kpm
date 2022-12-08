@@ -57,9 +57,9 @@ class ScAgentAbstract(ABC):
 
 class ScAgent(ScAgentAbstract, ABC):
     def __init__(self, event_element: Union[Idtf, ScAddr], event_type: ScEventType) -> None:
-        self._keynodes = ScKeynodes()
+        self.keynodes = ScKeynodes()
         if isinstance(event_element, Idtf):
-            event_element = self._keynodes.resolve(event_element, sc_types.NODE_CONST_CLASS)
+            event_element = self.keynodes.resolve(event_element, sc_types.NODE_CONST_CLASS)
         if not event_element.is_valid():
             self.logger.error("Failed to initialize ScAgent: event_class is invalid")
             raise InvalidValueError(f"event_class of {self.__class__.__name__} is invalid")
@@ -78,11 +78,11 @@ class ScAgentClassic(ScAgent, ABC):
     ) -> None:
         super().__init__(event_element, event_type)
         self._action_class_name = action_class_name
-        self._action_class = self._keynodes.resolve(action_class_name, sc_types.NODE_CONST_CLASS)
+        self._action_class = self.keynodes.resolve(action_class_name, sc_types.NODE_CONST_CLASS)
 
     def __repr__(self) -> str:
         description = f"ClassicScAgent(action_class_name={repr(self._action_class_name)}"
-        if self._event_element != self._keynodes.get(QuestionStatus.QUESTION_INITIATED):
+        if self._event_element != self.keynodes.get(QuestionStatus.QUESTION_INITIATED):
             description = f"{description}, event_class={repr(self._event_element)}"
         if self._event_type != ScEventType.ADD_OUTGOING_EDGE:
             description = f"{description}, event_type={repr(self._event_type)}"
