@@ -64,9 +64,9 @@ class ScAgentTest(ScAgent):
 
 class ScAgentClassicTest(ScAgentClassic):
     def on_event(self, class_node: ScAddr, edge: ScAddr, action_node: ScAddr) -> ScResult:
-        if not self._confirm_action_class(action_node):  # exclusive method for classic agent
-            return ScResult.SKIP
+        # ScAgentClassic automatically checks its action
         ...
+        return ScResult.OK
 ```
 
 For the ScAgent initialization you should define the sc-element and the type of the ScEvent.
@@ -75,6 +75,8 @@ For the ScAgentClassic initialization
 you should define the identifier of the action class node and arguments of the ScAgent.
 `event_class` is set to the `question_initiated` keynode by default.
 `event_type` is set to the `ScEventType.ADD_OUTGOING_EDGE` type by default.
+
+**ClassicScAgent checks its action element automatically and doesn't run `on_event` method if checking fails.**
 
 ```python
 keynodes = ScKeynodes()
@@ -102,6 +104,8 @@ module.add_agent(agent3)
 ...
 module.remove_agent(agent3)
 ```
+
+_Note: you don't need remove agents in the end of program._
 
 ### ScServer
 
@@ -561,7 +565,8 @@ def check_action_class(action_class: Union[ScAddr, Idtf], action_node: ScAddr) -
 ```
 
 This function returns **True** if action class has connection to action node.
-You can use identifier of action class instead of ScAddr
+You can use identifier of action class instead of ScAddr. 
+This function should not be used in the ScAgentClassic.
 
 ![check action class](docs/schemes/png/check_action_class.png)
 
@@ -732,7 +737,7 @@ assert check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, question_finished, action_n
 assert check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, question_finished_successfully, action_node)
 ```
 
-# Use-cases 
+# Use-cases
 
 - Script for creating and registration agent until user press ^C:
     - [based on ScAgentClassic](docs/examples/register_and_wait_for_user.py)
@@ -741,4 +746,3 @@ assert check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, question_finished_successfu
     - [based on ScAgentClassic](docs/examples/sum_agent_classic.py)
 - Logging examples:
     - [pretty project logging](docs/examples/pretty_logging.py)
-
