@@ -313,7 +313,7 @@ If you want to remove all edges between two nodes, which define by their type us
 def delete_edges(source: ScAddr, target: ScAddr, *edge_types: ScType) -> bool: ...
 ```
 
-These two functions return **True** if operations was successfully and **False** otherwise.
+These two functions return **True** if operations was successful and **False** otherwise.
 
 ```python
 from sc_kpm import sc_types
@@ -380,6 +380,8 @@ assert result == trg
 
 ### Getting link content
 
+For existed links you may get their content by address with this function:
+
 ```python
 def get_link_content(link: ScAddr) -> Union[str, int]: ...
 ```
@@ -424,7 +426,7 @@ def wrap_in_set(set_node: ScAddr, *elements: ScAddr) -> None: ...
 
 **set_node** connects other elements.
 
-If you want to create new set without existed set_node use: 
+If you want to create new set without existed **set_node** use: 
 
 ```python
 def create_set(set_type: ScType, *elements: ScAddr) -> ScAddr: ...
@@ -452,7 +454,7 @@ from sc_kpm import sc_types
 from sc_kpm.utils import create_node, create_nodes
 from sc_kpm.utils.creation_utils import wrap_in_set, create_set, create_structure
 
-elements = create_nodes(sc_types.NODE_CONST, sc_types.NODE_VAR)
+elements = create_nodes(sc_types.NODE_CONST, sc_types.NODE_VAR, sc_types.NODE_CONST)
 
 set_node = create_node(sc_types.NODE_CONST_CLASS)
 wrap_in_set(set_node, *elements)
@@ -485,7 +487,7 @@ from sc_kpm import sc_types
 from sc_kpm.utils import create_node, create_nodes
 from sc_kpm.utils.creation_utils import wrap_in_oriented_set, create_oriented_set
 
-elements = create_nodes(sc_types.NODE_CONST, sc_types.NODE_VAR)
+elements = create_nodes(sc_types.NODE_CONST, sc_types.NODE_CONST, sc_types.NODE_CONST)
 
 set_node = create_node(sc_types.NODE_CONST_CLASS)
 wrap_in_oriented_set(set_node, *elements)
@@ -558,7 +560,7 @@ Utils to work with actions, events and agents
 def check_action_class(action_class: Union[ScAddr, Idtf], action_node: ScAddr) -> bool: ...
 ```
 
-True if action class has connection to action node.
+This function returns **True** if action class has connection to action node.
 You can use identifier of action class instead of ScAddr
 
 ![check action class](docs/schemes/png/check_action_class.png)
@@ -581,11 +583,11 @@ assert check_action_class("some_classification", action_node)
 
 ### Get action arguments
 
+For getting list of action arguments concatenated by `rrel_[1 -> count]` use:
+
 ```python
 def get_action_arguments(action_class: Union[ScAddr, Idtf], count: int) -> List[ScAddr]: ...
 ```
-
-Get list of action arguments concatenated by `rrel_[1 -> count]`
 
 ![check action class](docs/schemes/png/get_arguments.png)
 
@@ -642,7 +644,7 @@ assert result_elements == [answer_element]
 
 ### Call, execute and wait agent
 
-Call agent function: creates **action node** with some arguments, concepts and connects it to the node with initiation identifier.
+Agent call function: creates **action node** with some arguments, concepts and connects it to the node with initiation identifier.
 Returns **question node**
 
 ```python
@@ -653,13 +655,13 @@ def call_agent(
 ) -> ScAddr: ...
 ```
 
-Wait agent function: Waits edge to reaction node for some seconds.
+Agent wait function: Waits for creation of edge to reaction node for some seconds.
 
 ```python
 def wait_agent(seconds: float, question_node: ScAddr, reaction_node: ScAddr) -> None: ...
 ```
 
-Execute agent function: combines two previous functions -- calls, waits and returns question node and **True** if success
+Agent execute function: combines two previous functions -- calls, waits and returns question node and **True** if success
 
 ```python
 def execute_agent(
