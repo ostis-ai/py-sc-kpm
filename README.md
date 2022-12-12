@@ -10,17 +10,17 @@ of [OSTIS Technology platform](https://github.com/ostis-ai/ostis-web-platform).
 
 # API Reference
 
-1. [Classes](#classes) 
+1. [Classes](#classes)
    + [ScKeynodes](#sckeynodes)
    + [ScAgent](#scagent-and-scagentclassic)
    + [ScModule](#scmodule)
    + [ScServer](#scserver)
-2. [Utils](#utils) 
+2. [Utils](#utils)
    + [Common utils](#common-utils)
    + [Creating utils](#creating-utils)
    + [Retrieve utils](#retrieve-utils)
    + [Action utils](#action-utils)
-3. [Use-cases](#use-cases) 
+3. [Use-cases](#use-cases)
 
 ## Classes
 
@@ -187,7 +187,7 @@ with server.connect():
     # Creating some agents
     with server.register_modules():
         # Registration some agents
-        server.wait_for_sigint()  # Agents will be active until ^C
+        server.serve()  # Agents will be active until ^C
 ```
 
 ## Utils
@@ -430,7 +430,7 @@ def wrap_in_set(set_node: ScAddr, *elements: ScAddr) -> None: ...
 
 **set_node** connects other elements.
 
-If you want to create new set without existed **set_node** use: 
+If you want to create new set without existed **set_node** use:
 
 ```python
 def create_set(set_type: ScType, *elements: ScAddr) -> ScAddr: ...
@@ -565,7 +565,7 @@ def check_action_class(action_class: Union[ScAddr, Idtf], action_node: ScAddr) -
 ```
 
 This function returns **True** if action class has connection to action node.
-You can use identifier of action class instead of ScAddr. 
+You can use identifier of action class instead of ScAddr.
 This function should not be used in the ScAgentClassic.
 
 ![check action class](docs/schemes/png/check_action_class.png)

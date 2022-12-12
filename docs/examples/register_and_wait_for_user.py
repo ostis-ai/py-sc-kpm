@@ -21,4 +21,4 @@ with server.connect():
     module = ScModule(TestScAgent("sum_action_class"))
     server.add_modules(module)
     with server.register_modules():
-        server.wait_for_sigint()
+        server.serve()

@@ -131,6 +131,6 @@ class CommonTests(BaseTestCase):
         with self.server.register_modules():
             thread = threading.Thread(target=execute_and_send_sigint, daemon=True)
             thread.start()
-            self.server.wait_for_sigint()
+            self.server.serve()
 
         self.server.remove_modules(module)
