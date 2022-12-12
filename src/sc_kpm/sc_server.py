@@ -134,8 +134,8 @@ class ScServer(ScServerAbstract):
         for module in modules:
             module._unregister()  # pylint: disable=protected-access
 
-    def wait_for_sigint(self) -> None:
-        """Stop the program until a SIGINT signal (^C, or stop in IDE) is received"""
+    def serve(self) -> None:
+        """Serve agents until a SIGINT signal (^C, or stop in IDE) is received"""
 
         signal.signal(signal.SIGINT, lambda *_: self.logger.info("^C SIGINT was interrupted"))
         signal.pause()
