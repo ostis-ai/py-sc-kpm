@@ -21,6 +21,7 @@ from sc_kpm.utils.common_utils import (
     delete_elements,
     get_edge,
     get_edges,
+    get_element_by_norole_relation,
     get_element_by_role_relation,
     get_link_content,
     get_system_idtf,
@@ -89,7 +90,7 @@ class TestActionUtils(BaseTestCase):
         nrel_idtf = "nrel_test"
         src, rrel_trg, nrel_trg = create_nodes(sc_types.NODE_CONST, sc_types.NODE_CONST, sc_types.NODE_CONST)
         rrel_node = create_node(sc_types.NODE_CONST_ROLE, rrel_idtf)
-        nrel_node = create_node(sc_types.NODE_CONST_ROLE, nrel_idtf)
+        nrel_node = create_node(sc_types.NODE_CONST_NOROLE, nrel_idtf)
 
         rrel_edge_1 = create_binary_relation(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, rrel_trg, rrel_node)
         rrel_edge_2 = create_role_relation(src, rrel_trg, rrel_node)
@@ -109,6 +110,12 @@ class TestActionUtils(BaseTestCase):
         expected_empty = get_element_by_role_relation(src, nrel_node)
         assert expected_rrel_target.is_valid()
         assert expected_rrel_target.value == rrel_trg.value
+        assert expected_empty.is_valid() is False
+
+        expected_nrel_target = get_element_by_norole_relation(src, nrel_node)
+        expected_empty = get_element_by_norole_relation(src, rrel_node)
+        assert expected_nrel_target.is_valid()
+        assert expected_nrel_target.value == nrel_trg.value
         assert expected_empty.is_valid() is False
 
     def test_get_system_idtf(self):

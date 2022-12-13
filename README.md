@@ -360,26 +360,32 @@ edges = get_edges(src, trg, sc_types.EDGE_ACCESS_VAR_POS_PERM, sc_types.EDGE_D_C
 assert edges == [edge1, edge2]
 ```
 
-### Getting by role relation
+### Getting elements by relation
 
-For getting element by address and role relation edge use:
+Get target element by source element and relation:
 
 ```python
 def get_element_by_role_relation(src: ScAddr, rrel_node: ScAddr) -> ScAddr: ...
+
+
+def get_element_by_norole_relation(src: ScAddr, nrel_node: ScAddr) -> ScAddr: ...
 ```
 
 ```python
 from sc_kpm import sc_types, ScKeynodes
 from sc_kpm.identifiers import CommonIdentifiers
-from sc_kpm.utils import create_nodes, create_role_relation
-from sc_kpm.utils import get_element_by_role_relation
+from sc_kpm.utils import create_nodes, create_role_relation, create_norole_relation
+from sc_kpm.utils import get_element_by_role_relation, get_element_by_norole_relation
 
 keynodes = ScKeynodes()
-src, trg = create_nodes(*[sc_types.NODE_CONST] * 2)
-rrel = create_role_relation(src, trg, keynodes[CommonIdentifiers.RREL_ONE])  # ScAddr(...)
+src, trg_rrel, trg_nrel = create_nodes(*[sc_types.NODE_CONST] * 3)
+rrel = create_role_relation(src, trg_rrel, keynodes[CommonIdentifiers.RREL_ONE])  # ScAddr(...)
+nrel = create_norole_relation(src, trg_nrel, keynodes[CommonIdentifiers.NREL_SYSTEM_IDENTIFIER])  # ScAddr(...)
 
-result = get_element_by_role_relation(src, keynodes[CommonIdentifiers.RREL_ONE])  # ScAddr(...)
-assert result == trg
+result_rrel = get_element_by_role_relation(src, keynodes[CommonIdentifiers.RREL_ONE])  # ScAddr(...)
+assert result_rrel == trg_rrel
+result_nrel = get_element_by_norole_relation(src, keynodes[CommonIdentifiers.NREL_SYSTEM_IDENTIFIER])  # ScAddr(...)
+assert result_nrel == trg_nrel
 ```
 
 ### Getting link content
