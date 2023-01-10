@@ -7,7 +7,7 @@ DIRECTORY_PATH = Path(__file__).parent
 README = (DIRECTORY_PATH / "README.md").read_text()
 
 VERSION = "0.0.1"
-INSTALL_REQUIRES = ["py-sc-client @ git+https://github.com/ostis-ai/py-sc-client@6ca943cace7289b3d9bde125e2d3900821941110"]
+INSTALL_REQUIRES = ["py-sc-client>=0.2.4"]
 CURRENT_PYTHON = sys.version_info[:2]
 REQUIRED_PYTHON = (3, 8)
 
