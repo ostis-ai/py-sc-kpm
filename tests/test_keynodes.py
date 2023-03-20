@@ -32,7 +32,7 @@ class KeynodesTests(BaseTestCase):
         ScKeynodes.resolve(idtf, sc_types.NODE_CONST)
         self.assertTrue(ScKeynodes.delete(idtf))
         self.assertFalse(ScKeynodes.get(idtf).is_valid())
-        self.assertRaises(InvalidValueError, ScKeynodes.__delitem__, idtf)
+        self.assertRaises(InvalidValueError, ScKeynodes.delete, idtf)
 
     def test_keynodes_initialization(self):
         self.assertRaises(TypeError, ScKeynodes)
