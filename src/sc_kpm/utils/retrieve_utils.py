@@ -19,7 +19,7 @@ def get_set_elements(set_node: ScAddr) -> List[ScAddr]:
     templ = ScTemplate()
     templ.triple(set_node, sc_types.EDGE_ACCESS_VAR_POS_PERM, sc_types.UNKNOWN)
     search_results = client.template_search(templ)
-    elements = [result.get(2) for result in search_results]
+    elements = [result[2] for result in search_results]
     elements.reverse()  # Elements are found in reverse order
     return elements
 
@@ -57,11 +57,11 @@ def _search_next_element_template(set_node: ScAddr, cur_element_edge: ScAddr) ->
     templ.triple_with_relation(
         cur_element_edge,
         sc_types.EDGE_D_COMMON_VAR,
-        [sc_types.EDGE_ACCESS_VAR_POS_PERM, ScAlias.ACCESS_EDGE],
+        sc_types.EDGE_ACCESS_VAR_POS_PERM >> ScAlias.ACCESS_EDGE,
         sc_types.EDGE_ACCESS_VAR_POS_PERM,
         keynodes[CommonIdentifiers.NREL_BASIC_SEQUENCE],
     )
-    templ.triple(set_node, ScAlias.ACCESS_EDGE, [sc_types.UNKNOWN, ScAlias.ELEMENT])
+    templ.triple(set_node, ScAlias.ACCESS_EDGE, sc_types.UNKNOWN >> ScAlias.ELEMENT)
     return _get_first_search_template_result(templ)
 
 

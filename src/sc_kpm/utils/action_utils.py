@@ -58,8 +58,8 @@ def get_action_answer(action_node: ScAddr) -> ScAddr:
     templ = ScTemplate()
     templ.triple_with_relation(
         action_node,
-        [sc_types.EDGE_D_COMMON_VAR, ScAlias.RELATION_EDGE],
-        [sc_types.NODE_VAR_STRUCT, ScAlias.ELEMENT],
+        sc_types.EDGE_D_COMMON_VAR >> ScAlias.RELATION_EDGE,
+        sc_types.NODE_VAR_STRUCT >> ScAlias.ELEMENT,
         sc_types.EDGE_ACCESS_VAR_POS_PERM,
         keynodes[CommonIdentifiers.NREL_ANSWER],
     )
