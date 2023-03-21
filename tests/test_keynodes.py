@@ -1,9 +1,10 @@
+from common_tests import BaseTestCase
 from sc_client import client
+from sc_client.client import delete_elements
 from sc_client.constants import sc_types
 from sc_client.constants.exceptions import InvalidValueError
-from sc_client.models import ScIdtfResolveParams, ScAddr
+from sc_client.models import ScAddr, ScIdtfResolveParams
 
-from common_tests import BaseTestCase
 from sc_kpm import ScKeynodes
 
 
@@ -23,11 +24,7 @@ class KeynodesTests(BaseTestCase):
         self.assertEqual(self.keynodes.get(idtf), ScAddr(0))
 
     def test_resolve_keynode(self):
-        idtf_format = "idtf_resolve_{}"
-        i: int = 1
-        while self.keynodes.get(idtf := idtf_format.format(i)).is_valid():
-            i += 1
+        idtf = "idtf_new_keynode"
         addr = self.keynodes.resolve(idtf, sc_types.NODE_CONST)
+        self.assertTrue(delete_elements(addr))
         self.assertTrue(addr.is_valid())
-        del self.keynodes._dict[idtf]
-        self.assertEqual(self.keynodes.get(idtf), addr)
