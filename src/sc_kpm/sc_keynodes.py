@@ -47,9 +47,10 @@ class ScKeynodes:
     def resolve(self, identifier: Idtf, sc_type: ScType | None) -> ScAddr:
         """Get keynode. If sc_type is valid, an element will be created in the KB"""
         addr = self._dict.get(identifier)
-        if addr is None or (not addr.is_valid() and sc_type is not None):
+        if addr is None:
             params = ScIdtfResolveParams(idtf=identifier, type=sc_type)
             addr = client.resolve_keynodes(params)[0]
-            self._dict[identifier] = addr
+            if addr.is_valid():
+                self._dict[identifier] = addr
             self._logger.debug("Resolved %s identifier with type %s: %s", repr(identifier), repr(sc_type), repr(addr))
         return addr
