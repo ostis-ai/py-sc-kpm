@@ -68,8 +68,7 @@ class _IdentifiersResolver:
             QuestionStatus.QUESTION_FINISHED_UNSUCCESSFULLY: sc_types.NODE_CONST_CLASS,
         }
 
-        keynodes = ScKeynodes()
         for idtf, sc_type in types_map.items():
-            keynodes.resolve(idtf, sc_type)
+            ScKeynodes.resolve(idtf, sc_type)
 
         cls.is_resolved = True

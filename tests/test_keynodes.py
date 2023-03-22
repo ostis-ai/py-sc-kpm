@@ -9,22 +9,23 @@ from sc_kpm import ScKeynodes
 
 
 class KeynodesTests(BaseTestCase):
-    keynodes = ScKeynodes()
-
     def test_get_existed_keynode(self):
         idtf = "idtf_existed_keynode"
         params = ScIdtfResolveParams(idtf=idtf, type=sc_types.NODE_CONST)
         addr = client.resolve_keynodes(params)[0]
-        result = self.keynodes[idtf]
+        result = ScKeynodes[idtf]
         self.assertEqual(result, addr)
 
     def test_get_unknown_idtf(self):
         idtf = "idtf_unknown_idtf"
-        self.assertRaises(InvalidValueError, self.keynodes.__getitem__, idtf)
-        self.assertEqual(self.keynodes.get(idtf), ScAddr(0))
+        self.assertRaises(InvalidValueError, ScKeynodes.__getitem__, idtf)
+        self.assertEqual(ScKeynodes.get(idtf), ScAddr(0))
 
     def test_resolve_keynode(self):
         idtf = "idtf_new_keynode"
-        addr = self.keynodes.resolve(idtf, sc_types.NODE_CONST)
+        addr = ScKeynodes.resolve(idtf, sc_types.NODE_CONST)
         self.assertTrue(delete_elements(addr))
         self.assertTrue(addr.is_valid())
+
+    def test_keynodes_initialization(self):
+        self.assertRaises(TypeError, ScKeynodes)
