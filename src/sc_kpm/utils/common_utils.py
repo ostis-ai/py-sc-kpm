@@ -24,7 +24,7 @@ def create_nodes(*node_types: ScType) -> List[ScAddr]:
 
 def create_node(node_type: ScType, sys_idtf: str = None) -> ScAddr:
     if sys_idtf:
-        return ScKeynodes().resolve(sys_idtf, node_type)
+        return ScKeynodes.resolve(sys_idtf, node_type)
     return create_nodes(node_type)[0]
 
 
@@ -90,8 +90,7 @@ def get_edge(source: ScAddr, target: ScAddr, edge_type: ScType) -> ScAddr:
 
 
 def get_system_idtf(addr: ScAddr) -> Idtf:
-    keynodes = ScKeynodes()
-    nrel_system_idtf = keynodes[CommonIdentifiers.NREL_SYSTEM_IDENTIFIER]
+    nrel_system_idtf = ScKeynodes[CommonIdentifiers.NREL_SYSTEM_IDENTIFIER]
 
     templ = ScTemplate()
     templ.triple_with_relation(

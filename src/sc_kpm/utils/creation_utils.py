@@ -14,9 +14,8 @@ from sc_kpm.utils.common_utils import create_edge, create_node, create_norole_re
 
 
 def wrap_in_oriented_set(set_node: ScAddr, start_element: ScAddr, *elements: ScAddr) -> None:
-    keynodes = ScKeynodes()
-    rrel_one = keynodes[CommonIdentifiers.RREL_ONE]
-    nrel_sequence = keynodes[CommonIdentifiers.NREL_BASIC_SEQUENCE]
+    rrel_one = ScKeynodes[CommonIdentifiers.RREL_ONE]
+    nrel_sequence = ScKeynodes[CommonIdentifiers.NREL_BASIC_SEQUENCE]
     curr_edge = create_role_relation(set_node, start_element, rrel_one)
     for next_element in elements:
         next_edge = create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, set_node, next_element)
