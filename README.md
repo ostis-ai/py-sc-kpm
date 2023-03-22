@@ -28,25 +28,22 @@ The library contains the python implementation of useful classes and functions t
 
 ### ScKeynodes
 
-A singleton dict-like object which provides
-the ability to cache the identifier and ScAddr of keynodes stored in the KB.
+Class which provides the ability to cache the identifier and ScAddr of keynodes stored in the KB.
 
 ```python
 from sc_client.constants import sc_types
 from sc_kpm import ScKeynodes
 
-keynodes = ScKeynodes()  # Create an instance of the ScKeynodes class to get access to the cache
-
 # Get the provided identifier
-keynodes["identifier_of_keynode"]  # Returns an ScAddr of the given identifier
+ScKeynodes["identifier_of_keynode"]  # Returns an ScAddr of the given identifier
 
 # Get the unprovided identifier
-keynodes["not_stored_in_kb"]  # Raises InvalidValueError if an identifier doesn't exist in the KB
-keynodes.get("not_stored_in_kb")  # Returns an invalid ScAddr(0) in the same situation
+ScKeynodes["not_stored_in_kb"]  # Raises InvalidValueError if an identifier doesn't exist in the KB
+ScKeynodes.get("not_stored_in_kb")  # Returns an invalid ScAddr(0) in the same situation
 
 # Resolve identifier
-keynodes.resolve("my_class_node", sc_types.NODE_CONST_CLASS)  # Returns the element if it exists, otherwise creates
-keynodes.resolve("some_node", None)  # Returns the element if it exists, otherwise returns an invalid ScAddr(0)
+ScKeynodes.resolve("my_class_node", sc_types.NODE_CONST_CLASS)  # Returns the element if it exists, otherwise creates
+ScKeynodes.resolve("some_node", None)  # Returns the element if it exists, otherwise returns an invalid ScAddr(0)
 ```
 
 ### ScAgent and ScAgentClassic
@@ -85,8 +82,7 @@ from sc_client.constants import sc_types
 from sc_client.constants.common import ScEventType
 from sc_kpm import ScKeynodes
 
-keynodes = ScKeynodes()
-action_class = keynodes.resolve("test_class", sc_types.NODE_CONST_CLASS)
+action_class = ScKeynodes.resolve("test_class", sc_types.NODE_CONST_CLASS)
 agent = ScAgentTest(action_class, ScEventType.ADD_OUTGOING_EDGE)
 
 classic_agent = ScAgentClassicTest("classic_test_class")
@@ -227,7 +223,7 @@ from sc_kpm.utils.common_utils import create_node, create_nodes
 
 lang = create_node(sc_types.NODE_CONST_CLASS)  # ScAddr(...)
 lang_en = create_node(sc_types.NODE_CONST_CLASS, "lang_en")  # ScAddr(...)
-assert lang_en == ScKeynodes()["lang_en"]
+assert lang_en == ScKeynodes["lang_en"]
 elements = create_nodes(sc_types.NODE_CONST, sc_types.NODE_VAR)  # [ScAddr(...), ScAddr(...)]
 ```
 
@@ -308,7 +304,7 @@ src, trg = create_nodes(*[sc_types.NODE_CONST] * 2)
 increase_relation = create_node(sc_types.NODE_CONST_CLASS, "increase")
 
 brel = create_binary_relation(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, trg, increase_relation)  # ScAddr(...)
-rrel = create_role_relation(src, trg, ScKeynodes()[CommonIdentifiers.RREL_ONE])  # ScAddr(...)
+rrel = create_role_relation(src, trg, ScKeynodes[CommonIdentifiers.RREL_ONE])  # ScAddr(...)
 nrel = create_norole_relation(src, trg, create_node(sc_types.NODE_CONST_NOROLE, "connection"))  # ScAddr(...)
 ```
 
@@ -387,14 +383,13 @@ from sc_kpm.identifiers import CommonIdentifiers
 from sc_kpm.utils import create_nodes, create_role_relation, create_norole_relation
 from sc_kpm.utils import get_element_by_role_relation, get_element_by_norole_relation
 
-keynodes = ScKeynodes()
 src, trg_rrel, trg_nrel = create_nodes(*[sc_types.NODE_CONST] * 3)
-rrel = create_role_relation(src, trg_rrel, keynodes[CommonIdentifiers.RREL_ONE])  # ScAddr(...)
-nrel = create_norole_relation(src, trg_nrel, keynodes[CommonIdentifiers.NREL_SYSTEM_IDENTIFIER])  # ScAddr(...)
+rrel = create_role_relation(src, trg_rrel, ScKeynodes[CommonIdentifiers.RREL_ONE])  # ScAddr(...)
+nrel = create_norole_relation(src, trg_nrel, ScKeynodes[CommonIdentifiers.NREL_SYSTEM_IDENTIFIER])  # ScAddr(...)
 
-result_rrel = get_element_by_role_relation(src, keynodes[CommonIdentifiers.RREL_ONE])  # ScAddr(...)
+result_rrel = get_element_by_role_relation(src, ScKeynodes[CommonIdentifiers.RREL_ONE])  # ScAddr(...)
 assert result_rrel == trg_rrel
-result_nrel = get_element_by_norole_relation(src, keynodes[CommonIdentifiers.NREL_SYSTEM_IDENTIFIER])  # ScAddr(...)
+result_nrel = get_element_by_norole_relation(src, ScKeynodes[CommonIdentifiers.NREL_SYSTEM_IDENTIFIER])  # ScAddr(...)
 assert result_nrel == trg_nrel
 ```
 
@@ -430,7 +425,7 @@ from sc_kpm.utils import get_system_idtf
 
 lang_en = create_node(sc_types.NODE_CONST_CLASS, "lang_en")  # ScAddr(...)
 idtf = get_system_idtf(lang_en)  # "lang_en"
-assert ScKeynodes()[idtf] == lang_en
+assert ScKeynodes[idtf] == lang_en
 ```
 
 ## Creating utils
@@ -595,7 +590,7 @@ from sc_kpm.utils import create_node, create_edge
 from sc_kpm.utils.action_utils import check_action_class
 
 action_node = create_node(sc_types.NODE_CONST)
-create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, ScKeynodes()[CommonIdentifiers.QUESTION], action_node)
+create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, ScKeynodes[CommonIdentifiers.QUESTION], action_node)
 action_class = create_node(sc_types.NODE_CONST_CLASS, "some_classification")
 create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, action_class, action_node)
 
@@ -621,17 +616,16 @@ from sc_kpm.identifiers import CommonIdentifiers
 from sc_kpm.utils import create_node, create_edge, create_role_relation
 from sc_kpm.utils.action_utils import get_action_arguments
 
-keynodes = ScKeynodes()
 action_node = create_node(sc_types.NODE_CONST)
 
 # Static argument
 argument1 = create_node(sc_types.NODE_CONST)
-create_role_relation(action_node, argument1, keynodes[CommonIdentifiers.RREL_ONE])
+create_role_relation(action_node, argument1, ScKeynodes[CommonIdentifiers.RREL_ONE])
 
 # Dynamic argument
 dynamic_node = create_node(sc_types.NODE_CONST)
-rrel_dynamic_arg = keynodes[CommonIdentifiers.RREL_DYNAMIC_ARGUMENT]
-create_role_relation(action_node, dynamic_node, rrel_dynamic_arg, keynodes[CommonIdentifiers.RREL_TWO])
+rrel_dynamic_arg = ScKeynodes[CommonIdentifiers.RREL_DYNAMIC_ARGUMENT]
+create_role_relation(action_node, dynamic_node, rrel_dynamic_arg, ScKeynodes[CommonIdentifiers.RREL_TWO])
 argument2 = create_node(sc_types.NODE_CONST)
 create_edge(sc_types.EDGE_ACCESS_CONST_POS_TEMP, dynamic_node, argument2)
 
@@ -716,7 +710,7 @@ kwargs = dict(
 )
 
 question = call_agent(**kwargs)  # ScAddr(...)
-wait_agent(3, question, ScKeynodes()[QuestionStatus.QUESTION_FINISHED])
+wait_agent(3, question, ScKeynodes[QuestionStatus.QUESTION_FINISHED])
 # or
 question, is_successfully = execute_agent(**kwargs, wait_time=3)  # ScAddr(...), bool
 ```
@@ -753,9 +747,8 @@ finish_action_with_status(action_node, True)
 finish_action(action_node, QuestionStatus.QUESTION_FINISHED)
 finish_action(action_node, QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY)
 
-keynodes = ScKeynodes()
-question_finished = keynodes[QuestionStatus.QUESTION_FINISHED]
-question_finished_successfully = keynodes[QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY]
+question_finished = ScKeynodes[QuestionStatus.QUESTION_FINISHED]
+question_finished_successfully = ScKeynodes[QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY]
 assert check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, question_finished, action_node)
 assert check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, question_finished_successfully, action_node)
 ```
