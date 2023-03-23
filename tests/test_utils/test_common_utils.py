@@ -5,8 +5,10 @@ Distributed under the MIT License
 """
 
 from sc_client import client
+from sc_client.client import delete_elements
 from sc_client.constants import sc_types
 
+from sc_kpm import ScKeynodes
 from sc_kpm.utils.common_utils import (
     check_edge,
     create_binary_relation,
@@ -18,12 +20,11 @@ from sc_kpm.utils.common_utils import (
     create_norole_relation,
     create_role_relation,
     delete_edges,
-    delete_elements,
     get_edge,
     get_edges,
     get_element_by_norole_relation,
     get_element_by_role_relation,
-    get_link_content,
+    get_link_content_data,
     get_system_idtf,
 )
 from tests.common_tests import BaseTestCase
@@ -54,7 +55,7 @@ class TestActionUtils(BaseTestCase):
         link_content = "my link content"
         link = create_link(link_content)
         assert link.is_valid()
-        assert get_link_content(link) == link_content
+        assert get_link_content_data(link) == link_content
 
         link_counter = 10
         link_list = create_links(*[link_content for _ in range(link_counter)])
@@ -77,6 +78,12 @@ class TestActionUtils(BaseTestCase):
         assert same_edge.is_valid() and same_edge.value == edge.value
         assert check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, source, target)
 
+        source, target, target2 = create_nodes(sc_types.NODE_CONST_CLASS, sc_types.NODE_CONST, sc_types.NODE_CONST)
+        edges = create_nodes(sc_types.EDGE_ACCESS_CONST_POS_PERM, source, target, target2)
+        assert all(edge_.is_valid() for edge_ in edges)
+        same_edges = get_edges(source, target, sc_types.EDGE_ACCESS_VAR_POS_PERM)
+        assert edges == same_edges
+
         edge_counter = 10
         for _ in range(edge_counter):
             create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, source, target)
@@ -86,11 +93,9 @@ class TestActionUtils(BaseTestCase):
             assert edge.is_valid()
 
     def test_relation_utils(self):
-        rrel_idtf = "rrel_test"
-        nrel_idtf = "nrel_test"
         src, rrel_trg, nrel_trg = create_nodes(sc_types.NODE_CONST, sc_types.NODE_CONST, sc_types.NODE_CONST)
-        rrel_node = create_node(sc_types.NODE_CONST_ROLE, rrel_idtf)
-        nrel_node = create_node(sc_types.NODE_CONST_NOROLE, nrel_idtf)
+        rrel_node = create_node(sc_types.NODE_CONST_ROLE)
+        nrel_node = create_node(sc_types.NODE_CONST_NOROLE)
 
         rrel_edge_1 = create_binary_relation(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, rrel_trg, rrel_node)
         rrel_edge_2 = create_role_relation(src, rrel_trg, rrel_node)
@@ -119,8 +124,8 @@ class TestActionUtils(BaseTestCase):
         assert expected_empty.is_valid() is False
 
     def test_get_system_idtf(self):
-        test_idtf = "test_identifier"
-        test_node = create_node(sc_types.NODE_CONST_ROLE, test_idtf)
+        test_idtf = "rrel_1"
+        test_node = ScKeynodes[test_idtf]
         assert get_system_idtf(test_node) == test_idtf
 
     def test_deletion_utils(self):

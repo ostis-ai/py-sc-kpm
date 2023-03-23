@@ -16,12 +16,11 @@ from sc_kpm.utils.common_utils import (
     create_norole_relation,
     create_role_relation,
     delete_edges,
-    delete_elements,
     get_edge,
     get_edges,
     get_element_by_norole_relation,
     get_element_by_role_relation,
-    get_link_content,
+    get_link_content_data,
     get_system_idtf,
     search_role_relation_template,
 )

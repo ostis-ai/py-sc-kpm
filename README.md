@@ -225,9 +225,11 @@ from sc_kpm import ScKeynodes
 from sc_kpm.utils.common_utils import create_node, create_nodes
 
 lang = create_node(sc_types.NODE_CONST_CLASS)  # ScAddr(...)
-lang_en = create_node(sc_types.NODE_CONST_CLASS, "lang_en")  # ScAddr(...)
-assert lang_en == ScKeynodes["lang_en"]
+lang_en = create_node(sc_types.NODE_CONST_CLASS)  # ScAddr(...)
+assert lang.is_valid() and lang_en.is_valid()
 elements = create_nodes(sc_types.NODE_CONST, sc_types.NODE_VAR)  # [ScAddr(...), ScAddr(...)]
+assert len(elements) == 2
+assert all(element.is_valid() for element in elements)
 ```
 
 ### Edges creating
@@ -304,20 +306,14 @@ from sc_kpm.utils import create_node, create_nodes
 from sc_kpm.utils import create_binary_relation, create_role_relation, create_norole_relation
 
 src, trg = create_nodes(*[sc_types.NODE_CONST] * 2)
-increase_relation = create_node(sc_types.NODE_CONST_CLASS, "increase")
+increase_relation = create_node(sc_types.NODE_CONST_CLASS)
 
 brel = create_binary_relation(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, trg, increase_relation)  # ScAddr(...)
 rrel = create_role_relation(src, trg, ScKeynodes[CommonIdentifiers.RREL_ONE])  # ScAddr(...)
-nrel = create_norole_relation(src, trg, create_node(sc_types.NODE_CONST_NOROLE, "connection"))  # ScAddr(...)
+nrel = create_norole_relation(src, trg, create_node(sc_types.NODE_CONST_NOROLE))  # ScAddr(...)
 ```
 
 ### Deleting utils
-
-If you want remove elements (nodes, edges) use function:
-
-```python
-def delete_elements(*addrs: ScAddr) -> bool: ...
-```
 
 If you want to remove all edges between two nodes, which define by their type use
 
@@ -325,15 +321,12 @@ If you want to remove all edges between two nodes, which define by their type us
 def delete_edges(source: ScAddr, target: ScAddr, *edge_types: ScType) -> bool: ...
 ```
 
-These two functions return **True** if operations was successful and **False** otherwise.
+It return **True** if operations was successful and **False** otherwise.
 
 ```python
 from sc_client.constants import sc_types
 from sc_kpm.utils import create_nodes, create_edge
-from sc_kpm.utils import delete_edges, delete_elements
-
-elements = create_nodes(*[sc_types.NODE_CONST] * 2)
-delete_elements(*elements)  # True
+from sc_kpm.utils import delete_edges
 
 src, trg = create_nodes(*[sc_types.NODE_CONST] * 2)
 edge = create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, trg)
@@ -406,10 +399,10 @@ def get_link_content(link: ScAddr) -> Union[str, int]: ...
 
 ```python
 from sc_kpm.utils import create_link
-from sc_kpm.utils import get_link_content
+from sc_kpm.utils import get_link_content_data
 
 water = create_link("water")
-content = get_link_content(water)  # "water"
+content = get_link_content_data(water)  # "water"
 ```
 
 ### Getting system identifier
@@ -426,7 +419,7 @@ from sc_kpm import ScKeynodes
 from sc_kpm.utils import create_node
 from sc_kpm.utils import get_system_idtf
 
-lang_en = create_node(sc_types.NODE_CONST_CLASS, "lang_en")  # ScAddr(...)
+lang_en = create_node(sc_types.NODE_CONST_CLASS)  # ScAddr(...)
 idtf = get_system_idtf(lang_en)  # "lang_en"
 assert ScKeynodes[idtf] == lang_en
 ```
@@ -594,7 +587,7 @@ from sc_kpm.utils.action_utils import check_action_class
 
 action_node = create_node(sc_types.NODE_CONST)
 create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, ScKeynodes[CommonIdentifiers.QUESTION], action_node)
-action_class = create_node(sc_types.NODE_CONST_CLASS, "some_classification")
+action_class = create_node(sc_types.NODE_CONST_CLASS)
 create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, action_class, action_node)
 
 assert check_action_class(action_class, action_node)
