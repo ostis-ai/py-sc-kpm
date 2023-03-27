@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - List of action utils for agent development based on actions
 - List of generation utils for creating complex structures
 - List of search utils for complex construction manipulations
+- List of iterate utils for easy passing the same type of data
 - Code linting tools: isort, pylint, black, pre-commit
 - Documentation for contributors and developers
 - CI for checking messages of commits
