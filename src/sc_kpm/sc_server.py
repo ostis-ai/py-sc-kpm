@@ -12,6 +12,7 @@ from logging import Logger, getLogger
 from typing import Callable
 
 from sc_client import client
+from sc_client.constants.numeric import SERVER_RECONNECTION_TIME
 
 from sc_kpm.identifiers import _IdentifiersResolver
 from sc_kpm.sc_module import ScModuleAbstract
@@ -54,9 +55,11 @@ class ScServerAbstract(ABC):
 
 
 class ScServer(ScServerAbstract):
-    def __init__(self, sc_server_url: str) -> None:
+    def __init__(self, sc_server_url: str, do_reconnect=False, reconnection_time=SERVER_RECONNECTION_TIME) -> None:
         self._url: str = sc_server_url
         self._modules: set[ScModuleAbstract] = set()
+        self._do_reconnect = do_reconnect
+        self._reconnection_time = reconnection_time
         self.is_registered = False
         self.logger = getLogger(f"{self.__module__}.{self.__class__.__name__}")
 
@@ -64,7 +67,7 @@ class ScServer(ScServerAbstract):
         return f"{self.__class__.__name__}({', '.join(map(repr, self._modules))})"
 
     def connect(self) -> _Finisher:
-        client.connect(self._url)
+        client.connect(self._url, self._do_reconnect, self._reconnection_time)
         self.logger.info("Connected by url: %s", repr(self._url))
         _IdentifiersResolver.resolve()
         return _Finisher(self.disconnect, self.logger)
