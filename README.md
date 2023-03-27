@@ -44,6 +44,9 @@ ScKeynodes.get("not_stored_in_kb")  # Returns an invalid ScAddr(0) in the same s
 # Resolve identifier
 ScKeynodes.resolve("my_class_node", sc_types.NODE_CONST_CLASS)  # Returns the element if it exists, otherwise creates
 ScKeynodes.resolve("some_node", None)  # Returns the element if it exists, otherwise returns an invalid ScAddr(0)
+
+# Delete identifier
+ScKeynodes.delete("identifier_to_delete")  # Delete keynode from kb and ScKeynodes cache
 ```
 
 ### ScAgent and ScAgentClassic

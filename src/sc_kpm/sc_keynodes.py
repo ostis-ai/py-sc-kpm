@@ -8,6 +8,7 @@ from logging import Logger, getLogger
 from typing import Dict, Optional
 
 from sc_client import client
+from sc_client.client import delete_elements
 from sc_client.constants.exceptions import InvalidValueError
 from sc_client.constants.sc_types import ScType
 from sc_client.models import ScAddr, ScIdtfResolveParams
@@ -23,7 +24,7 @@ class ScKeynodesMeta(type):
         cls._dict: Dict[Idtf, ScAddr] = {}
         cls._logger: Logger = getLogger(f"{__name__}.{cls.__name__}")
 
-    def __call__(cls, *args, **kwargs):
+    def __call__(cls, *args, **kwargs) -> None:
         raise TypeError(f"Use {cls.__name__} without initialization")
 
     def __getitem__(cls, identifier: Idtf) -> ScAddr:
@@ -33,6 +34,12 @@ class ScKeynodesMeta(type):
             cls._logger.error("Failed to get ScAddr by %s keynode: ScAddr is invalid", identifier)
             raise InvalidValueError(f"ScAddr of {identifier} is invalid")
         return addr
+
+    def delete(cls, identifier: Idtf) -> bool:
+        """Delete keynode from the kb and memory and return boolean status"""
+        addr = cls.__getitem__(identifier)  # pylint: disable=no-value-for-parameter
+        del cls._dict[identifier]
+        return delete_elements(addr)
 
     def get(cls, identifier: Idtf) -> ScAddr:
         """Get keynode, can be ScAddr(0)"""
