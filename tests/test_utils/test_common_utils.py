@@ -13,6 +13,7 @@ from sc_kpm.utils.common_utils import (
     check_edge,
     create_binary_relation,
     create_edge,
+    create_edges,
     create_link,
     create_links,
     create_node,
@@ -79,10 +80,11 @@ class TestActionUtils(BaseTestCase):
         assert check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, source, target)
 
         source, target, target2 = create_nodes(sc_types.NODE_CONST_CLASS, sc_types.NODE_CONST, sc_types.NODE_CONST)
-        edges = create_nodes(sc_types.EDGE_ACCESS_CONST_POS_PERM, source, target, target2)
+        edges = create_edges(sc_types.EDGE_ACCESS_CONST_POS_PERM, source, target, target2)
         assert all(edge_.is_valid() for edge_ in edges)
-        same_edges = get_edges(source, target, sc_types.EDGE_ACCESS_VAR_POS_PERM)
-        assert edges == same_edges
+        same_target1 = get_edge(source, target, sc_types.EDGE_ACCESS_VAR_POS_PERM)
+        same_target2 = get_edge(source, target2, sc_types.EDGE_ACCESS_VAR_POS_PERM)
+        assert edges == [same_target1, same_target2]
 
         edge_counter = 10
         for _ in range(edge_counter):

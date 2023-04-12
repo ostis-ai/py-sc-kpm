@@ -238,16 +238,20 @@ For creating edge between **src** and **trg** with setting its type use **create
 
 ```python
 def create_edge(edge_type: ScType, src: ScAddr, trg: ScAddr) -> ScAddr: ...
+
+def create_edges(edge_type: ScType, src: ScAddr, *targets: ScAddr) -> List[ScAddr]: ...
 ```
 
 ```python
 from sc_client.constants import sc_types
 from sc_kpm.utils import create_nodes
-from sc_kpm.utils import create_edge
+from sc_kpm.utils import create_edge, create_edges
 
-src, trg = create_nodes(*[sc_types.NODE_CONST] * 2)
-msg_edge = create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, trg)  # ScAddr(...)
-assert src.is_valid() and trg.is_valid() and msg_edge.is_valid()
+src, trg, trg2, trg3 = create_nodes(*[sc_types.NODE_CONST] * 4)
+edge = create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, trg)  # ScAddr(...)
+edges = create_edges(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, trg2, trg3)  # [ScAddr(...), ScAddr(...)]
+assert edge.is_valid()
+assert all(edges)
 ```
 
 Function **is_valid()** is used for validation addresses of nodes or edges.

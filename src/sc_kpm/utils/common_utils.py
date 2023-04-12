@@ -48,9 +48,14 @@ def create_link(
 
 
 def create_edge(edge_type: ScType, src: ScAddr, trg: ScAddr) -> ScAddr:
+    return create_edges(edge_type, src, trg)[0]
+
+
+def create_edges(edge_type: ScType, src: ScAddr, *targets: ScAddr) -> List[ScAddr]:
     construction = ScConstruction()
-    construction.create_edge(edge_type, src, trg)
-    return client.create_elements(construction)[0]
+    for trg in targets:
+        construction.create_edge(edge_type, src, trg)
+    return client.create_elements(construction)
 
 
 def create_binary_relation(edge_type: ScType, src: ScAddr, trg: ScAddr, *relations: ScAddr) -> ScAddr:
@@ -84,7 +89,7 @@ def get_edges(source: ScAddr, target: ScAddr, *edge_types: ScType) -> List[ScAdd
         templ = ScTemplate()
         templ.triple(source, edge_type, target)
         results = client.template_search(templ)
-        result_edges.extend(result.get(1) for result in results)
+        result_edges.extend(result[1] for result in results)
     return result_edges
 
 

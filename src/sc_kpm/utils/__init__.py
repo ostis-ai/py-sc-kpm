@@ -9,6 +9,7 @@ from sc_kpm.utils.common_utils import (
     check_edge,
     create_binary_relation,
     create_edge,
+    create_edges,
     create_link,
     create_links,
     create_node,
