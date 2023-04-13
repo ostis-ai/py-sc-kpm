@@ -59,24 +59,25 @@ class TestGenerationUtils(BaseTestCase):
         template = _get_set_template(set_node, element1, element2)
         search_results = client.template_search(template)
         assert search_results
-        assert search_results[0].addrs[0].value == set_node.value
+        assert search_results[0][0] == set_node
 
 
 def _get_oriented_set_template(set_node: ScAddr, start_element: ScAddr, other_element: ScAddr) -> ScTemplate:
     rrel_one = ScKeynodes[CommonIdentifiers.RREL_ONE]
     nrel_sequence = ScKeynodes[CommonIdentifiers.NREL_BASIC_SEQUENCE]
 
+    edge1, edge2 = "edge1", "edge2"
     template = ScTemplate()
     template.triple_with_relation(
         set_node,
-        [sc_types.EDGE_ACCESS_VAR_POS_PERM, edge1 := "edge1"],
+        sc_types.EDGE_ACCESS_VAR_POS_PERM >> edge1,
         start_element,
         sc_types.EDGE_ACCESS_VAR_POS_PERM,
         rrel_one,
     )
     template.triple(
         set_node,
-        [sc_types.EDGE_ACCESS_VAR_POS_PERM, edge2 := "edge2"],
+        sc_types.EDGE_ACCESS_VAR_POS_PERM >> edge2,
         other_element,
     )
     template.triple_with_relation(
@@ -107,7 +108,7 @@ def _get_set_template(set_node: ScAddr, element1: ScAddr, element2: ScAddr) -> S
 def _get_structure_template(element1: ScAddr, element2: ScAddr) -> ScTemplate:
     template = ScTemplate()
     template.triple(
-        [sc_types.NODE_VAR_STRUCT, set_node := "_set_node"],
+        sc_types.NODE_VAR_STRUCT >> (set_node := "_set_node"),
         sc_types.EDGE_ACCESS_VAR_POS_PERM,
         element1,
     )

@@ -96,7 +96,7 @@ def get_system_idtf(addr: ScAddr) -> Idtf:
     templ.triple_with_relation(
         addr,
         sc_types.EDGE_D_COMMON_VAR,
-        [sc_types.LINK_VAR, ScAlias.LINK],
+        sc_types.LINK_VAR >> ScAlias.LINK,
         sc_types.EDGE_ACCESS_VAR_POS_PERM,
         nrel_system_idtf,
     )
@@ -110,8 +110,8 @@ def _search_relation_template(src: ScAddr, rel_node: ScAddr, rel_type: ScType) -
     template = ScTemplate()
     template.triple_with_relation(
         src,
-        [rel_type, ScAlias.ACCESS_EDGE],
-        [sc_types.UNKNOWN, ScAlias.ELEMENT],
+        rel_type >> ScAlias.ACCESS_EDGE,
+        sc_types.UNKNOWN >> ScAlias.ELEMENT,
         sc_types.EDGE_ACCESS_VAR_POS_PERM,
         rel_node,
     )
