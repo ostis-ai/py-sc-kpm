@@ -12,7 +12,7 @@ from sc_client.constants.common import ScEventType
 from sc_client.models import ScAddr, ScLinkContentType
 
 from sc_kpm import ScAgent, ScModule, ScResult, ScServer
-from sc_kpm.utils import create_link, get_link_content
+from sc_kpm.utils import create_link, get_link_content_data
 from sc_kpm.utils.action_utils import (
     create_action_answer,
     execute_agent,
@@ -41,8 +41,8 @@ class SumAgent(ScAgent):
         arg1_link, arg2_link = get_action_arguments(action_node, 2)
         if not arg1_link or not arg2_link:
             return ScResult.ERROR_INVALID_PARAMS
-        arg1_content = get_link_content(arg1_link)
-        arg2_content = get_link_content(arg2_link)
+        arg1_content = get_link_content_data(arg1_link)
+        arg2_content = get_link_content_data(arg2_link)
         if not isinstance(arg1_content, int) or not isinstance(arg2_content, int):
             return ScResult.ERROR_INVALID_TYPE
         create_action_answer(action_node, create_link(arg1_content + arg2_content, ScLinkContentType.INT))
@@ -69,7 +69,7 @@ def main():
             assert is_successful
             answer_struct = get_action_answer(question)
             answer_link = get_set_elements(answer_struct)[0]
-            answer_content = get_link_content(answer_link)
+            answer_content = get_link_content_data(answer_link)
             logging.info("Answer received: %s", repr(answer_content))
 
 

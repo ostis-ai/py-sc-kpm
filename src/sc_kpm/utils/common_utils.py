@@ -10,6 +10,7 @@ from sc_client import client
 from sc_client.constants import sc_types
 from sc_client.constants.sc_types import ScType
 from sc_client.models import ScAddr, ScConstruction, ScLinkContent, ScLinkContentType, ScTemplate, ScTemplateResult
+from sc_client.models.sc_construction import ScLinkContentData
 
 from sc_kpm.identifiers import CommonIdentifiers, ScAlias
 from sc_kpm.sc_keynodes import Idtf, ScKeynodes
@@ -22,9 +23,7 @@ def create_nodes(*node_types: ScType) -> List[ScAddr]:
     return client.create_elements(construction)
 
 
-def create_node(node_type: ScType, sys_idtf: str = None) -> ScAddr:
-    if sys_idtf:
-        return ScKeynodes.resolve(sys_idtf, node_type)
+def create_node(node_type: ScType) -> ScAddr:
     return create_nodes(node_type)[0]
 
 
@@ -49,9 +48,14 @@ def create_link(
 
 
 def create_edge(edge_type: ScType, src: ScAddr, trg: ScAddr) -> ScAddr:
+    return create_edges(edge_type, src, trg)[0]
+
+
+def create_edges(edge_type: ScType, src: ScAddr, *targets: ScAddr) -> List[ScAddr]:
     construction = ScConstruction()
-    construction.create_edge(edge_type, src, trg)
-    return client.create_elements(construction)[0]
+    for trg in targets:
+        construction.create_edge(edge_type, src, trg)
+    return client.create_elements(construction)
 
 
 def create_binary_relation(edge_type: ScType, src: ScAddr, trg: ScAddr, *relations: ScAddr) -> ScAddr:
@@ -71,7 +75,12 @@ def create_norole_relation(src: ScAddr, trg: ScAddr, *nrel_nodes: ScAddr) -> ScA
 
 
 def check_edge(edge_type: ScType, source: ScAddr, target: ScAddr) -> bool:
-    return get_edge(source, target, edge_type).is_valid()
+    return bool(get_edges(source, target, edge_type))
+
+
+def get_edge(source: ScAddr, target: ScAddr, edge_type: ScType) -> ScAddr:
+    edges = get_edges(source, target, edge_type)
+    return edges[0] if edges else ScAddr(0)
 
 
 def get_edges(source: ScAddr, target: ScAddr, *edge_types: ScType) -> List[ScAddr]:
@@ -80,13 +89,8 @@ def get_edges(source: ScAddr, target: ScAddr, *edge_types: ScType) -> List[ScAdd
         templ = ScTemplate()
         templ.triple(source, edge_type, target)
         results = client.template_search(templ)
-        result_edges.extend([result.get(1) for result in results])
+        result_edges.extend(result[1] for result in results)
     return result_edges
-
-
-def get_edge(source: ScAddr, target: ScAddr, edge_type: ScType) -> ScAddr:
-    edges = get_edges(source, target, edge_type)
-    return edges[0] if edges else ScAddr(0)
 
 
 def get_system_idtf(addr: ScAddr) -> Idtf:
@@ -102,7 +106,7 @@ def get_system_idtf(addr: ScAddr) -> Idtf:
     )
     result = client.template_search(templ)
     if result:
-        return get_link_content(result[0].get(ScAlias.LINK))
+        return get_link_content_data(result[0].get(ScAlias.LINK))
     return ""
 
 
@@ -137,14 +141,10 @@ def get_element_by_norole_relation(src: ScAddr, nrel_node: ScAddr) -> ScAddr:
     return search_result.get(ScAlias.ELEMENT) if search_result else ScAddr(0)
 
 
-def get_link_content(link: ScAddr) -> Union[str, int]:
+def get_link_content_data(link: ScAddr) -> ScLinkContentData:
     content_part = client.get_link_content(link)
     return content_part[0].data
 
 
-def delete_elements(*addrs: ScAddr) -> bool:
-    return client.delete_elements(*addrs)
-
-
 def delete_edges(source: ScAddr, target: ScAddr, *edge_types: ScType) -> bool:
-    return delete_elements(*get_edges(source, target, *edge_types))
+    return client.delete_elements(*get_edges(source, target, *edge_types))

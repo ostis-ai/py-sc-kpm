@@ -4,6 +4,7 @@ Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
 
+from sc_client.client import delete_elements
 from sc_client.constants import sc_types
 from sc_client.constants.common import ScEventType
 
@@ -11,7 +12,7 @@ from sc_kpm import ScAgent, ScKeynodes, ScModule
 from sc_kpm.identifiers import CommonIdentifiers
 from sc_kpm.sc_result import ScResult
 from sc_kpm.utils.action_utils import check_action_class, execute_agent, finish_action_with_status
-from sc_kpm.utils.common_utils import create_edge, create_node, delete_elements
+from sc_kpm.utils.common_utils import create_edge, create_node
 from tests.common_tests import BaseTestCase
 
 test_node_idtf = "test_node"
@@ -34,21 +35,21 @@ class ScModuleTest(ScModule):
 
 class TestActionUtils(BaseTestCase):
     def test_validate_action(self):
-        action_class = "test_action_class"
+        action_class_idtf = "test_action_class"
+        action_class_node = ScKeynodes.resolve(action_class_idtf, sc_types.NODE_CONST)
         question = ScKeynodes[CommonIdentifiers.QUESTION]
         test_node = create_node(sc_types.NODE_CONST)
-        action_class_node = create_node(sc_types.NODE_CONST, action_class)
-        assert check_action_class(action_class_node, test_node) is False
-        assert check_action_class(action_class, test_node) is False
+        self.assertFalse(check_action_class(action_class_node, test_node))
+        self.assertFalse(check_action_class(action_class_idtf, test_node))
         class_edge = create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, action_class_node, test_node)
-        assert check_action_class(action_class_node, test_node) is False
-        assert check_action_class(action_class, test_node) is False
+        self.assertFalse(check_action_class(action_class_node, test_node))
+        self.assertFalse(check_action_class(action_class_idtf, test_node))
         create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, question, test_node)
-        assert check_action_class(action_class_node, test_node)
-        assert check_action_class(action_class, test_node)
+        self.assertTrue(check_action_class(action_class_node, test_node))
+        self.assertTrue(check_action_class(action_class_idtf, test_node))
         delete_elements(class_edge)
-        assert check_action_class(action_class_node, test_node) is False
-        assert check_action_class(action_class, test_node) is False
+        self.assertFalse(check_action_class(action_class_node, test_node))
+        self.assertFalse(check_action_class(action_class_idtf, test_node))
 
     def test_call_agent(self):
         module = ScModuleTest()
