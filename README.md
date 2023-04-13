@@ -50,6 +50,7 @@ ScKeynodes.delete("identifier_to_delete")  # Delete keynode from kb and ScKeynod
 
 # Get rrel node
 ScKeynodes.rrel(1)  # Returns valid ScAddr of 'rrel_1'
+ScKeynodes.rrel(11)  # Raises KeyError if index more than ScKeynodes.max_rrel_index (default 10)
 ```
 
 ### ScAgent and ScAgentClassic
