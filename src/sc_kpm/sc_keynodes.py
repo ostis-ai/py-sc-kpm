@@ -10,7 +10,7 @@ from typing import Dict, Optional
 from sc_client import client
 from sc_client.client import delete_elements
 from sc_client.constants.exceptions import InvalidValueError
-from sc_client.constants.sc_types import ScType
+from sc_client.constants.sc_types import NODE_CONST_ROLE, ScType
 from sc_client.models import ScAddr, ScIdtfResolveParams
 
 Idtf = str
@@ -55,6 +55,10 @@ class ScKeynodesMeta(type):
                 cls._dict[identifier] = addr
             cls._logger.debug("Resolved %s identifier with type %s: %s", repr(identifier), repr(sc_type), repr(addr))
         return addr
+
+    def rrel(cls, index: int) -> ScAddr:
+        """Get rrel_i node"""
+        return cls.resolve(f"rrel_{index}", NODE_CONST_ROLE)  # pylint: disable=no-value-for-parameter
 
 
 class ScKeynodes(metaclass=ScKeynodesMeta):
