@@ -77,10 +77,12 @@ class ScSetTestCase(BaseTestCase):
         ]
         sc_set = ScSet(*elements, set_node=set_node)
         self.assertEqual(len(sc_set), len(elements))
+        self.assertTrue(sc_set)
 
     def test_get_power_empty(self):
         sc_set = ScSet()
         self.assertEqual(len(sc_set), 0)
+        self.assertFalse(sc_set)
 
 
 def _get_set_template(set_node: ScAddr, element1: ScAddr, element2: ScAddr) -> ScTemplate:
