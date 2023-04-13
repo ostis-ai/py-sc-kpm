@@ -1,14 +1,16 @@
 from typing import Iterator, List
 
-from sc_client.client import create_elements, template_search
+from sc_client.client import create_elements
 from sc_client.constants import ScType, sc_types
-from sc_client.models import ScAddr, ScConstruction, ScTemplate, ScTemplateResult
+from sc_client.models import ScAddr, ScConstruction
+
+from sc_kpm.sc_sets.sc_set_abstract import ScSetAbstract
 
 
-class ScSet:
+class ScSet(ScSetAbstract):
     def __init__(self, *elements: ScAddr, set_node: ScAddr = None, set_node_type: ScType = None) -> None:
         if set_node is not None:
-            self._set_node = set_node
+            super().__init__(set_node)
             self.add(*elements)
         else:
             construction = ScConstruction()
@@ -18,10 +20,10 @@ class ScSet:
             construction.create_node(set_node_type, set_node_alias)
             for element in elements:
                 construction.create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, set_node_alias, element)
-            self._set_node = create_elements(construction)[0]
+            set_node = create_elements(construction)[0]
+            super().__init__(set_node)
 
     def add(self, *elements: ScAddr) -> None:
-        """Add elements to set"""
         if elements:
             construction = ScConstruction()
             for element in elements:
@@ -39,20 +41,6 @@ class ScSet:
             if construction.commands:
                 create_elements(construction)
 
-    @property
-    def set_node(self) -> ScAddr:
-        """Get main element of sc-set"""
-        return self._set_node
-
-    def __len__(self) -> int:
-        """Get set power"""
-        return len(self._elements_search_results())
-
-    def _elements_search_results(self) -> List[ScTemplateResult]:
-        templ = ScTemplate()
-        templ.triple(self._set_node, sc_types.EDGE_ACCESS_VAR_POS_PERM, sc_types.UNKNOWN)
-        return template_search(templ)
-
     def __iter__(self) -> Iterator[ScAddr]:
         """Iterate by elements of set"""
         search_results = self._elements_search_results()
@@ -61,5 +49,4 @@ class ScSet:
 
     @property
     def elements(self) -> List[ScAddr]:
-        """Get all elements of sc-set"""
         return list(self)
