@@ -23,7 +23,7 @@ class ScKeynodesMeta(type):
         super().__init__(*args, **kwargs)
         cls._dict: Dict[Idtf, ScAddr] = {}
         cls._logger: Logger = getLogger(f"{__name__}.{cls.__name__}")
-        cls.max_rrel_index: int = 10
+        cls._max_rrel_index: int = 10
 
     def __call__(cls, *args, **kwargs) -> None:
         raise TypeError(f"Use {cls.__name__} without initialization")
@@ -58,9 +58,9 @@ class ScKeynodesMeta(type):
         return addr
 
     def rrel(cls, index: int) -> ScAddr:
-        """Get rrel_i node"""
-        if index > cls.max_rrel_index:
-            raise KeyError(f"You cannot use rrel more than {cls.max_rrel_index}")
+        """Get rrel_i node. Max rrel index is 10"""
+        if index > cls._max_rrel_index:
+            raise KeyError(f"You cannot use rrel more than {cls._max_rrel_index}")
         return cls.resolve(f"rrel_{index}", NODE_CONST_ROLE)  # pylint: disable=no-value-for-parameter
 
 

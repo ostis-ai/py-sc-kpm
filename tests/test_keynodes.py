@@ -43,6 +43,4 @@ class KeynodesTests(BaseTestCase):
         self.assertTrue(check_elements(rrel_1)[0].is_role())
 
     def test_large_rrel(self):
-        self.assertRaises(KeyError, ScKeynodes.rrel, ScKeynodes.max_rrel_index + 1)
-        ScKeynodes.max_rrel_index += 1
-        self.assertTrue(ScKeynodes.rrel(11).is_valid())
+        self.assertRaises(KeyError, ScKeynodes.rrel, ScKeynodes._max_rrel_index + 1)
