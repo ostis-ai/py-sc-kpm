@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - README and LICENSE files
-- ScKeynodes class for caching identifiers and ScAddr objects
+- ScKeynodes class for caching identifiers and ScAddr objects. Easy access to rrel keynodes
 - ScAgent class for handling a single ScEvent
 - ScModule class for handling a multiple ScAgent
 - ScServer class for modules serving
