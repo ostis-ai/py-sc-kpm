@@ -38,9 +38,12 @@ class KeynodesTests(BaseTestCase):
         self.assertRaises(TypeError, ScKeynodes)
 
     def test_rrel(self):
-        rrel_1 = ScKeynodes.rrel(1)
+        rrel_1 = ScKeynodes.rrel_index(1)
         self.assertTrue(rrel_1.is_valid())
         self.assertTrue(check_elements(rrel_1)[0].is_role())
 
     def test_large_rrel(self):
-        self.assertRaises(KeyError, ScKeynodes.rrel, ScKeynodes._max_rrel_index + 1)
+        self.assertRaises(KeyError, ScKeynodes.rrel_index, ScKeynodes._max_rrel_index + 1)
+
+    def test_wrong_rrel(self):
+        self.assertRaises(TypeError, ScKeynodes.rrel_index, "str")

@@ -57,8 +57,10 @@ class ScKeynodesMeta(type):
             cls._logger.debug("Resolved %s identifier with type %s: %s", repr(identifier), repr(sc_type), repr(addr))
         return addr
 
-    def rrel(cls, index: int) -> ScAddr:
+    def rrel_index(cls, index: int) -> ScAddr:
         """Get rrel_i node. Max rrel index is 10"""
+        if not isinstance(index, int):
+            raise TypeError("Index of rrel node must be int")
         if index > cls._max_rrel_index:
             raise KeyError(f"You cannot use rrel more than {cls._max_rrel_index}")
         return cls.resolve(f"rrel_{index}", NODE_CONST_ROLE)  # pylint: disable=no-value-for-parameter

@@ -49,8 +49,9 @@ ScKeynodes.resolve("some_node", None)  # Returns the element if it exists, other
 ScKeynodes.delete("identifier_to_delete")  # Delete keynode from kb and ScKeynodes cache
 
 # Get rrel node
-ScKeynodes.rrel(1)  # Returns valid ScAddr of 'rrel_1'
-ScKeynodes.rrel(11)  # Raises KeyError if index more than 10
+ScKeynodes.rrel_index(1)  # Returns valid ScAddr of 'rrel_1'
+ScKeynodes.rrel_index(11)  # Raises KeyError if index more than 10
+ScKeynodes.rrel_index("some_str")  # Raises TypeError if index is not int
 ```
 
 ### ScAgent and ScAgentClassic
@@ -316,7 +317,7 @@ src, trg = create_nodes(*[sc_types.NODE_CONST] * 2)
 increase_relation = create_node(sc_types.NODE_CONST_CLASS)
 
 brel = create_binary_relation(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, trg, increase_relation)  # ScAddr(...)
-rrel = create_role_relation(src, trg, ScKeynodes.rrel(1))  # ScAddr(...)
+rrel = create_role_relation(src, trg, ScKeynodes.rrel_index(1))  # ScAddr(...)
 nrel = create_norole_relation(src, trg, create_node(sc_types.NODE_CONST_NOROLE))  # ScAddr(...)
 ```
 
@@ -387,10 +388,10 @@ from sc_kpm.utils import create_nodes, create_role_relation, create_norole_relat
 from sc_kpm.utils import get_element_by_role_relation, get_element_by_norole_relation
 
 src, trg_rrel, trg_nrel = create_nodes(*[sc_types.NODE_CONST] * 3)
-rrel = create_role_relation(src, trg_rrel, ScKeynodes.rrel(1))  # ScAddr(...)
+rrel = create_role_relation(src, trg_rrel, ScKeynodes.rrel_index(1))  # ScAddr(...)
 nrel = create_norole_relation(src, trg_nrel, ScKeynodes[CommonIdentifiers.NREL_SYSTEM_IDENTIFIER])  # ScAddr(...)
 
-result_rrel = get_element_by_role_relation(src, ScKeynodes.rrel(1))  # ScAddr(...)
+result_rrel = get_element_by_role_relation(src, ScKeynodes.rrel_index(1))  # ScAddr(...)
 assert result_rrel == trg_rrel
 result_nrel = get_element_by_norole_relation(src, ScKeynodes[CommonIdentifiers.NREL_SYSTEM_IDENTIFIER])  # ScAddr(...)
 assert result_nrel == trg_nrel
@@ -623,12 +624,12 @@ action_node = create_node(sc_types.NODE_CONST)
 
 # Static argument
 argument1 = create_node(sc_types.NODE_CONST)
-create_role_relation(action_node, argument1, ScKeynodes.rrel(1))
+create_role_relation(action_node, argument1, ScKeynodes.rrel_index(1))
 
 # Dynamic argument
 dynamic_node = create_node(sc_types.NODE_CONST)
 rrel_dynamic_arg = ScKeynodes[CommonIdentifiers.RREL_DYNAMIC_ARGUMENT]
-create_role_relation(action_node, dynamic_node, rrel_dynamic_arg, ScKeynodes.rrel(2))
+create_role_relation(action_node, dynamic_node, rrel_dynamic_arg, ScKeynodes.rrel_index(2))
 argument2 = create_node(sc_types.NODE_CONST)
 create_edge(sc_types.EDGE_ACCESS_CONST_POS_TEMP, dynamic_node, argument2)
 

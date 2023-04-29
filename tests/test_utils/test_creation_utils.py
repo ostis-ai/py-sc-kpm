@@ -70,7 +70,7 @@ def _get_oriented_set_template(set_node: ScAddr, start_element: ScAddr, other_el
         sc_types.EDGE_ACCESS_VAR_POS_PERM >> edge1,
         start_element,
         sc_types.EDGE_ACCESS_VAR_POS_PERM,
-        ScKeynodes.rrel(1),
+        ScKeynodes.rrel_index(1),
     )
     template.triple(
         set_node,
