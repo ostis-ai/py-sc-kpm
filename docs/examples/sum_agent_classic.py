@@ -12,6 +12,7 @@ from sc_client.models import ScAddr, ScLinkContentType
 
 from sc_kpm import ScAgentClassic, ScModule, ScResult, ScServer
 from sc_kpm.identifiers import CommonIdentifiers
+from sc_kpm.sc_sets import ScSet
 from sc_kpm.utils import create_link, get_link_content_data
 from sc_kpm.utils.action_utils import (
     create_action_answer,
@@ -20,7 +21,6 @@ from sc_kpm.utils.action_utils import (
     get_action_answer,
     get_action_arguments,
 )
-from sc_kpm.utils.retrieve_utils import get_set_elements
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s | %(levelname)s | %(name)s | %(message)s", datefmt="[%d-%b-%y %H:%M:%S]"
@@ -65,7 +65,7 @@ def main():
         )
         assert is_successful
         answer_struct = get_action_answer(question)
-        answer_link = get_set_elements(answer_struct)[0]
+        answer_link = ScSet(set_node=answer_struct).elements[0]
         answer_content = get_link_content_data(answer_link)
         logging.info("Answer received: %s", repr(answer_content))
 
