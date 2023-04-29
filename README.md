@@ -200,6 +200,199 @@ with server.connect():
         server.serve()  # Agents will be active until ^C
 ```
 
+### ScSets
+
+Sc-set is a construction that presents main node called `set_node` and linked elements.
+There is no limit in types for sc-set elements:
+
+![sc-set example](docs/schemes/png/set.png)
+
+#### ScSet
+
+- *sc_kpm.sc_sets*.**ScSet**
+
+Class for handling simple sc-sets.
+It is the parent class for `ScOrientedSet` and `ScNumberedSet`
+
+Methods and properties:
+
+1. *ScSet*(*elements: ScAddr, set_node: ScAddr = None, set_node_type: ScType = None) -> None
+
+   Constructor of sc-set receives all elements to add, optional `set_node` and optional `set_node_type`.
+   If you don't specify `set_node`, it will be created with `set_node_type` (default NODE_CONST).
+
+2. *ScSet*.**add**(*elements: ScAddr) -> None
+
+   Add elements to the end of sc-set construction.
+
+3. *ScSet*.**set_node** -> ScAddr
+
+   Property to give the **main node** of sc-set.
+
+4. *ScSet* == *ScSet* -> bool
+
+   Check sc-sets have the same set_nodes.
+
+5. *ScSet*.**elements_set** -> Set[ScAddr]
+
+   Property to give all elements from sc-set as a set.
+   Use it if you don't need order in ordered sets.
+
+6. **iter**(*ScSet*) -> Iterator[ScAddr]
+
+   Dunder method for iterating by sc-set.
+   Lazy algorithm (ScOrientedSet and ScNumberedSet).
+
+7. **len**(*ScSet*) -> int
+
+   Fast dunder method to give **count of elements** (power of sc-set).
+
+8. **bool**(*ScSet*) -> bool
+
+   Dunder method for if-statement: True if there are elements in sc-set.
+
+9. *ScSet*.**is_empty**() -> bool
+
+   True if there are **no elements** in sc-set.
+
+10. *ScAddr* **in** *ScSet* -> bool
+
+    Dunder method: True if sc-set contains element.
+
+11. *ScSet*.**clear**() -> bool
+
+    Remove all elements from sc-set.
+
+12. *ScSet*.**remove**(*elements: ScAddr) -> None
+
+    Remove elements from sc-set.
+    *WARNING*: method isn't optimized in ScOrientedSet and ScNumberedSet
+
+```python
+from sc_client.constants import sc_types
+from sc_client.models import ScAddr
+
+from sc_kpm.sc_sets import ScSet
+from sc_kpm.utils import create_node, create_nodes
+
+# Example elements to add
+example_set_node: ScAddr = create_node(sc_types.NODE_CONST)
+elements: list[ScAddr] = create_nodes(*[sc_types.NODE_CONST] * 5)
+
+# Init sc-set and add elements
+empty_set = ScSet()
+
+set_with_elements = ScSet(elements[0], elements[1])
+set_with_elements.add(elements[2], elements[3])
+set_with_elements.add(elements[4])
+
+set_with_elements_and_set_node = ScSet(elements[2], set_node=example_set_node)
+empty_set_with_specific_set_node_type = ScSet(set_node_type=sc_types.NODE_VAR)
+
+# Get set node
+set_node = empty_set.set_node
+assert set_with_elements_and_set_node.set_node == example_set_node
+
+# Get elements: list and set
+assert set_with_elements.elements_set == set(elements)  # set view faster and safe
+
+# Iterate by elements
+for element in set_with_elements:
+    print(element)
+
+# Length, bool, is_empty, in
+assert len(set_with_elements) == len(elements)
+assert bool(set_with_elements)
+assert not set_with_elements.is_empty()
+assert empty_set.is_empty()
+assert elements[2] in set_with_elements
+
+# Clear and remove
+set_with_elements.remove(elements[4])
+assert len(set_with_elements), len(elements) - 1
+set_with_elements.clear()
+assert set_with_elements.is_empty()
+```
+
+##### ScStructure
+
+If `set_node` has type `sc_types.NODE_CONST_STRUCT` construction is called sc-structure
+and looks like a loop in SCg:
+
+![structure](docs/schemes/png/structure.png)
+![structure2](docs/schemes/png/structure_circuit.png)
+
+- *sc_kpm*.**ScStructure**
+
+Class for handling structure construction in the kb.
+The same logic as in `ScSet`, but *set_node_type* if set NODE_CONST_STRUCT.
+There are checks that set node has struct sc-type:
+
+```python
+from sc_kpm.sc_sets import ScStructure
+
+sc_struct = ScStructure(..., set_node=..., set_node_type=...)
+
+sc_struct = ScStructure(..., set_node=create_node(sc_types.NODE_CONST))  # InvalidTypeError - not struct type
+sc_struct = ScStructure(..., set_node_type=sc_types.NODE_CONST)  # InvalidTypeError - not struct type
+```
+
+#### Ordered sc-sets
+
+ScOrientedSet and ScNumberedSet are ordered sc-constructions.
+Child classes of ScSet, have the order in iteration and get list elements:
+
+- *Sc{ordered}Set*.**elements_set** -> List[ScAddr]
+
+  Get the list of all elements with order
+
+##### ScOrientedSet
+
+- *sc_kpm*.**ScOrientedSet**
+
+![oriented_set_example](docs/schemes/png/oriented_set.png)
+
+Class for handling sc-oriented-set construction.
+Has marked edges between edges from set_node to elements.
+Easy lazy iterating.
+No access by index.
+
+```python
+from sc_client.constants import sc_types
+
+from sc_kpm.sc_sets import ScOrientedSet
+from sc_kpm.utils import create_nodes
+
+
+elements = create_nodes(*[sc_types.NODE_CONST] * 5)
+numbered_set = ScOrientedSet(*elements)
+assert numbered_set.elements_list == elements
+```
+
+##### ScNumberedSet
+
+- *sc_kpm*.**ScNumberedSet**
+
+![numbered_set_example](docs/schemes/png/numbered_set.png)
+
+Class for handling sc-numbered-set construction.
+Set-node is edged with numerating each element with rrel node.
+Easy access to elements by index (index i is marked with rrel(i + 1))
+
+```python
+from sc_client.constants import sc_types
+
+from sc_kpm.sc_sets import ScNumberedSet
+from sc_kpm.utils import create_nodes
+
+
+elements = create_nodes(*[sc_types.NODE_CONST] * 5)
+numbered_set = ScNumberedSet(*elements)
+assert numbered_set.elements_list == elements
+assert numbered_set[2] == elements[2]
+numbered_set[5]  # raise KeyError
+```
+
 ## Utils
 
 There are some functions for working with nodes, edges, links: create them, search, get content, delete, etc.
@@ -432,142 +625,6 @@ idtf = get_system_idtf(lang_en)  # "lang_en"
 assert ScKeynodes[idtf] == lang_en
 ```
 
-## Creating utils
-
-There are functions to work with sets: create, wrap, etc.
-
-### Set and structure creating
-
-For wrapping some elements to set use next functions:
-
-```python
-def wrap_in_set(set_node: ScAddr, *elements: ScAddr) -> None: ...
-```
-
-**set_node** connects other elements.
-
-If you want to create new set without existed **set_node** use:
-
-```python
-def create_set(set_type: ScType, *elements: ScAddr) -> ScAddr: ...
-```
-
-For creating structure from existed nodes use next function:
-
-```python
-def create_structure(*elements: ScAddr) -> ScAddr: ...
-```
-
-This is a presentation of set in SCg-code:
-
-![set](docs/schemes/png/set.png)
-
-Next two pictures show equivalent presentations of structures in SCg-code:
-
-![structure](docs/schemes/png/structure.png)
-![structure2](docs/schemes/png/structure_circuit.png)
-
-In structure sc_type of **main node** is `sc_types.NODE_CONST_STRUCT`
-
-```python
-from sc_client.constants import sc_types
-from sc_kpm.utils import create_node, create_nodes
-from sc_kpm.utils.creation_utils import wrap_in_set, create_set, create_structure
-
-elements = create_nodes(sc_types.NODE_CONST, sc_types.NODE_VAR, sc_types.NODE_CONST)
-
-set_node = create_node(sc_types.NODE_CONST_CLASS)
-wrap_in_set(set_node, *elements)
-# or
-set_node = create_set(sc_types.NODE_CONST, *elements)  # ScAddr(...)
-# or
-struct_node = create_structure(*elements)  # ScAddr(...)
-```
-
-### Oriented set creating
-
-For wrapping nodes to oriented set use next function:
-
-```python
-def wrap_in_oriented_set(set_node: ScAddr, start_element: ScAddr, *elements: ScAddr) -> None: ...
-```
-
-For creating oriented set without explicitly **set_node** use:
-
-```python
-def create_oriented_set(*elements: ScAddr) -> ScAddr: ...
-```
-
-On an oriented set, the order of nodes is given:
-
-![oriented set](docs/schemes/png/oriented_set.png)
-
-```python
-from sc_client.constants import sc_types
-from sc_kpm.utils import create_node, create_nodes
-from sc_kpm.utils.creation_utils import wrap_in_oriented_set, create_oriented_set
-
-elements = create_nodes(sc_types.NODE_CONST, sc_types.NODE_CONST, sc_types.NODE_CONST)
-
-set_node = create_node(sc_types.NODE_CONST_CLASS)
-wrap_in_oriented_set(set_node, *elements)
-# or
-set_node = create_oriented_set(*elements)  # ScAddr(...)
-```
-
-## Retrieve utils
-
-There are utils for searching elements of sets and getting their power
-
-### Getting sets elements
-
-If you want to get elements of set or oriented set by **set node** use:
-
-```python
-def get_set_elements(set_node: ScAddr) -> List[ScAddr]: ...
-
-
-def get_oriented_set_elements(set_node: ScAddr) -> List[ScAddr]: ...
-```
-
-```python
-from sc_client.constants import sc_types
-from sc_kpm.utils import create_nodes
-from sc_kpm.utils.creation_utils import create_structure, create_oriented_set
-from sc_kpm.utils.retrieve_utils import get_set_elements, get_oriented_set_elements
-
-elements = create_nodes(sc_types.NODE_CONST, sc_types.NODE_VAR)
-struct_node = create_structure(*elements)
-search_results = get_set_elements(struct_node)  # [ScAddr(...), ScAddr(...)]
-assert search_results == elements
-
-elements = create_nodes(sc_types.NODE_CONST, sc_types.NODE_VAR)
-set_node = create_oriented_set(*elements)
-search_results = get_oriented_set_elements(set_node)  # [ScAddr(...), ScAddr(...)]
-assert search_results == elements
-```
-
-### Getting set power
-
-For getting count of elements in set or oriented set use:
-
-```python
-def get_set_power(set_node: ScAddr) -> int: ...
-```
-
-```python
-from sc_client.constants import sc_types
-from sc_kpm.utils import create_nodes
-from sc_kpm.utils.creation_utils import create_structure
-from sc_kpm.utils.retrieve_utils import get_set_power
-
-elements = create_nodes(sc_types.NODE_CONST, sc_types.NODE_VAR)
-struct_node = create_structure(*elements)
-
-power = get_set_power(struct_node)  # 2
-assert power == len(elements)
-```
-
 ## Action utils
 
 Utils to work with actions, events and agents
@@ -654,14 +711,14 @@ Create and get structure with output of action
 from sc_client.constants import sc_types
 from sc_kpm.utils import create_node
 from sc_kpm.utils.action_utils import create_action_answer, get_action_answer
-from sc_kpm.utils.retrieve_utils import get_set_elements
+from sc_kpm.sc_sets import ScStructure
 
 action_node = create_node(sc_types.NODE_CONST_STRUCT)
 answer_element = create_node(sc_types.NODE_CONST_STRUCT)
 create_action_answer(action_node, answer_element)
 result = get_action_answer(action_node)
-result_elements = get_set_elements(result)
-assert result_elements == [answer_element]
+result_elements = ScStructure(result).elements_set
+assert result_elements == {answer_element}
 ```
 
 ### Call, execute and wait agent
