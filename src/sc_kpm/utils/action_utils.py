@@ -14,6 +14,7 @@ from sc_client.models import ScAddr, ScConstruction, ScTemplate
 
 from sc_kpm.identifiers import CommonIdentifiers, QuestionStatus, ScAlias
 from sc_kpm.sc_keynodes import Idtf, ScKeynodes
+from sc_kpm.sc_sets.sc_structure import ScStructure
 from sc_kpm.utils.common_utils import (
     check_edge,
     create_edge,
@@ -22,8 +23,6 @@ from sc_kpm.utils.common_utils import (
     create_role_relation,
     get_element_by_role_relation,
 )
-from sc_kpm.utils.creation_utils import create_structure
-from sc_kpm.utils.retrieve_utils import _get_first_search_template_result
 
 COMMON_WAIT_TIME: float = 5
 
@@ -46,7 +45,7 @@ def get_action_arguments(action_node: ScAddr, count: int) -> List[ScAddr]:
 
 
 def create_action_answer(action_node: ScAddr, *elements: ScAddr) -> None:
-    answer_struct_node = create_structure(*elements)
+    answer_struct_node = ScStructure(*elements).set_node
     create_norole_relation(action_node, answer_struct_node, ScKeynodes[CommonIdentifiers.NREL_ANSWER])
 
 
@@ -59,8 +58,9 @@ def get_action_answer(action_node: ScAddr) -> ScAddr:
         sc_types.EDGE_ACCESS_VAR_POS_PERM,
         ScKeynodes[CommonIdentifiers.NREL_ANSWER],
     )
-    result = _get_first_search_template_result(templ)
-    return result.get(ScAlias.ELEMENT) if result else ScAddr(0)
+    if search_results := client.template_search(templ):
+        return search_results[0].get(ScAlias.ELEMENT)
+    return ScAddr(0)
 
 
 IsDynamic = bool
