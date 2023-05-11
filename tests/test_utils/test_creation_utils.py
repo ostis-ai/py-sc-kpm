@@ -63,9 +63,6 @@ class TestGenerationUtils(BaseTestCase):
 
 
 def _get_oriented_set_template(set_node: ScAddr, start_element: ScAddr, other_element: ScAddr) -> ScTemplate:
-    rrel_one = ScKeynodes[CommonIdentifiers.RREL_ONE]
-    nrel_sequence = ScKeynodes[CommonIdentifiers.NREL_BASIC_SEQUENCE]
-
     edge1, edge2 = "edge1", "edge2"
     template = ScTemplate()
     template.triple_with_relation(
@@ -73,7 +70,7 @@ def _get_oriented_set_template(set_node: ScAddr, start_element: ScAddr, other_el
         sc_types.EDGE_ACCESS_VAR_POS_PERM >> edge1,
         start_element,
         sc_types.EDGE_ACCESS_VAR_POS_PERM,
-        rrel_one,
+        ScKeynodes.rrel_index(1),
     )
     template.triple(
         set_node,
@@ -85,7 +82,7 @@ def _get_oriented_set_template(set_node: ScAddr, start_element: ScAddr, other_el
         sc_types.EDGE_D_COMMON_VAR,
         edge2,
         sc_types.EDGE_ACCESS_VAR_POS_PERM,
-        nrel_sequence,
+        ScKeynodes[CommonIdentifiers.NREL_BASIC_SEQUENCE],
     )
     return template
 

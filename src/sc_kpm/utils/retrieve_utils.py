@@ -43,7 +43,7 @@ def _get_next_element(set_node: ScAddr, elements: List[ScAddr], access_edge: ScA
     if access_edge:
         elem_search_result = _search_next_element_template(set_node, access_edge)
     else:
-        elem_search_result = search_role_relation_template(set_node, ScKeynodes[CommonIdentifiers.RREL_ONE])
+        elem_search_result = search_role_relation_template(set_node, ScKeynodes.rrel_index(1))
     if elem_search_result is None:
         return None
     elements.append(elem_search_result.get(ScAlias.ELEMENT))

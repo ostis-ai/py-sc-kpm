@@ -40,8 +40,7 @@ def check_action_class(action_class: Union[ScAddr, Idtf], action_node: ScAddr) -
 def get_action_arguments(action_node: ScAddr, count: int) -> List[ScAddr]:
     arguments = []
     for index in range(1, count + 1):
-        rrel_i = ScKeynodes[f"rrel_{index}"]
-        argument = get_element_by_role_relation(action_node, rrel_i)
+        argument = get_element_by_role_relation(action_node, ScKeynodes.rrel_index(index))
         arguments.append(argument)
     return arguments
 
@@ -98,7 +97,7 @@ def _create_action_with_arguments(arguments: Dict[ScAddr, IsDynamic], concepts: 
     argument: ScAddr
     for index, (argument, is_dynamic) in enumerate(arguments.items(), 1):
         if argument.is_valid():
-            rrel_i = ScKeynodes[f"rrel_{index}"]
+            rrel_i = ScKeynodes.rrel_index(index)
             if is_dynamic:
                 dynamic_node = create_node(sc_types.NODE_CONST)
                 create_role_relation(action_node, dynamic_node, rrel_dynamic_arg, rrel_i)
