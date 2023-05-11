@@ -17,6 +17,7 @@ class CommonIdentifiers:
     RREL_DYNAMIC_ARGUMENT: Idtf = "rrel_dynamic_argument"
     RREL_ONE: Idtf = "rrel_1"
     RREL_TWO: Idtf = "rrel_2"
+    RREL_LAST: Idtf = "rrel_last"
     NREL_BASIC_SEQUENCE: Idtf = "nrel_basic_sequence"
     NREL_SYSTEM_IDENTIFIER: Idtf = "nrel_system_identifier"
     NREL_ANSWER: Idtf = "nrel_answer"
@@ -58,6 +59,7 @@ class _IdentifiersResolver:
             CommonIdentifiers.RREL_DYNAMIC_ARGUMENT: sc_types.NODE_CONST_ROLE,
             CommonIdentifiers.RREL_ONE: sc_types.NODE_CONST_ROLE,
             CommonIdentifiers.RREL_TWO: sc_types.NODE_CONST_ROLE,
+            CommonIdentifiers.RREL_LAST: sc_types.NODE_CONST_ROLE,
             CommonIdentifiers.NREL_BASIC_SEQUENCE: sc_types.NODE_CONST_NOROLE,
             CommonIdentifiers.NREL_SYSTEM_IDENTIFIER: sc_types.NODE_CONST_NOROLE,
             CommonIdentifiers.NREL_ANSWER: sc_types.NODE_CONST_NOROLE,
