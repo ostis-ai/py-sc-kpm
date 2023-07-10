@@ -84,30 +84,13 @@ def call_agent(
     concepts: List[Idtf],
     initiation: Idtf = QuestionStatus.QUESTION_INITIATED,
 ) -> ScAddr:
-    question = _create_action_with_arguments(arguments, concepts)
-    initiation_node = ScKeynodes.resolve(initiation, sc_types.NODE_CONST_CLASS)
-    create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, initiation_node, question)
+    question = create_action(*concepts)
+    add_action_arguments(question, arguments)
+    call_action(question, initiation)
     return question
 
 
-def _create_action_with_arguments(arguments: Dict[ScAddr, IsDynamic], concepts: List[Idtf]) -> ScAddr:
-    action_node = _create_action(concepts)
-    rrel_dynamic_arg = ScKeynodes[CommonIdentifiers.RREL_DYNAMIC_ARGUMENT]
-
-    argument: ScAddr
-    for index, (argument, is_dynamic) in enumerate(arguments.items(), 1):
-        if argument.is_valid():
-            rrel_i = ScKeynodes.rrel_index(index)
-            if is_dynamic:
-                dynamic_node = create_node(sc_types.NODE_CONST)
-                create_role_relation(action_node, dynamic_node, rrel_dynamic_arg, rrel_i)
-                create_edge(sc_types.EDGE_ACCESS_CONST_POS_TEMP, dynamic_node, argument)
-            else:
-                create_role_relation(action_node, argument, rrel_i)
-    return action_node
-
-
-def _create_action(concepts: List[Idtf]) -> ScAddr:
+def create_action(*concepts: Idtf) -> ScAddr:
     construction = ScConstruction()
     construction.create_node(sc_types.NODE_CONST, ScAlias.ACTION_NODE)
     for concept in concepts:
@@ -118,6 +101,37 @@ def _create_action(concepts: List[Idtf]) -> ScAddr:
         )
     action_node = client.create_elements(construction)[0]
     return action_node
+
+
+def add_action_arguments(action_node: ScAddr, arguments: Dict[ScAddr, IsDynamic]) -> None:
+    rrel_dynamic_arg = ScKeynodes[CommonIdentifiers.RREL_DYNAMIC_ARGUMENT]
+    argument: ScAddr
+    for index, (argument, is_dynamic) in enumerate(arguments.items(), 1):
+        if argument.is_valid():
+            rrel_i = ScKeynodes.rrel_index(index)
+            if is_dynamic:
+                dynamic_node = create_node(sc_types.NODE_CONST)
+                create_role_relation(action_node, dynamic_node, rrel_dynamic_arg, rrel_i)
+                create_edge(sc_types.EDGE_ACCESS_CONST_POS_TEMP, dynamic_node, argument)
+            else:
+                create_role_relation(action_node, argument, rrel_i)
+
+
+def execute_action(
+    action_node: ScAddr,
+    initiation: Idtf = QuestionStatus.QUESTION_INITIATED,
+    reaction: Idtf = QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY,
+    wait_time: float = COMMON_WAIT_TIME,
+) -> bool:
+    call_action(action_node, initiation)
+    wait_agent(wait_time, action_node, ScKeynodes[QuestionStatus.QUESTION_FINISHED])
+    result = check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, ScKeynodes[reaction], action_node)
+    return result
+
+
+def call_action(action_node: ScAddr, initiation: Idtf = QuestionStatus.QUESTION_INITIATED) -> None:
+    initiation_node = ScKeynodes.resolve(initiation, sc_types.NODE_CONST_CLASS)
+    create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, initiation_node, action_node)
 
 
 # TODO rewrite to event
