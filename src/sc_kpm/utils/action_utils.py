@@ -4,16 +4,18 @@ Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
 
-import time
-from datetime import datetime, timedelta
+from threading import Event
 from typing import Dict, List, Tuple, Union
 
 from sc_client import client
+from sc_client.client import events_create, events_destroy
 from sc_client.constants import sc_types
-from sc_client.models import ScAddr, ScConstruction, ScTemplate
+from sc_client.constants.common import ScEventType
+from sc_client.models import ScAddr, ScConstruction, ScEventParams, ScTemplate
 
 from sc_kpm.identifiers import CommonIdentifiers, QuestionStatus, ScAlias
 from sc_kpm.sc_keynodes import Idtf, ScKeynodes
+from sc_kpm.sc_result import ScResult
 from sc_kpm.sc_sets.sc_structure import ScStructure
 from sc_kpm.utils.common_utils import (
     check_edge,
@@ -74,7 +76,7 @@ def execute_agent(
     wait_time: float = COMMON_WAIT_TIME,
 ) -> Tuple[ScAddr, bool]:
     question = call_agent(arguments, concepts, initiation)
-    wait_agent(wait_time, question, ScKeynodes[QuestionStatus.QUESTION_FINISHED])
+    wait_agent(wait_time, question)
     result = check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, ScKeynodes[reaction], question)
     return question, result
 
@@ -124,7 +126,7 @@ def execute_action(
     wait_time: float = COMMON_WAIT_TIME,
 ) -> bool:
     call_action(action_node, initiation)
-    wait_agent(wait_time, action_node, ScKeynodes[QuestionStatus.QUESTION_FINISHED])
+    wait_agent(wait_time, action_node)
     result = check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, ScKeynodes[reaction], action_node)
     return result
 
@@ -134,11 +136,20 @@ def call_action(action_node: ScAddr, initiation: Idtf = QuestionStatus.QUESTION_
     create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, initiation_node, action_node)
 
 
-# TODO rewrite to event
-def wait_agent(seconds: float, question_node: ScAddr, reaction_node: ScAddr) -> None:
-    finish = datetime.now() + timedelta(seconds=seconds)
-    while not check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, reaction_node, question_node) and datetime.now() < finish:
-        time.sleep(0.1)
+def wait_agent(seconds: float, question_node: ScAddr, reaction_node: ScAddr = None) -> None:
+    reaction_node = reaction_node or ScKeynodes[QuestionStatus.QUESTION_FINISHED]
+    finish_event = Event()
+
+    def event_callback(_: ScAddr, __: ScAddr, trg: ScAddr) -> ScResult:
+        if trg != reaction_node:
+            return ScResult.SKIP
+        finish_event.set()
+        return ScResult.OK
+
+    event_params = ScEventParams(question_node, ScEventType.ADD_INGOING_EDGE, event_callback)
+    sc_event = events_create(event_params)[0]
+    finish_event.wait(seconds)  # TODO: return status in 0.2.0
+    events_destroy(sc_event)
 
 
 def finish_action(action_node: ScAddr, status: Idtf = QuestionStatus.QUESTION_FINISHED) -> ScAddr:

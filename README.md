@@ -735,9 +735,10 @@ def call_agent(
 ```
 
 Agent wait function: Waits for creation of edge to reaction node for some seconds.
+Default reaction_node is `question_finished`.
 
 ```python
-def wait_agent(seconds: float, question_node: ScAddr, reaction_node: ScAddr) -> None: ...
+def wait_agent(seconds: float, question_node: ScAddr, reaction_node: ScAddr = None) -> None: ...
 ```
 
 Agent execute function: combines two previous functions -- calls, waits and returns question node and **True** if success
