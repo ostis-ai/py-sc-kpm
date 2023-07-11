@@ -6,7 +6,7 @@ from setuptools import find_packages, setup
 DIRECTORY_PATH = Path(__file__).parent
 README = (DIRECTORY_PATH / "README.md").read_text()
 
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 INSTALL_REQUIRES = ["py-sc-client>=0.2.6"]
 CURRENT_PYTHON = sys.version_info[:2]
 REQUIRED_PYTHON = (3, 8)
