@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Atomic operations with actions: create, add arguments and call
+### Changed
+- Wait agent function uses ScEvent
 
 ## [v0.1.0]
 ### Added
