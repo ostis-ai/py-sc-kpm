@@ -127,16 +127,23 @@ class TestActionUtils(BaseTestCase):
         self.server.add_modules(module)
         with self.server.register_modules():
             action_node = create_action()
-            timeout = 1.0
-            # Time is over
+            timeout = 0.5
+            # Action is not finished while waiting
             start_time = time.time()
-            wait_agent(timeout, action_node)
-            finish_time = time.time()
-            self.assertLess(start_time + timeout, finish_time)
-            # Time isn't over
+            wait_agent(timeout, action_node, ScKeynodes[QuestionStatus.QUESTION_FINISHED])
+            timedelta = time.time() - start_time
+            self.assertGreater(timedelta, timeout)
+            # Action is finished while waiting
             call_action(action_node, test_node_idtf)
             start_time = time.time()
-            wait_agent(timeout, action_node)
-            finish_time = time.time()
-            self.assertGreater(start_time + timeout, finish_time)
+            wait_agent(timeout, action_node, ScKeynodes[QuestionStatus.QUESTION_FINISHED])
+            timedelta = time.time() - start_time
+            self.assertLess(timedelta, timeout)
+            # Action finished before waiting
+            call_action(action_node, test_node_idtf)
+            time.sleep(0.1)
+            start_time = time.time()
+            wait_agent(timeout, action_node, ScKeynodes[QuestionStatus.QUESTION_FINISHED])
+            timedelta = time.time() - start_time
+            self.assertLess(timedelta, timeout)
         self.server.remove_modules(module)

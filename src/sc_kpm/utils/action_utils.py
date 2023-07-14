@@ -148,8 +148,10 @@ def wait_agent(seconds: float, question_node: ScAddr, reaction_node: ScAddr = No
 
     event_params = ScEventParams(question_node, ScEventType.ADD_INGOING_EDGE, event_callback)
     sc_event = events_create(event_params)[0]
-    finish_event.wait(seconds)  # TODO: return status in 0.2.0
+    if not check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, reaction_node, question_node):
+        finish_event.wait(seconds)
     events_destroy(sc_event)
+    # TODO: return status in 0.2.0
 
 
 def finish_action(action_node: ScAddr, status: Idtf = QuestionStatus.QUESTION_FINISHED) -> ScAddr:
