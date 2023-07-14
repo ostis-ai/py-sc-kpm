@@ -6,7 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [v0.1.1]
+## [v0.1.2]
+### Fixed
+- Wait agent bug: it failed if action finished before
+
+## [v0.1.1] - [YANKED]
 ### Added
 - Atomic operations with actions: create, add arguments and call
 ### Changed
