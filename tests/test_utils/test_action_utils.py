@@ -9,10 +9,20 @@ from sc_client.constants import sc_types
 from sc_client.constants.common import ScEventType
 
 from sc_kpm import ScAgent, ScKeynodes, ScModule
-from sc_kpm.identifiers import CommonIdentifiers
+from sc_kpm.identifiers import CommonIdentifiers, QuestionStatus
 from sc_kpm.sc_result import ScResult
-from sc_kpm.utils.action_utils import check_action_class, execute_agent, finish_action_with_status
-from sc_kpm.utils.common_utils import create_edge, create_node
+from sc_kpm.utils.action_utils import (
+    add_action_arguments,
+    call_action,
+    call_agent,
+    check_action_class,
+    create_action,
+    execute_action,
+    execute_agent,
+    finish_action_with_status,
+    wait_agent,
+)
+from sc_kpm.utils.common_utils import check_edge, create_edge, create_node
 from tests.common_tests import BaseTestCase
 
 test_node_idtf = "test_node"
@@ -51,9 +61,62 @@ class TestActionUtils(BaseTestCase):
         self.assertFalse(check_action_class(action_class_node, test_node))
         self.assertFalse(check_action_class(action_class_idtf, test_node))
 
-    def test_call_agent(self):
+    def test_execute_agent(self):
         module = ScModuleTest()
         self.server.add_modules(module)
         with self.server.register_modules():
             assert execute_agent({}, [], test_node_idtf)[1]
+        self.server.remove_modules(module)
+
+    def test_call_agent(self):
+        module = ScModuleTest()
+        self.server.add_modules(module)
+        with self.server.register_modules():
+            question = call_agent({}, [], test_node_idtf)
+            wait_agent(1, question, ScKeynodes[QuestionStatus.QUESTION_FINISHED])
+            result = check_edge(
+                sc_types.EDGE_ACCESS_VAR_POS_PERM, ScKeynodes[QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY], question
+            )
+            self.assertTrue(result)
+        self.server.remove_modules(module)
+
+    def test_wrong_execute_agent(self):
+        module = ScModuleTest()
+        self.server.add_modules(module)
+        with self.server.register_modules():
+            self.assertFalse(execute_agent({}, [], "wrong_agent", wait_time=1)[1])
+        self.server.remove_modules(module)
+
+    def test_execute_action(self):
+        module = ScModuleTest()
+        self.server.add_modules(module)
+        with self.server.register_modules():
+            action_node = create_action()
+            add_action_arguments(action_node, {})
+            assert execute_action(action_node, test_node_idtf)
+        self.server.remove_modules(module)
+
+    def test_call_action(self):
+        module = ScModuleTest()
+        self.server.add_modules(module)
+        with self.server.register_modules():
+            action_node = create_action()
+            add_action_arguments(action_node, {})
+            call_action(action_node, test_node_idtf)
+            wait_agent(1, action_node, ScKeynodes[QuestionStatus.QUESTION_FINISHED])
+            result = check_edge(
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                ScKeynodes[QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY],
+                action_node,
+            )
+            self.assertTrue(result)
+        self.server.remove_modules(module)
+
+    def test_wrong_execute_action(self):
+        module = ScModuleTest()
+        self.server.add_modules(module)
+        with self.server.register_modules():
+            action_node = create_action()
+            add_action_arguments(action_node, {})
+            self.assertFalse(execute_action(action_node, "wrong_agent", wait_time=1))
         self.server.remove_modules(module)

@@ -776,6 +776,63 @@ wait_agent(3, question, ScKeynodes[QuestionStatus.QUESTION_FINISHED])
 question, is_successfully = execute_agent(**kwargs, wait_time=3)  # ScAddr(...), bool
 ```
 
+### Create, call and execute action
+
+Functions that allow to create action and add arguments and call later.
+
+Function that creates action with concepts and return its ScAddr.
+
+```python
+def create_action(*concepts: Idtf) -> ScAddr: ...
+```
+
+Function that creates arguments of action
+
+```python
+def add_action_arguments(action_node: ScAddr, arguments: Dict[ScAddr, IsDynamic]) -> None: ...
+```
+
+Now you can call or execute action.
+Action call functions don't return action_node because it's parameter to them.
+
+```python
+def call_action(
+        action_node: ScAddr, initiation: Idtf = QuestionStatus.QUESTION_INITIATED
+) -> None: ...
+```
+
+```python
+def execute_action(
+        action_node: ScAddr,
+        initiation: Idtf = QuestionStatus.QUESTION_INITIATED,
+        reaction: Idtf = QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY,
+        wait_time: float = COMMON_WAIT_TIME,
+) -> bool: ...
+```
+
+Example:
+
+```python
+from sc_client.models import ScLinkContentType
+from sc_kpm import ScKeynodes
+from sc_kpm.identifiers import CommonIdentifiers, QuestionStatus
+from sc_kpm.utils import create_link
+from sc_kpm.utils.action_utils import add_action_arguments, call_action, create_action, execute_action, wait_agent
+
+arg1 = create_link(2, ScLinkContentType.INT)
+arg2 = create_link(3, ScLinkContentType.INT)
+
+action_node = create_action(CommonIdentifiers.QUESTION, "some_class_name")  # ScAddr(...)
+# Do something here
+arguments = {arg1: False, arg2: False}
+
+add_action_arguments(action_node, arguments)
+call_action(action_node)
+wait_agent(3, action_node, ScKeynodes[QuestionStatus.QUESTION_FINISHED])
+# or
+is_successful = execute_action(action_node, wait_time=3)  # bool
+```
+
 ### Finish action
 
 Function `finish_action` connects status class to action node:
