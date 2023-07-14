@@ -3,6 +3,7 @@ This source file is part of an OSTIS project. For the latest info, see https://g
 Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
+import time
 
 from sc_client.client import delete_elements
 from sc_client.constants import sc_types
@@ -119,4 +120,23 @@ class TestActionUtils(BaseTestCase):
             action_node = create_action()
             add_action_arguments(action_node, {})
             self.assertFalse(execute_action(action_node, "wrong_agent", wait_time=1))
+        self.server.remove_modules(module)
+
+    def test_wait_action(self):
+        module = ScModuleTest()
+        self.server.add_modules(module)
+        with self.server.register_modules():
+            action_node = create_action()
+            timeout = 1.0
+            # Time is over
+            start_time = time.time()
+            wait_agent(timeout, action_node)
+            finish_time = time.time()
+            self.assertLess(start_time + timeout, finish_time)
+            # Time isn't over
+            call_action(action_node, test_node_idtf)
+            start_time = time.time()
+            wait_agent(timeout, action_node)
+            finish_time = time.time()
+            self.assertGreater(start_time + timeout, finish_time)
         self.server.remove_modules(module)
