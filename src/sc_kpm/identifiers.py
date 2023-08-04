@@ -6,7 +6,6 @@ Distributed under the MIT License
 from dataclasses import dataclass
 
 from sc_client.constants import sc_types
-
 from sc_kpm.sc_keynodes import Idtf, ScKeynodes
 
 

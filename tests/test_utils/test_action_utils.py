@@ -8,7 +8,6 @@ import time
 from sc_client.client import delete_elements
 from sc_client.constants import sc_types
 from sc_client.constants.common import ScEventType
-
 from sc_kpm import ScAgent, ScKeynodes, ScModule
 from sc_kpm.identifiers import CommonIdentifiers, QuestionStatus
 from sc_kpm.sc_result import ScResult

@@ -6,8 +6,7 @@ Distributed under the MIT License
 
 from sc_client.client import check_elements
 from sc_client.constants import sc_types
-from sc_client.constants.exceptions import InvalidTypeError
-
+from sc_client.exceptions import InvalidTypeError
 from sc_kpm.sc_sets import ScSet, ScStructure
 from sc_kpm.utils.common_utils import create_node
 from tests.common_tests import BaseTestCase

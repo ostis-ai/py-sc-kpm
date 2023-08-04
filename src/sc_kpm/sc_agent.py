@@ -11,9 +11,8 @@ from typing import Optional, Union
 from sc_client import client
 from sc_client.constants import sc_types
 from sc_client.constants.common import ScEventType
-from sc_client.constants.exceptions import InvalidValueError
+from sc_client.exceptions import InvalidValueError
 from sc_client.models import ScAddr, ScEvent, ScEventParams
-
 from sc_kpm.identifiers import QuestionStatus
 from sc_kpm.sc_keynodes import Idtf, ScKeynodes
 from sc_kpm.sc_result import ScResult

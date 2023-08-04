@@ -3,7 +3,6 @@ from typing import Iterator, List
 from sc_client.client import template_generate, template_search
 from sc_client.constants import sc_types
 from sc_client.models import ScAddr, ScTemplate
-
 from sc_kpm.sc_keynodes import ScKeynodes
 from sc_kpm.sc_sets.sc_set import ScSet
 

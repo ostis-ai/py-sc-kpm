@@ -9,7 +9,6 @@ import threading
 
 from sc_client.constants.common import ScEventType
 from sc_client.models import ScAddr
-
 from sc_kpm import ScAgent, ScAgentClassic, ScModule, ScResult
 from sc_kpm.identifiers import CommonIdentifiers
 from sc_kpm.utils.action_utils import execute_agent, finish_action_with_status

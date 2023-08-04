@@ -10,7 +10,6 @@ import logging
 
 from sc_client.constants.common import ScEventType
 from sc_client.models import ScAddr, ScLinkContentType
-
 from sc_kpm import ScAgent, ScModule, ScResult, ScServer
 from sc_kpm.sc_sets import ScStructure
 from sc_kpm.utils import create_link, get_link_content_data

@@ -1,8 +1,8 @@
 from common_tests import BaseTestCase
+
 from sc_client.client import create_elements, delete_elements
 from sc_client.constants import sc_types
 from sc_client.models import ScConstruction, ScLinkContent, ScLinkContentType
-
 from sc_kpm.utils import create_links
 from sc_kpm.utils.iteration_utils import iter_link_contents_data, iter_links_data
 

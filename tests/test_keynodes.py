@@ -1,10 +1,10 @@
 from common_tests import BaseTestCase
+
 from sc_client import client
 from sc_client.client import check_elements, delete_elements
 from sc_client.constants import sc_types
-from sc_client.constants.exceptions import InvalidValueError
+from sc_client.exceptions import InvalidValueError
 from sc_client.models import ScAddr, ScIdtfResolveParams
-
 from sc_kpm import ScKeynodes
 
 

@@ -1,8 +1,7 @@
 from sc_client.client import check_elements
 from sc_client.constants import ScType, sc_types
-from sc_client.constants.exceptions import InvalidTypeError
+from sc_client.exceptions import InvalidTypeError
 from sc_client.models import ScAddr
-
 from sc_kpm.sc_sets.sc_set import ScSet
 
 

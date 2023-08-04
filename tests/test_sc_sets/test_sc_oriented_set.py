@@ -7,7 +7,6 @@ Distributed under the MIT License
 from sc_client.client import delete_elements, template_search
 from sc_client.constants import sc_types
 from sc_client.models import ScAddr, ScTemplate
-
 from sc_kpm import ScKeynodes
 from sc_kpm.identifiers import CommonIdentifiers, ScAlias
 from sc_kpm.sc_sets.sc_oriented_set import ScOrientedSet

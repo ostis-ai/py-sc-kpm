@@ -9,8 +9,8 @@ from typing import Dict, Optional
 
 from sc_client import client
 from sc_client.client import delete_elements
-from sc_client.constants.exceptions import InvalidValueError
 from sc_client.constants.sc_types import NODE_CONST_ROLE, ScType
+from sc_client.exceptions import InvalidValueError
 from sc_client.models import ScAddr, ScIdtfResolveParams
 
 Idtf = str

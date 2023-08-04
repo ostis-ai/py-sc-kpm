@@ -12,7 +12,6 @@ from sc_client.client import events_create, events_destroy
 from sc_client.constants import sc_types
 from sc_client.constants.common import ScEventType
 from sc_client.models import ScAddr, ScConstruction, ScEventParams, ScTemplate
-
 from sc_kpm.identifiers import CommonIdentifiers, QuestionStatus, ScAlias
 from sc_kpm.sc_keynodes import Idtf, ScKeynodes
 from sc_kpm.sc_result import ScResult

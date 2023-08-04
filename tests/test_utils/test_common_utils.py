@@ -7,7 +7,6 @@ Distributed under the MIT License
 from sc_client import client
 from sc_client.client import delete_elements
 from sc_client.constants import sc_types
-
 from sc_kpm import ScKeynodes
 from sc_kpm.utils.common_utils import (
     check_edge,
