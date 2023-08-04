@@ -50,7 +50,7 @@ class ScKeynodesMeta(type):
         """Get keynode. If sc_type is valid, an element will be created in the KB"""
         addr = cls._dict.get(identifier)
         if addr is None:
-            params = ScIdtfResolveParams(idtf=identifier, type=sc_type)
+            params = ScIdtfResolveParams(identifier, sc_type)
             addr = client.resolve_keynodes(params)[0]
             if addr.is_valid():
                 cls._dict[identifier] = addr

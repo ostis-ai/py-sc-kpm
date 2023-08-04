@@ -11,7 +11,7 @@ from sc_kpm import ScKeynodes
 class KeynodesTests(BaseTestCase):
     def test_get_existed_keynode(self):
         idtf = "idtf_existed_keynode"
-        params = ScIdtfResolveParams(idtf=idtf, type=sc_types.NODE_CONST)
+        params = ScIdtfResolveParams(idtf, sc_types.NODE_CONST)
         addr = client.resolve_keynodes(params)[0]
         result = ScKeynodes[idtf]
         self.assertEqual(result, addr)

@@ -4,11 +4,10 @@ import json
 import logging
 import threading
 import time
-from typing import Callable
+from typing import Any, Callable
 
 import websocket
 
-from sc_client.client.payload_factory import ScPayload
 from sc_client.constants import common, config
 from sc_client.exceptions import PayloadMaxSizeError
 from sc_client.models import Response, ScAddr, ScEvent
@@ -134,7 +133,7 @@ class ScClient:
             else:
                 self._on_error(self.ws_app, ConnectionAbortedError("Sc-server takes a long time to respond"))
 
-    def send_message(self, request_type: common.ClientCommand, payload: ScPayload) -> Response:
+    def send_message(self, request_type: common.ClientCommand, payload: Any) -> Response:
         with self.lock_instance:
             self.command_id += 1
             command_id = self.command_id

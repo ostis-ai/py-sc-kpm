@@ -56,7 +56,8 @@ class ScConstructionCommand:
     data: Any
 
 
-class ScIdtfResolveParams(TypedDict):
+@dataclass
+class ScIdtfResolveParams:
     idtf: str
     type: ScType | None
 
