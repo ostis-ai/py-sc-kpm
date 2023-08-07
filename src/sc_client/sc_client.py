@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from sc_client._payload_factory import PayloadFactory
+from sc_client._response_processor import ResponseProcessor
+from sc_client._sc_connection import ScConnection
 from sc_client.constants import common
 from sc_client.constants.common import MESSAGE, REF, ClientCommand, RequestType
 from sc_client.constants.config import SERVER_RECONNECT_RETRIES, SERVER_RECONNECT_RETRY_DELAY
@@ -19,9 +22,6 @@ from sc_client.models import (
     ScType,
 )
 from sc_client.models.sc_construction import ScLinkContentData
-from sc_client.sc_client.payload_factory import PayloadFactory
-from sc_client.sc_client.response_processor import ResponseProcessor
-from sc_client.sc_client.sc_connection import ScConnection
 
 
 class ScClient:
@@ -115,12 +115,16 @@ class ScClient:
         return self.run(common.ClientCommand.KEYNODES, *params)
 
     def template_search(
-        self, template: ScTemplate | str | ScTemplateIdtf | ScAddr, params: ScTemplateParams = None
+        self,
+        template: ScTemplate | str | ScTemplateIdtf | ScAddr,
+        params: ScTemplateParams = None,
     ) -> list[ScTemplateResult]:
         return self.run(common.ClientCommand.SEARCH_TEMPLATE, template, params)
 
     def template_generate(
-        self, template: ScTemplate | str | ScTemplateIdtf | ScAddr, params: ScTemplateParams = None
+        self,
+        template: ScTemplate | str | ScTemplateIdtf | ScAddr,
+        params: ScTemplateParams = None,
     ) -> ScTemplateResult:
         return self.run(common.ClientCommand.GENERATE_TEMPLATE, template, params)
 

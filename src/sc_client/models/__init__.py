@@ -5,6 +5,7 @@ from sc_client.models.sc_construction import (
     ScConstructionCommand,
     ScIdtfResolveParams,
     ScLinkContent,
+    ScLinkContentData,
     ScLinkContentType,
 )
 from sc_client.models.sc_event import ScEvent, ScEventCallbackFunc, ScEventParams
