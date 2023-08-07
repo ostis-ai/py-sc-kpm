@@ -8,7 +8,8 @@ For initialisation, you need only name of action class and event type if it isn'
 
 import logging
 
-from sc_client.models import ScAddr, ScLinkContentType
+from sc_client import ScAddr
+from sc_client.models import ScLinkContentType
 from sc_kpm import ScAgentClassic, ScModule, ScResult, ScServer
 from sc_kpm.identifiers import CommonIdentifiers
 from sc_kpm.sc_sets import ScStructure

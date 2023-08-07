@@ -5,8 +5,9 @@ Distributed under the MIT License
 """
 from dataclasses import dataclass
 
+from sc_client import sc_keynodes
+from sc_client._sc_keynodes import Idtf
 from sc_client.constants import sc_types
-from sc_kpm.sc_keynodes import Idtf, ScKeynodes
 
 
 @dataclass(frozen=True)
@@ -70,6 +71,6 @@ class _IdentifiersResolver:
         }
 
         for idtf, sc_type in types_map.items():
-            ScKeynodes.resolve(idtf, sc_type)
+            sc_keynodes.resolve(idtf, sc_type)
 
         cls.is_resolved = True

@@ -1,9 +1,8 @@
 from typing import Iterator, List
 
-from sc_client import template_generate, template_search
+from sc_client import ScAddr, sc_client, sc_keynodes
 from sc_client.constants import sc_types
-from sc_client.models import ScAddr, ScTemplate
-from sc_kpm.sc_keynodes import ScKeynodes
+from sc_client.models import ScTemplate
 from sc_kpm.sc_sets.sc_set import ScSet
 
 
@@ -25,9 +24,9 @@ class ScNumberedSet(ScSet):
                     sc_types.EDGE_ACCESS_VAR_POS_PERM,
                     element,
                     sc_types.EDGE_ACCESS_VAR_POS_PERM,
-                    ScKeynodes.rrel_index(index),
+                    sc_keynodes.rrel_index(index),
                 )
-            template_generate(template)
+            sc_client.template_generate(template)
 
     def __iter__(self) -> Iterator[ScAddr]:
         return iter(self.elements_list)
@@ -43,7 +42,7 @@ class ScNumberedSet(ScSet):
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
             sc_types.NODE_VAR_ROLE,
         )
-        results = template_search(templ)
+        results = sc_client.template_search(templ)
         sorted_results = sorted((result for result in results), key=lambda res: res[4].value)
         # Sort rrel elements addrs
         return [result[2] for result in sorted_results]
@@ -55,9 +54,9 @@ class ScNumberedSet(ScSet):
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
             sc_types.UNKNOWN,
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
-            ScKeynodes.rrel_index(i + 1),
+            sc_keynodes.rrel_index(i + 1),
         )
-        results = template_search(templ)
+        results = sc_client.template_search(templ)
         if not results:
             raise KeyError("No element by index")
         return results[0][2]

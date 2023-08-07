@@ -6,20 +6,12 @@ Distributed under the MIT License
 
 from typing import List, Optional, Union
 
-import sc_client
+from sc_client import ScAddr, ScType, sc_client, sc_keynodes
+from sc_client._sc_keynodes import Idtf
 from sc_client.constants import sc_types
-from sc_client.models import (
-    ScAddr,
-    ScConstruction,
-    ScLinkContent,
-    ScLinkContentType,
-    ScTemplate,
-    ScTemplateResult,
-    ScType,
-)
-from sc_client.models.sc_construction import ScLinkContentData
+from sc_client.models import ScLinkContent, ScLinkContentType, ScTemplate, ScTemplateResult
+from sc_client.models.sc_construction import ScConstruction, ScLinkContentData
 from sc_kpm.identifiers import CommonIdentifiers, ScAlias
-from sc_kpm.sc_keynodes import Idtf, ScKeynodes
 
 
 def create_nodes(*node_types: ScType) -> List[ScAddr]:
@@ -100,7 +92,7 @@ def get_edges(source: ScAddr, target: ScAddr, *edge_types: ScType) -> List[ScAdd
 
 
 def get_system_idtf(addr: ScAddr) -> Idtf:
-    nrel_system_idtf = ScKeynodes[CommonIdentifiers.NREL_SYSTEM_IDENTIFIER]
+    nrel_system_idtf = sc_keynodes[CommonIdentifiers.NREL_SYSTEM_IDENTIFIER]
 
     templ = ScTemplate()
     templ.triple_with_relation(

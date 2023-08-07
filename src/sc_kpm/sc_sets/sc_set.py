@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from typing import Iterator
 
-from sc_client import create_elements, delete_elements, template_search
+from sc_client import ScAddr, ScType, sc_client
 from sc_client.constants import sc_types
-from sc_client.models import ScAddr, ScConstruction, ScTemplate, ScTemplateResult, ScType
+from sc_client.models import ScConstruction, ScTemplate, ScTemplateResult
 from sc_kpm.utils.common_utils import create_node
 
 
@@ -40,7 +40,7 @@ class ScSet:
             construction = ScConstruction()
             for element in elements:
                 construction.create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, self._set_node, element)
-            create_elements(construction)
+            sc_client.create_elements(construction)
 
     @property
     def set_node(self) -> ScAddr:
@@ -82,16 +82,16 @@ class ScSet:
         templ = ScTemplate()
         for element in elements:
             templ.triple(self._set_node, sc_types.EDGE_ACCESS_VAR_POS_PERM, element)
-        template_results = template_search(templ)
-        delete_elements(*(res[1] for res in template_results))
+        template_results = sc_client.template_search(templ)
+        sc_client.delete_elements(*(res[1] for res in template_results))
 
     def clear(self) -> None:
         """Remove the connections between set_node and all elements"""
         template_results = self._elements_search_results()
-        delete_elements(*(res[1] for res in template_results))
+        sc_client.delete_elements(*(res[1] for res in template_results))
 
     def _elements_search_results(self) -> list[ScTemplateResult]:
         """Template search of all elements"""
         templ = ScTemplate()
         templ.triple(self._set_node, sc_types.EDGE_ACCESS_VAR_POS_PERM, sc_types.UNKNOWN)
-        return template_search(templ)
+        return sc_client.template_search(templ)

@@ -1,10 +1,9 @@
 from typing import Iterator, List, Optional
 
-from sc_client import delete_elements, template_generate, template_search
+from sc_client import ScAddr, sc_client, sc_keynodes
 from sc_client.constants import sc_types
-from sc_client.models import ScAddr, ScTemplate, ScTemplateResult
+from sc_client.models import ScTemplate, ScTemplateResult
 from sc_kpm.identifiers import CommonIdentifiers, ScAlias
-from sc_kpm.sc_keynodes import ScKeynodes
 from sc_kpm.sc_sets.sc_set import ScSet
 from sc_kpm.utils.common_utils import create_edge, create_role_relation, search_role_relation_template
 
@@ -33,7 +32,7 @@ class ScOrientedSet(ScSet):
 
     def __iter__(self) -> Iterator[ScAddr]:
         """Iterate by ScOrientedSet elements"""
-        start_template = search_role_relation_template(self._set_node, ScKeynodes[CommonIdentifiers.RREL_ONE])
+        start_template = search_role_relation_template(self._set_node, sc_keynodes[CommonIdentifiers.RREL_ONE])
         if not start_template:
             return
         yield start_template.get(ScAlias.ELEMENT)
@@ -59,7 +58,7 @@ class ScOrientedSet(ScSet):
 
     def _create_first_element_edge(self, element: ScAddr) -> ScAddr:
         """Create marked with rrel_1 edge to first element"""
-        return create_role_relation(self._set_node, element, ScKeynodes[CommonIdentifiers.RREL_ONE])
+        return create_role_relation(self._set_node, element, sc_keynodes[CommonIdentifiers.RREL_ONE])
 
     def _get_last_edge_and_delete_rrel_last(self) -> Optional[ScAddr]:
         """Search last edge of ScOrientedSet is it exists"""
@@ -70,16 +69,18 @@ class ScOrientedSet(ScSet):
             sc_types.EDGE_ACCESS_VAR_POS_PERM >> ScAlias.ACCESS_EDGE,
             sc_types.UNKNOWN,
             sc_types.EDGE_ACCESS_VAR_POS_PERM >> ScAlias.RELATION_EDGE,
-            ScKeynodes[CommonIdentifiers.RREL_LAST],
+            sc_keynodes[CommonIdentifiers.RREL_LAST],
         )
-        last_elem_templates = template_search(template)
+        last_elem_templates = sc_client.template_search(template)
         if last_elem_templates:
             last_elem_template = last_elem_templates[0]
-            delete_elements(last_elem_template.get(ScAlias.RELATION_EDGE))  # Delete edge between rrel_last and edge
+            sc_client.delete_elements(
+                last_elem_template.get(ScAlias.RELATION_EDGE)
+            )  # Delete edge between rrel_last and edge
             return last_elem_template.get(ScAlias.ACCESS_EDGE)
 
         # Search unmarked last edge
-        next_elem_result = search_role_relation_template(self._set_node, ScKeynodes[CommonIdentifiers.RREL_ONE])
+        next_elem_result = search_role_relation_template(self._set_node, sc_keynodes[CommonIdentifiers.RREL_ONE])
         while True:
             next_edge = next_elem_result.get(ScAlias.ACCESS_EDGE)
             next_elem_result = self._search_next_element_template(next_edge)
@@ -99,13 +100,13 @@ class ScOrientedSet(ScSet):
             sc_types.EDGE_D_COMMON_VAR,
             ScAlias.ACCESS_EDGE,
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
-            ScKeynodes[CommonIdentifiers.NREL_BASIC_SEQUENCE],
+            sc_keynodes[CommonIdentifiers.NREL_BASIC_SEQUENCE],
         )
-        return template_generate(template).get(ScAlias.ACCESS_EDGE)
+        return sc_client.template_generate(template).get(ScAlias.ACCESS_EDGE)
 
     @staticmethod
     def _mark_edge_with_rrel_last(last_edge: ScAddr) -> None:
-        create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, ScKeynodes[CommonIdentifiers.RREL_LAST], last_edge)
+        create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, sc_keynodes[CommonIdentifiers.RREL_LAST], last_edge)
 
     def _search_next_element_template(self, cur_element_edge: ScAddr) -> Optional[ScTemplateResult]:
         templ = ScTemplate()
@@ -114,8 +115,8 @@ class ScOrientedSet(ScSet):
             sc_types.EDGE_D_COMMON_VAR,
             sc_types.EDGE_ACCESS_VAR_POS_PERM >> ScAlias.ACCESS_EDGE,
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
-            ScKeynodes[CommonIdentifiers.NREL_BASIC_SEQUENCE],
+            sc_keynodes[CommonIdentifiers.NREL_BASIC_SEQUENCE],
         )
         templ.triple(self._set_node, ScAlias.ACCESS_EDGE, sc_types.UNKNOWN >> ScAlias.ELEMENT)
-        search_results = template_search(templ)
+        search_results = sc_client.template_search(templ)
         return search_results[0] if search_results else None

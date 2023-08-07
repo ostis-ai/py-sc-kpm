@@ -5,7 +5,7 @@ For this we wait for SIGINT.
 
 import logging
 
-from sc_client.models import ScAddr
+from sc_client import ScAddr
 from sc_kpm import ScAgentClassic, ScModule, ScResult, ScServer
 
 logging.basicConfig(level=logging.INFO)

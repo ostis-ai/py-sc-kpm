@@ -4,9 +4,8 @@ Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
 import sc_client
-from sc_client import delete_elements
+from sc_client import sc_client, sc_keynodes
 from sc_client.constants import sc_types
-from sc_kpm import ScKeynodes
 from sc_kpm.utils.common_utils import (
     check_edge,
     create_binary_relation,
@@ -125,7 +124,7 @@ class TestActionUtils(BaseTestCase):
 
     def test_get_system_idtf(self):
         test_idtf = "rrel_1"
-        test_node = ScKeynodes[test_idtf]
+        test_node = sc_keynodes[test_idtf]
         assert get_system_idtf(test_node) == test_idtf
 
     def test_deletion_utils(self):
@@ -133,7 +132,7 @@ class TestActionUtils(BaseTestCase):
         rrel_edge = create_binary_relation(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, rrel_trg)
         nrel_edge = create_norole_relation(src, nrel_trg)
         assert delete_edges(src, rrel_trg, sc_types.EDGE_ACCESS_VAR_POS_PERM)
-        assert delete_elements(nrel_edge, src, rrel_trg, nrel_trg)
+        assert sc_client.delete_elements(nrel_edge, src, rrel_trg, nrel_trg)
 
         result = sc_client.check_elements(rrel_edge)[0]
         assert result.is_valid() is False

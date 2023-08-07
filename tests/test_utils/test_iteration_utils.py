@@ -1,6 +1,6 @@
 from common_tests import BaseTestCase
 
-from sc_client import create_elements, delete_elements
+from sc_client import sc_client, sc_keynodes
 from sc_client.constants import sc_types
 from sc_client.models import ScConstruction, ScLinkContent, ScLinkContentType
 from sc_kpm.utils import create_links
@@ -16,14 +16,14 @@ class TestActionUtils(BaseTestCase):
         construction = ScConstruction()
         construction.create_link(sc_types.LINK_CONST, content1)
         construction.create_link(sc_types.LINK_CONST, content2)
-        links = create_elements(construction)
+        links = sc_client.create_elements(construction)
         links_data_from_iterator = list(iter_link_contents_data(contents))
         self.assertEqual(links_data_from_iterator, data)
-        delete_elements(*links)
+        sc_client.delete_elements(*links)
 
     def test_iter_links_data(self):
         links_data = ["content1", "content2"]
         links = create_links(*links_data)
         links_data_from_iterator = list(iter_links_data(links))
         self.assertEqual(links_data_from_iterator, links_data)
-        delete_elements(*links)
+        sc_client.delete_elements(*links)
