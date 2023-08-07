@@ -1,4 +1,4 @@
-from sc_client.constants.common import ERRORS, MESSAGE, REF, ClientCommand, RequestType
+from sc_client.constants.common import MESSAGE, REF, ClientCommand, RequestType
 from sc_client.exceptions import ServerError
 from sc_client.payload_factory import PayloadFactory
 from sc_client.response_processor import ResponseProcessor
@@ -30,9 +30,9 @@ class Executor:
     def run(self, command_type: ClientCommand, *args):
         payload = self.payload_factory.run(command_type, *args)
         response = self.sc_client.send_message(self._executor_mapper.get(command_type), payload)
-        if response.get(ERRORS):
+        if response.errors:
             error_msgs = []
-            errors = response.get(ERRORS)
+            errors = response.errors
             if isinstance(errors, str):
                 error_msgs.append(errors)
             else:

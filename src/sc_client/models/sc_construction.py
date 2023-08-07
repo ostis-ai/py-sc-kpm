@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, TypedDict, Union
+from typing import Any, Union
 
 from sc_client.constants import common
+from sc_client.constants.common import ERRORS, EVENT, ID, PAYLOAD, STATUS
 from sc_client.constants.config import LINK_CONTENT_MAX_SIZE
 from sc_client.exceptions import InvalidTypeError, LinkContentOversizeError
 from sc_client.models import ScAddr
@@ -85,8 +87,22 @@ class ScLinkContent:
         return self.content_type.name.lower()
 
 
-class Response(TypedDict):
+@dataclass
+class Response:
     id: int
     status: bool
     event: bool
     payload: Any
+    errors: Any
+
+    @classmethod
+    def load(cls, response: str) -> Response:
+        response: dict = json.loads(response)
+        instance = cls(
+            id=response.get(ID),
+            status=response.get(STATUS),
+            event=response.get(EVENT),
+            payload=response.get(PAYLOAD),
+            errors=response.get(ERRORS),
+        )
+        return instance

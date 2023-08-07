@@ -60,14 +60,14 @@ class ScClient:
 
     def _on_message(self, _, response: str) -> None:
         self._logger.debug(f"Receive: {str(response)[:config.LOGGING_MAX_SIZE]}")
-        response = json.loads(response, object_hook=Response)
-        if response.get(common.EVENT):
+        response = Response.load(response)
+        if response.event:
             threading.Thread(
                 target=self._emit_callback,
-                args=(response.get(common.ID), response.get(common.PAYLOAD)),
+                args=(response.id, response.payload),
             ).start()
         else:
-            self.responses_dict[response.get(common.ID)] = response
+            self.responses_dict[response.id] = response
 
     def _emit_callback(self, event_id: int, elems: list[int]) -> None:
         event = self.events_dict.get(event_id)

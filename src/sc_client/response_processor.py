@@ -15,32 +15,32 @@ class BaseResponseProcessor:
 
 class CreateElementsResponseProcessor(BaseResponseProcessor):
     def __call__(self, response: Response, *_) -> list[ScAddr]:
-        return [ScAddr(addr_value) for addr_value in response.get(c.PAYLOAD)]
+        return [ScAddr(addr_value) for addr_value in response.payload]
 
 
 class CreateElementsBySCsResponseProcessor(BaseResponseProcessor):
     def __call__(self, response: Response, *_) -> list[bool]:
-        return [bool(result) for result in response.get(c.PAYLOAD)]
+        return [bool(result) for result in response.payload]
 
 
 class CheckElementsResponseProcessor(BaseResponseProcessor):
     def __call__(self, response: Response, *_) -> list[ScType]:
-        return [ScType(type_value) for type_value in response.get(c.PAYLOAD)]
+        return [ScType(type_value) for type_value in response.payload]
 
 
 class DeleteElementsResponseProcessor(BaseResponseProcessor):
     def __call__(self, response: Response, *_) -> bool:
-        return response.get(c.STATUS)
+        return response.status
 
 
 class SetLinkContentResponseProcessor(BaseResponseProcessor):
     def __call__(self, response: Response, *_) -> bool:
-        return response.get(c.STATUS)
+        return response.status
 
 
 class GetLinkContentResponseProcessor(BaseResponseProcessor):
     def __call__(self, response: Response, *_) -> list[ScLinkContent]:
-        response_payload = response.get(c.PAYLOAD)
+        response_payload = response.payload
         result = []
         for link in response_payload:
             str_type: str = link.get(c.TYPE)
@@ -50,7 +50,7 @@ class GetLinkContentResponseProcessor(BaseResponseProcessor):
 
 class GetLinksByContentResponseProcessor(BaseResponseProcessor):
     def __call__(self, response: Response, *_) -> list[list[ScAddr]]:
-        response_payload = response.get(c.PAYLOAD)
+        response_payload = response.payload
         if response_payload:
             return [[ScAddr(addr_value) for addr_value in addr_list] for addr_list in response_payload]
         return response_payload
@@ -62,23 +62,23 @@ class GetLinksByContentSubstringResponseProcessor(GetLinksByContentResponseProce
 
 class GetLinksContentsByContentSubstringResponseProcessor(BaseResponseProcessor):
     def __call__(self, response: Response, *_) -> list[list[ScAddr]]:
-        response_payload = response.get(c.PAYLOAD)
+        response_payload = response.payload
         return response_payload
 
 
 class ResolveKeynodesResponseProcessor(BaseResponseProcessor):
     def __call__(self, response: Response, *_) -> list[ScAddr]:
-        response_payload = response.get(c.PAYLOAD)
+        response_payload = response.payload
         if response_payload:
             return [ScAddr(addr_value) for addr_value in response_payload]
-        return response
+        return response  # TODO
 
 
 class TemplateSearchResponseProcessor(BaseResponseProcessor):
     def __call__(self, response: Response, *_) -> list[ScTemplateResult]:
         result = []
-        if response.get(c.STATUS):
-            response_payload = response.get(c.PAYLOAD)
+        if response.status:
+            response_payload = response.payload
             aliases = response_payload.get(c.ALIASES)
             all_addrs = response_payload.get(c.ADDRS)
             for addrs_list in all_addrs:
@@ -90,8 +90,8 @@ class TemplateSearchResponseProcessor(BaseResponseProcessor):
 class TemplateGenerateResponseProcessor(BaseResponseProcessor):
     def __call__(self, response: Response, *_) -> ScTemplateResult:
         result = None
-        if response.get(c.STATUS):
-            response_payload = response.get(c.PAYLOAD)
+        if response.status:
+            response_payload = response.payload
             aliases = response_payload.get(c.ALIASES)
             addrs_list = response_payload.get(c.ADDRS)
             addrs = [ScAddr(addr) for addr in addrs_list]
@@ -103,7 +103,7 @@ class EventsCreateResponseProcessor(BaseResponseProcessor):
     def __call__(self, response: Response, *events: ScEvent) -> list[ScEvent]:
         result = []
         for count, event in enumerate(events):
-            command_id = response.get(c.PAYLOAD)[count]
+            command_id = response.payload[count]
             sc_event = ScEvent(command_id, event.event_type, event.callback)
             self.sc_client.set_event(sc_event)
             result.append(sc_event)
@@ -114,7 +114,7 @@ class EventsDestroyResponseProcessor(BaseResponseProcessor):
     def __call__(self, response: Response, *events: ScEvent) -> bool:
         for event in events:
             self.sc_client.drop_event(event.id)
-        return response.get(c.STATUS)
+        return response.status
 
 
 class ResponseProcessor:
