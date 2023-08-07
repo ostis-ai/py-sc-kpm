@@ -69,9 +69,7 @@ class GetLinksContentsByContentSubstringResponseProcessor(BaseResponseProcessor)
 class ResolveKeynodesResponseProcessor(BaseResponseProcessor):
     def __call__(self, response: Response, *_) -> list[ScAddr]:
         response_payload = response.payload
-        if response_payload:
-            return [ScAddr(addr_value) for addr_value in response_payload]
-        return response  # TODO
+        return [ScAddr(addr_value) for addr_value in response_payload]
 
 
 class TemplateSearchResponseProcessor(BaseResponseProcessor):

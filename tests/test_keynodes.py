@@ -16,6 +16,10 @@ class KeynodesTests(BaseTestCase):
         result = ScKeynodes[idtf]
         self.assertEqual(result, addr)
 
+    def test_resolve_no_keynode(self):
+        addrs = sc_client.resolve_keynodes()
+        self.assertEqual([], addrs)
+
     def test_get_unknown_idtf(self):
         idtf = "idtf_unknown_idtf"
         self.assertRaises(InvalidValueError, ScKeynodes.__getitem__, idtf)
