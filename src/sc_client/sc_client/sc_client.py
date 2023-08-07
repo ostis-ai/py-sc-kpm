@@ -25,10 +25,10 @@ from sc_client.sc_client.sc_connection import ScConnection
 
 
 class ScClient:
-    def __init__(self):
+    def __init__(self) -> None:
         self.sc_connection = ScConnection()
-        self.payload_factory = PayloadFactory()
-        self.response_processor = ResponseProcessor(self.sc_connection)
+        self._payload_factory = PayloadFactory()
+        self._response_processor = ResponseProcessor(self.sc_connection)
         self._executor_mapper = {
             ClientCommand.CREATE_ELEMENTS: RequestType.CREATE_ELEMENTS,
             ClientCommand.CREATE_ELEMENTS_BY_SCS: RequestType.CREATE_ELEMENTS_BY_SCS,
@@ -46,8 +46,8 @@ class ScClient:
             ClientCommand.SEARCH_TEMPLATE: RequestType.SEARCH_TEMPLATE,
         }
 
-    def run(self, command_type: ClientCommand, *args):
-        payload = self.payload_factory.run(command_type, *args)
+    def run(self, command_type: ClientCommand, *args: any):
+        payload = self._payload_factory.run(command_type, *args)
         response = self.sc_connection.send_message(self._executor_mapper.get(command_type), payload)
         if response.errors:
             error_msgs = []
@@ -56,11 +56,11 @@ class ScClient:
                 error_msgs.append(errors)
             else:
                 for error in errors:
-                    payload_part = "\nPayload: " + str(payload[int(error.get(REF))]) if error.get(REF) else ""
+                    payload_part = f"\nPayload: {payload[int(error.get(REF))]}" if error.get(REF) else ""
                     error_msgs.append(error.get(MESSAGE) + payload_part)
             error_msgs = "\n".join(error_msgs)
             raise ServerError(error_msgs)
-        return self.response_processor.run(command_type, response, *args)
+        return self._response_processor.run(command_type, response, *args)
 
     def connect(self, url: str) -> None:
         self.sc_connection.set_connection(url)

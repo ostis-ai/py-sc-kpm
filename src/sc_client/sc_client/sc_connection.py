@@ -15,7 +15,7 @@ from sc_client.models import Response, ScAddr, ScEvent
 
 
 class ScConnection:
-    def __init__(self):
+    def __init__(self) -> None:
         self._logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
         self.is_open = False
         self.lock_instance = threading.Lock()

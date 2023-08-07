@@ -5,7 +5,7 @@ from sc_client.exceptions import ErrorNotes, InvalidTypeError
 
 
 class ScType:
-    def __init__(self, value: int = 0):
+    def __init__(self, value: int = 0) -> None:
         if not isinstance(value, int):
             raise InvalidTypeError(ErrorNotes.IntTypeInitialization)
         self._value = value

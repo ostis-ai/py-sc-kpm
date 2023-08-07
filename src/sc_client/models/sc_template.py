@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Dict, Iterator, List, Optional, Tuple, Union
+from typing import Dict, Iterator, Tuple, Union
 
 from sc_client.exceptions import InvalidTypeError
 from sc_client.models.sc_addr import ScAddr
@@ -14,7 +16,7 @@ ScTemplateIdtf = str
 
 class ScTemplateValue:
     value: ScTemplateValueItem
-    alias: Optional[str] = None
+    alias: str | None = None
 
     def __init__(self, param: ScTemplateParam):
         if isinstance(param, tuple):
@@ -35,7 +37,7 @@ class ScTemplateTriple:
     edge: ScTemplateValue
     trg: ScTemplateValue
 
-    def __init__(self, src: ScTemplateParam, edge: ScTemplateParam, trg: ScTemplateParam):
+    def __init__(self, src: ScTemplateParam, edge: ScTemplateParam, trg: ScTemplateParam) -> None:
         self.src = ScTemplateValue(src)
         self.edge = ScTemplateValue(edge)
         self.trg = ScTemplateValue(trg)
@@ -43,7 +45,7 @@ class ScTemplateTriple:
 
 class ScTemplate:
     def __init__(self) -> None:
-        self.triple_list: List[ScTemplateTriple] = []
+        self.triple_list: list[ScTemplateTriple] = []
 
     def triple(
         self,
@@ -71,14 +73,14 @@ class ScTemplate:
 class ScTemplateResult:
     addrs_iter: Iterator[ScAddr]
 
-    def __init__(self, addrs: List[ScAddr], aliases: Dict[str, int]) -> None:
+    def __init__(self, addrs: list[ScAddr], aliases: dict[str, int]) -> None:
         self.addrs = addrs
         self.aliases = aliases
 
     def __len__(self) -> int:
         return len(self.addrs)
 
-    def get(self, alias_or_index: Union[str, int]) -> ScAddr:
+    def get(self, alias_or_index: str | int) -> ScAddr:
         """Get ScAddr by alias or index in the template result"""
         if isinstance(alias_or_index, str):
             return self.addrs[self.aliases[alias_or_index]]
@@ -88,10 +90,10 @@ class ScTemplateResult:
         """Get ScAddr by index in the template result"""
         return self.addrs[index]
 
-    def __iter__(self):
+    def __iter__(self) -> ScTemplateResult:
         """Iterate by triples"""
         self.addrs_iter = iter(self.addrs)
         return self
 
-    def __next__(self) -> Tuple[ScAddr, ScAddr, ScAddr]:
+    def __next__(self) -> tuple[ScAddr, ScAddr, ScAddr]:
         return next(self.addrs_iter), next(self.addrs_iter), next(self.addrs_iter)

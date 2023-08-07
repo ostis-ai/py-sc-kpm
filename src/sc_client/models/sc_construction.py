@@ -15,8 +15,8 @@ from sc_client.models.sc_type import ScType
 
 class ScConstruction:
     def __init__(self) -> None:
-        self.aliases = {}
-        self.commands = []
+        self.aliases: dict[str, int] = {}
+        self.commands: list[ScConstructionCommand] = []
 
     def create_node(self, sc_type: ScType, alias: str = None) -> None:
         if not sc_type.is_node():

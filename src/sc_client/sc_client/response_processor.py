@@ -6,10 +6,10 @@ from sc_client.sc_client.sc_connection import ScConnection
 
 
 class BaseResponseProcessor:
-    def __init__(self, sc_connection: ScConnection):
-        self.sc_connection = sc_connection
+    def __init__(self, sc_connection: ScConnection) -> None:
+        self._sc_connection = sc_connection
 
-    def __call__(self, response: Response, *args):
+    def __call__(self, response: Response, *args: any) -> any:
         raise NotImplementedError
 
 
@@ -103,7 +103,7 @@ class EventsCreateResponseProcessor(BaseResponseProcessor):
         for count, event in enumerate(events):
             command_id = response.payload[count]
             sc_event = ScEvent(command_id, event.event_type, event.callback)
-            self.sc_connection.set_event(sc_event)
+            self._sc_connection.set_event(sc_event)
             result.append(sc_event)
         return result
 
@@ -111,13 +111,13 @@ class EventsCreateResponseProcessor(BaseResponseProcessor):
 class EventsDestroyResponseProcessor(BaseResponseProcessor):
     def __call__(self, response: Response, *events: ScEvent) -> bool:
         for event in events:
-            self.sc_connection.drop_event(event.id)
+            self._sc_connection.drop_event(event.id)
         return response.status
 
 
 class ResponseProcessor:
     def __init__(self, sc_connection: ScConnection):
-        self._response_request_mapper = {
+        self._response_request_mapper: dict[int, BaseResponseProcessor] = {
             c.ClientCommand.CREATE_ELEMENTS: CreateElementsResponseProcessor(sc_connection),
             c.ClientCommand.CREATE_ELEMENTS_BY_SCS: CreateElementsBySCsResponseProcessor(sc_connection),
             c.ClientCommand.CHECK_ELEMENTS: CheckElementsResponseProcessor(sc_connection),
@@ -136,6 +136,6 @@ class ResponseProcessor:
             c.ClientCommand.SEARCH_TEMPLATE: TemplateSearchResponseProcessor(sc_connection),
         }
 
-    def run(self, request_type: c.ClientCommand, *args, **kwargs):
+    def run(self, request_type: c.ClientCommand, *args, **kwargs) -> any:
         response_processor = self._response_request_mapper.get(request_type)
         return response_processor(*args, **kwargs)
