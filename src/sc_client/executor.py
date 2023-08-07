@@ -1,8 +1,8 @@
-from sc_client.client.payload_factory import PayloadFactory
-from sc_client.client.response_processor import ResponseProcessor
-from sc_client.client.sc_client import ScClient
 from sc_client.constants.common import ERRORS, MESSAGE, REF, ClientCommand, RequestType
 from sc_client.exceptions import ServerError
+from sc_client.payload_factory import PayloadFactory
+from sc_client.response_processor import ResponseProcessor
+from sc_client.sc_client import ScClient
 
 
 class Executor:

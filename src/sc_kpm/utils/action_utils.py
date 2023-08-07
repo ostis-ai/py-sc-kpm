@@ -7,8 +7,8 @@ Distributed under the MIT License
 from threading import Event
 from typing import Dict, List, Tuple, Union
 
-from sc_client import client
-from sc_client.client import events_create, events_destroy
+import sc_client
+from sc_client import events_create, events_destroy
 from sc_client.constants import sc_types
 from sc_client.constants.common import ScEventType
 from sc_client.models import ScAddr, ScConstruction, ScEventParams, ScTemplate
@@ -33,7 +33,7 @@ def check_action_class(action_class: Union[ScAddr, Idtf], action_node: ScAddr) -
     templ = ScTemplate()
     templ.triple(action_class, sc_types.EDGE_ACCESS_VAR_POS_PERM, action_node)
     templ.triple(ScKeynodes[CommonIdentifiers.QUESTION], sc_types.EDGE_ACCESS_VAR_POS_PERM, action_node)
-    search_results = client.template_search(templ)
+    search_results = sc_client.template_search(templ)
     return len(search_results) > 0
 
 
@@ -59,7 +59,7 @@ def get_action_answer(action_node: ScAddr) -> ScAddr:
         sc_types.EDGE_ACCESS_VAR_POS_PERM,
         ScKeynodes[CommonIdentifiers.NREL_ANSWER],
     )
-    if search_results := client.template_search(templ):
+    if search_results := sc_client.template_search(templ):
         return search_results[0].get(ScAlias.ELEMENT)
     return ScAddr(0)
 
@@ -100,7 +100,7 @@ def create_action(*concepts: Idtf) -> ScAddr:
             ScKeynodes.resolve(concept, sc_types.NODE_CONST_CLASS),
             ScAlias.ACTION_NODE,
         )
-    action_node = client.create_elements(construction)[0]
+    action_node = sc_client.create_elements(construction)[0]
     return action_node
 
 

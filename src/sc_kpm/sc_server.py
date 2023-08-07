@@ -11,7 +11,7 @@ from abc import ABC, abstractmethod
 from logging import Logger, getLogger
 from typing import Callable
 
-from sc_client import client
+import sc_client
 from sc_kpm.identifiers import _IdentifiersResolver
 from sc_kpm.sc_module import ScModuleAbstract
 
@@ -63,13 +63,13 @@ class ScServer(ScServerAbstract):
         return f"{self.__class__.__name__}({', '.join(map(repr, self._modules))})"
 
     def connect(self) -> _Finisher:
-        client.connect(self._url)
+        sc_client.connect(self._url)
         self.logger.info("Connected by url: %s", repr(self._url))
         _IdentifiersResolver.resolve()
         return _Finisher(self.disconnect, self.logger)
 
     def disconnect(self) -> None:
-        client.disconnect()
+        sc_client.disconnect()
         self.logger.info("Disconnected from url: %s", repr(self._url))
 
     def add_modules(self, *modules: ScModuleAbstract) -> None:
@@ -117,7 +117,7 @@ class ScServer(ScServerAbstract):
         self.disconnect()
 
     def _register(self, *modules: ScModuleAbstract) -> None:
-        if not client.is_connected():
+        if not sc_client.is_connected():
             self.logger.error("Failed to register: connection lost")
             raise ConnectionError(f"Connection to url {repr(self._url)} lost")
         for module in modules:
@@ -128,7 +128,7 @@ class ScServer(ScServerAbstract):
             module._register()  # pylint: disable=protected-access
 
     def _unregister(self, *modules: ScModuleAbstract) -> None:
-        if not client.is_connected():
+        if not sc_client.is_connected():
             self.logger.error("Failed to unregister: connection to %s lost", repr(self._url))
             raise ConnectionError(f"Connection to {repr(self._url)} lost")
         for module in modules:

@@ -4,7 +4,7 @@ Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
 
-from sc_client.client import check_elements
+from sc_client import check_elements
 from sc_client.constants import sc_types
 from sc_client.exceptions import InvalidTypeError
 from sc_kpm.sc_sets import ScSet, ScStructure

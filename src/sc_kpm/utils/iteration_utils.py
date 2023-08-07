@@ -1,6 +1,6 @@
 from typing import Iterable, Iterator
 
-from sc_client.client import get_link_content
+from sc_client import get_link_content
 from sc_client.models import ScAddr
 from sc_client.models.sc_construction import ScLinkContent, ScLinkContentData
 

@@ -4,8 +4,8 @@ import re
 from typing import Any, get_origin
 
 from sc_client import exceptions
-from sc_client.client.internal_utils import process_triple_item
 from sc_client.constants import common
+from sc_client.internal_utils import process_triple_item
 from sc_client.models import (
     ScAddr,
     ScConstruction,

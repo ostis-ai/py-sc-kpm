@@ -7,8 +7,7 @@ Distributed under the MIT License
 from logging import Logger, getLogger
 from typing import Dict, Optional
 
-from sc_client import client
-from sc_client.client import delete_elements
+from sc_client import delete_elements, resolve_keynodes
 from sc_client.constants.sc_types import NODE_CONST_ROLE, ScType
 from sc_client.exceptions import InvalidValueError
 from sc_client.models import ScAddr, ScIdtfResolveParams
@@ -51,7 +50,7 @@ class ScKeynodesMeta(type):
         addr = cls._dict.get(identifier)
         if addr is None:
             params = ScIdtfResolveParams(identifier, sc_type)
-            addr = client.resolve_keynodes(params)[0]
+            addr = resolve_keynodes(params)[0]
             if addr.is_valid():
                 cls._dict[identifier] = addr
             cls._logger.debug("Resolved %s identifier with type %s: %s", repr(identifier), repr(sc_type), repr(addr))

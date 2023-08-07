@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from sc_client.client.sc_client import ScClient
 from sc_client.constants import common as c
 from sc_client.constants.sc_types import ScType
 from sc_client.models import Response, ScAddr, ScEvent, ScLinkContent, ScLinkContentType, ScTemplateResult
+from sc_client.sc_client import ScClient
 
 
 class BaseResponseProcessor:

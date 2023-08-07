@@ -4,7 +4,7 @@ Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
 
-from sc_client.client import delete_elements, template_search
+from sc_client import delete_elements, template_search
 from sc_client.constants import sc_types
 from sc_client.models import ScAddr, ScTemplate
 from sc_kpm import ScKeynodes

@@ -8,7 +8,7 @@ from abc import ABC, abstractmethod
 from logging import getLogger
 from typing import Optional, Union
 
-from sc_client import client
+import sc_client
 from sc_client.constants import sc_types
 from sc_client.constants.common import ScEventType
 from sc_client.exceptions import InvalidValueError
@@ -35,14 +35,14 @@ class ScAgentAbstract(ABC):
             self.logger.warning("Almost registered")
             return
         event_params = ScEventParams(self._event_element, self._event_type, self._callback)
-        self._event = client.events_create(event_params)[0]
+        self._event = sc_client.events_create(event_params)[0]
         self.logger.info("Registered with ScEvent: %s - %s", repr(self._event_element), repr(self._event_type))
 
     def _unregister(self) -> None:
         if self._event is None:
             self.logger.warning("ScEvent was already destroyed or not registered")
             return
-        client.events_destroy(self._event)
+        sc_client.events_destroy(self._event)
         self._event = None
         self.logger.info("Unregistered ScEvent: %s - %s", repr(self._event_element), repr(self._event_type))
 

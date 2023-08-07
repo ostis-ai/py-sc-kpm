@@ -3,9 +3,8 @@ This source file is part of an OSTIS project. For the latest info, see https://g
 Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
-
-from sc_client import client
-from sc_client.client import delete_elements
+import sc_client
+from sc_client import delete_elements
 from sc_client.constants import sc_types
 from sc_kpm import ScKeynodes
 from sc_kpm.utils.common_utils import (
@@ -36,7 +35,7 @@ class TestActionUtils(BaseTestCase):
         node_2 = create_node(sc_types.NODE_CONST_CLASS)
         assert node.is_valid() and node_2.is_valid()
 
-        result = client.check_elements(node, node_2)
+        result = sc_client.check_elements(node, node_2)
         assert len(result) == 2
         assert result[0].is_node() and result[0].is_var() and result[0].is_role()
         assert result[1].is_node() and result[1].is_const() and result[1].is_class()
@@ -46,7 +45,7 @@ class TestActionUtils(BaseTestCase):
         for node in node_list:
             assert node.is_valid()
 
-        result = client.check_elements(*node_list)
+        result = sc_client.check_elements(*node_list)
         assert len(result) == nodes_counter
         for result_item in result:
             assert result_item.is_node() and result_item.is_const()
@@ -63,7 +62,7 @@ class TestActionUtils(BaseTestCase):
         for link in link_list:
             assert link.is_valid()
 
-        result = client.check_elements(*link_list)
+        result = sc_client.check_elements(*link_list)
         for result_item in result:
             assert result_item.is_valid() and result_item.is_link()
 
@@ -106,7 +105,7 @@ class TestActionUtils(BaseTestCase):
         for edge in edges:
             assert edge.is_valid()
 
-        result = client.check_elements(*edges)
+        result = sc_client.check_elements(*edges)
         for result_item in result:
             assert result_item.is_valid() and result_item.is_edge() and result_item.is_const()
         assert result[0].is_pos() and result[1].is_pos()
@@ -136,5 +135,5 @@ class TestActionUtils(BaseTestCase):
         assert delete_edges(src, rrel_trg, sc_types.EDGE_ACCESS_VAR_POS_PERM)
         assert delete_elements(nrel_edge, src, rrel_trg, nrel_trg)
 
-        result = client.check_elements(rrel_edge)[0]
+        result = sc_client.check_elements(rrel_edge)[0]
         assert result.is_valid() is False

@@ -1,6 +1,6 @@
 from typing import Iterator, List, Optional
 
-from sc_client.client import delete_elements, template_generate, template_search
+from sc_client import delete_elements, template_generate, template_search
 from sc_client.constants import sc_types
 from sc_client.models import ScAddr, ScTemplate, ScTemplateResult
 from sc_kpm.identifiers import CommonIdentifiers, ScAlias
