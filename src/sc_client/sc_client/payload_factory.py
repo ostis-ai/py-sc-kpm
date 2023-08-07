@@ -5,7 +5,6 @@ from typing import Any, get_origin
 
 from sc_client import exceptions
 from sc_client.constants import common
-from sc_client.internal_utils import process_triple_item
 from sc_client.models import (
     ScAddr,
     ScConstruction,
@@ -19,6 +18,8 @@ from sc_client.models import (
     ScTemplate,
     ScTemplateIdtf,
     ScTemplateParams,
+    ScTemplateValue,
+    ScType,
 )
 from sc_client.models.sc_construction import ScLinkContentData
 
@@ -227,13 +228,25 @@ class TemplatePayloadCreator(BasePayloadCreator):
                     payload_params.update({alias: str(addr)})
         return {common.TEMPLATE: payload_template, common.PARAMS: payload_params}
 
-    @staticmethod
-    def _process_template(template: ScTemplate):
+    @classmethod
+    def _process_template(cls, template: ScTemplate):
         payload_template = []
         for triple in template.triple_list:
             items = [triple.src, triple.edge, triple.trg]
-            payload_template.append([process_triple_item(item) for item in items])
+            payload_template.append([cls._process_triple_item(item) for item in items])
         return payload_template
+
+    @staticmethod
+    def _process_triple_item(item: ScTemplateValue) -> dict:
+        if isinstance(item.value, ScAddr):
+            result = {common.TYPE: common.Types.ADDR, common.VALUE: item.value.value}
+        elif isinstance(item.value, ScType):
+            result = {common.TYPE: common.Types.TYPE, common.VALUE: item.value.value}
+        else:
+            result = {common.TYPE: common.Types.ALIAS, common.VALUE: item.value}
+        if item.alias:
+            result[common.ALIAS] = item.alias
+        return result
 
 
 class EventsCreatePayloadCreator(BasePayloadCreator):

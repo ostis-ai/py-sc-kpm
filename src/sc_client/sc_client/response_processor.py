@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from sc_client.constants import common as c
 from sc_client.models import Response, ScAddr, ScEvent, ScLinkContent, ScLinkContentType, ScTemplateResult, ScType
-from sc_client.sc_client import ScClient
+from sc_client.sc_client.sc_connection import ScConnection
 
 
 class BaseResponseProcessor:
-    def __init__(self, sc_client: ScClient):
-        self.sc_client = sc_client
+    def __init__(self, sc_connection: ScConnection):
+        self.sc_connection = sc_connection
 
     def __call__(self, response: Response, *args):
         raise NotImplementedError
@@ -103,7 +103,7 @@ class EventsCreateResponseProcessor(BaseResponseProcessor):
         for count, event in enumerate(events):
             command_id = response.payload[count]
             sc_event = ScEvent(command_id, event.event_type, event.callback)
-            self.sc_client.set_event(sc_event)
+            self.sc_connection.set_event(sc_event)
             result.append(sc_event)
         return result
 
@@ -111,29 +111,29 @@ class EventsCreateResponseProcessor(BaseResponseProcessor):
 class EventsDestroyResponseProcessor(BaseResponseProcessor):
     def __call__(self, response: Response, *events: ScEvent) -> bool:
         for event in events:
-            self.sc_client.drop_event(event.id)
+            self.sc_connection.drop_event(event.id)
         return response.status
 
 
 class ResponseProcessor:
-    def __init__(self, sc_client: ScClient):
+    def __init__(self, sc_connection: ScConnection):
         self._response_request_mapper = {
-            c.ClientCommand.CREATE_ELEMENTS: CreateElementsResponseProcessor(sc_client),
-            c.ClientCommand.CREATE_ELEMENTS_BY_SCS: CreateElementsBySCsResponseProcessor(sc_client),
-            c.ClientCommand.CHECK_ELEMENTS: CheckElementsResponseProcessor(sc_client),
-            c.ClientCommand.DELETE_ELEMENTS: DeleteElementsResponseProcessor(sc_client),
-            c.ClientCommand.KEYNODES: ResolveKeynodesResponseProcessor(sc_client),
-            c.ClientCommand.GET_LINK_CONTENT: GetLinkContentResponseProcessor(sc_client),
-            c.ClientCommand.GET_LINKS_BY_CONTENT: GetLinksByContentResponseProcessor(sc_client),
-            c.ClientCommand.GET_LINKS_BY_CONTENT_SUBSTRING: GetLinksByContentSubstringResponseProcessor(sc_client),
+            c.ClientCommand.CREATE_ELEMENTS: CreateElementsResponseProcessor(sc_connection),
+            c.ClientCommand.CREATE_ELEMENTS_BY_SCS: CreateElementsBySCsResponseProcessor(sc_connection),
+            c.ClientCommand.CHECK_ELEMENTS: CheckElementsResponseProcessor(sc_connection),
+            c.ClientCommand.DELETE_ELEMENTS: DeleteElementsResponseProcessor(sc_connection),
+            c.ClientCommand.KEYNODES: ResolveKeynodesResponseProcessor(sc_connection),
+            c.ClientCommand.GET_LINK_CONTENT: GetLinkContentResponseProcessor(sc_connection),
+            c.ClientCommand.GET_LINKS_BY_CONTENT: GetLinksByContentResponseProcessor(sc_connection),
+            c.ClientCommand.GET_LINKS_BY_CONTENT_SUBSTRING: GetLinksByContentSubstringResponseProcessor(sc_connection),
             c.ClientCommand.GET_LINKS_CONTENTS_BY_CONTENT_SUBSTRING: (
-                GetLinksContentsByContentSubstringResponseProcessor(sc_client)
+                GetLinksContentsByContentSubstringResponseProcessor(sc_connection)
             ),
-            c.ClientCommand.SET_LINK_CONTENTS: SetLinkContentResponseProcessor(sc_client),
-            c.ClientCommand.EVENTS_CREATE: EventsCreateResponseProcessor(sc_client),
-            c.ClientCommand.EVENTS_DESTROY: EventsDestroyResponseProcessor(sc_client),
-            c.ClientCommand.GENERATE_TEMPLATE: TemplateGenerateResponseProcessor(sc_client),
-            c.ClientCommand.SEARCH_TEMPLATE: TemplateSearchResponseProcessor(sc_client),
+            c.ClientCommand.SET_LINK_CONTENTS: SetLinkContentResponseProcessor(sc_connection),
+            c.ClientCommand.EVENTS_CREATE: EventsCreateResponseProcessor(sc_connection),
+            c.ClientCommand.EVENTS_DESTROY: EventsDestroyResponseProcessor(sc_connection),
+            c.ClientCommand.GENERATE_TEMPLATE: TemplateGenerateResponseProcessor(sc_connection),
+            c.ClientCommand.SEARCH_TEMPLATE: TemplateSearchResponseProcessor(sc_connection),
         }
 
     def run(self, request_type: c.ClientCommand, *args, **kwargs):

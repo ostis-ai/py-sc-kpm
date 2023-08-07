@@ -6,6 +6,7 @@ import threading
 import time
 from typing import Any, Callable
 
+# noinspection PyPackageRequirements
 import websocket
 
 from sc_client.constants import common, config
@@ -13,7 +14,7 @@ from sc_client.exceptions import PayloadMaxSizeError
 from sc_client.models import Response, ScAddr, ScEvent
 
 
-class ScClient:
+class ScConnection:
     def __init__(self):
         self._logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
         self.is_open = False
@@ -110,11 +111,9 @@ class ScClient:
             self._on_error(self.ws_app, e)
 
     def receive_message(self, command_id: int) -> Response:
-        response = None
-        while not response and self.is_open:
-            response = self.responses_dict.get(command_id)
+        while command_id not in self.responses_dict and self.is_open:
             time.sleep(config.SERVER_ANSWER_CHECK_TIME)
-        return response
+        return self.responses_dict[command_id]
 
     def _send_message(self, data: str, retries: int, retry: int = 0) -> None:
         try:
