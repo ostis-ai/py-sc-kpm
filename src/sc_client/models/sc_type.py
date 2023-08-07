@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from sc_client.constants.sc_types import bitmasks
+from sc_client.constants import bitmasks
 from sc_client.exceptions import ErrorNotes, InvalidTypeError
 
 

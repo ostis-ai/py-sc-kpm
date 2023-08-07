@@ -5,8 +5,7 @@ Distributed under the MIT License
 """
 
 from sc_client.constants import common
-from sc_client.constants.sc_types import ScType
-from sc_client.models import ScAddr, ScTemplateValue
+from sc_client.models import ScAddr, ScTemplateValue, ScType
 
 
 def process_triple_item(item: ScTemplateValue) -> dict:

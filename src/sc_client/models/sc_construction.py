@@ -6,9 +6,9 @@ from typing import Any, TypedDict, Union
 
 from sc_client.constants import common
 from sc_client.constants.config import LINK_CONTENT_MAX_SIZE
-from sc_client.constants.sc_types import ScType
 from sc_client.exceptions import InvalidTypeError, LinkContentOversizeError
 from sc_client.models import ScAddr
+from sc_client.models.sc_type import ScType
 
 
 class ScConstruction:

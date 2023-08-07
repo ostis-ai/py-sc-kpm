@@ -8,9 +8,9 @@ from logging import Logger, getLogger
 from typing import Dict, Optional
 
 from sc_client import delete_elements, resolve_keynodes
-from sc_client.constants.sc_types import NODE_CONST_ROLE, ScType
+from sc_client.constants.sc_types import NODE_CONST_ROLE
 from sc_client.exceptions import InvalidValueError
-from sc_client.models import ScAddr, ScIdtfResolveParams
+from sc_client.models import ScAddr, ScIdtfResolveParams, ScType
 
 Idtf = str
 

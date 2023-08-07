@@ -18,4 +18,5 @@ from sc_client.models.sc_template import (
     ScTemplateValue,
     ScTemplateValueItem,
 )
+from sc_client.models.sc_type import ScType
 from sc_client.models.scs import SCs, SCsText
