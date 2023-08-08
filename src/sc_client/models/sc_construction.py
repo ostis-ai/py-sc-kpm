@@ -8,7 +8,7 @@ from typing import Any, Union
 from sc_client.constants import common
 from sc_client.constants.common import ERRORS, EVENT, ID, PAYLOAD, STATUS
 from sc_client.constants.config import LINK_CONTENT_MAX_SIZE
-from sc_client.exceptions import InvalidTypeError, LinkContentOversizeError
+from sc_client.exceptions import ErrorNotes, InvalidTypeError, LinkContentOversizeError
 from sc_client.models import ScAddr
 from sc_client.models.sc_type import ScType
 
@@ -20,7 +20,7 @@ class ScConstruction:
 
     def create_node(self, sc_type: ScType, alias: str = None) -> None:
         if not sc_type.is_node():
-            raise InvalidTypeError("You should pass the node type here")
+            raise InvalidTypeError(ErrorNotes.EXPECTED_SC_TYPE, "node")
         cmd = ScConstructionCommand(sc_type, None)
         if alias:
             self.aliases[alias] = len(self.commands)
@@ -34,7 +34,7 @@ class ScConstruction:
         alias: str = None,
     ) -> None:
         if not sc_type.is_edge():
-            raise InvalidTypeError("You should pass the edge type here")
+            raise InvalidTypeError(ErrorNotes.EXPECTED_SC_TYPE, "edge")
         cmd = ScConstructionCommand(sc_type, {common.SOURCE: src, common.TARGET: trg})
         if alias:
             self.aliases[alias] = len(self.commands)
@@ -42,7 +42,7 @@ class ScConstruction:
 
     def create_link(self, sc_type: ScType, content: ScLinkContent, alias: str = None) -> None:
         if not sc_type.is_link():
-            raise InvalidTypeError("You should pass the link type here")
+            raise InvalidTypeError(ErrorNotes.EXPECTED_SC_TYPE, "link")
         cmd = ScConstructionCommand(sc_type, {common.CONTENT: content.data, common.TYPE: content.content_type.value})
         if alias:
             self.aliases[alias] = len(self.commands)

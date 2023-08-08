@@ -2,7 +2,7 @@ from logging import Logger, getLogger
 from typing import Dict, Optional
 
 from sc_client.constants.sc_types import NODE_CONST_ROLE
-from sc_client.exceptions import InvalidValueError
+from sc_client.exceptions import ErrorNotes, InvalidValueError
 from sc_client.models import ScAddr, ScIdtfResolveParams, ScType
 from sc_client.sc_client import ScClient
 
@@ -23,7 +23,7 @@ class ScKeynodes:
         addr = self.get(identifier)  # pylint: disable=no-value-for-parameter
         if not addr.is_valid():
             self._logger.error("Failed to get ScAddr by %s keynode: ScAddr is invalid", identifier)
-            raise InvalidValueError(f"ScAddr of {identifier} is invalid")
+            raise InvalidValueError(ErrorNotes.SC_ADDR_OF_IDENTIFIER_IS_INVALID, identifier)
         return addr
 
     def delete(self, identifier: Idtf) -> bool:

@@ -7,7 +7,7 @@ from sc_client.exceptions import ErrorNotes, InvalidTypeError
 class ScType:
     def __init__(self, value: int = 0) -> None:
         if not isinstance(value, int):
-            raise InvalidTypeError(ErrorNotes.IntTypeInitialization)
+            raise InvalidTypeError(ErrorNotes.INT_TYPE_INITIALIZATION)
         self._value = value
 
     @property
@@ -93,7 +93,7 @@ class ScType:
         t1 = self.value & bitmasks.SC_TYPE_ELEMENT_MASK
         t2 = other.value & bitmasks.SC_TYPE_ELEMENT_MASK
         if (t1 != 0 or t2 != 0) and (t1 != t2):
-            raise InvalidTypeError()
+            raise InvalidTypeError
         return ScType(self.value | other.value)
 
     def change_const(self, is_const: bool) -> ScType:

@@ -6,7 +6,7 @@ from sc_client.exceptions import ErrorNotes, InvalidTypeError
 class ScAddr:
     def __init__(self, value: int = 0) -> None:
         if not isinstance(value, int):
-            raise InvalidTypeError(ErrorNotes.IntTypeInitialization)
+            raise InvalidTypeError(ErrorNotes.INT_TYPE_INITIALIZATION)
         self._value = value
 
     @property
@@ -24,7 +24,7 @@ class ScAddr:
 
     def __eq__(self, other: ScAddr) -> bool:
         if not isinstance(other, ScAddr):
-            raise InvalidTypeError(f"Cannot compare ScAddr with {type(other)}")
+            raise InvalidTypeError(ErrorNotes.EXPECTED_OBJECT_TYPES_SC_ADDR)
         return self.value == other.value
 
     def is_equal(self, other: ScAddr) -> bool:

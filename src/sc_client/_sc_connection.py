@@ -149,7 +149,7 @@ class ScConnection:
         self._send_message(data, self.reconnect_retries)
         response = self.receive_message(command_id)
         if not response:
-            raise ConnectionAbortedError("Sc-server takes a long time to respond")
+            raise ConnectionAbortedError("Sc-server takes a long time to respond")  # never uses
         return response
 
     def get_event(self, event_id: int) -> ScEvent | None:

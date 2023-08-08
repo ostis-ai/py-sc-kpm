@@ -4,8 +4,9 @@ from sc_client.exceptions.messages import ErrorDefaultMessages
 class ScException(Exception):
     default_message: str
 
-    def __init__(self, note: str = None) -> None:
-        super().__init__(self.default_message if not note else f"{self.default_message}: {note}")
+    def __init__(self, note: str = None, *note_args) -> None:
+        # pylint: disable=keyword-arg-before-vararg
+        super().__init__(self.default_message if not note else f"{self.default_message}: {note.format(*note_args)}")
 
 
 class InvalidValueError(ScException):
@@ -16,16 +17,12 @@ class InvalidTypeError(ScException):
     default_message = ErrorDefaultMessages.INVALID_TYPE
 
 
-class InvalidStateError(ScException):
-    default_message = ErrorDefaultMessages.INVALID_STATE
-
-
 class LinkContentOversizeError(ScException):
     default_message = ErrorDefaultMessages.LINK_OVERSIZE
 
 
-class ServerError(ScException):
-    default_message = ErrorDefaultMessages.SERVER_ERROR
+class ScServerError(ScException):
+    default_message = ErrorDefaultMessages.SC_SERVER_ERROR
 
 
 class PayloadMaxSizeError(ScException):

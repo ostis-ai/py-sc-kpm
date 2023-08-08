@@ -8,7 +8,7 @@ from sc_client._response_processor import ResponseProcessor
 from sc_client._sc_connection import ScConnection
 from sc_client.constants import common
 from sc_client.constants.common import MESSAGE, REF, ClientCommand, RequestType
-from sc_client.exceptions import InvalidTypeError, ServerError
+from sc_client.exceptions import ErrorNotes, InvalidTypeError, ScServerError
 from sc_client.models import (
     ScAddr,
     ScConstruction,
@@ -62,7 +62,7 @@ class ScClient:
                     payload_part = f"\nPayload: {payload[int(error.get(REF))]}" if error.get(REF) else ""
                     error_msgs.append(error.get(MESSAGE) + payload_part)
             error_msgs = "\n".join(error_msgs)
-            error = ServerError(error_msgs)
+            error = ScServerError(error_msgs)
             self._logger.error(error, exc_info=True)
             raise error
         return self._response_processor.run(command_type, response, *args)
@@ -147,5 +147,5 @@ class ScClient:
 
     def is_event_valid(self, event: ScEvent) -> bool:
         if not isinstance(event, ScEvent):
-            raise InvalidTypeError("expected object types: ScEvent")
+            raise InvalidTypeError(ErrorNotes.EXPECTED_OBJECT_TYPES, "ScEvent")
         return bool(self._sc_connection.get_event(event.id))

@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Dict, Iterator, Tuple, Union
 
-from sc_client.exceptions import InvalidTypeError
+from sc_client.exceptions import ErrorNotes, InvalidTypeError
 from sc_client.models.sc_addr import ScAddr
 from sc_client.models.sc_type import ScType
 
@@ -22,12 +22,12 @@ class ScTemplateValue:
         if isinstance(param, tuple):
             param, alias = param
             if not isinstance(alias, str):
-                raise InvalidTypeError("Alias must be str")
+                raise InvalidTypeError(ErrorNotes.ALIAS_MUST_BE_STR)
             if not isinstance(param, (ScAddr, ScType)):
-                raise InvalidTypeError("Value with alias must be ScAddr")
+                raise InvalidTypeError(ErrorNotes.VALUE_WITH_ALIAS_MUST_BE_SC_ADDR)
             self.alias = alias
         if isinstance(param, ScType) and param.is_const():
-            raise InvalidTypeError("You should to use variable types in template")
+            raise InvalidTypeError(ErrorNotes.VAR_TYPE_IN_TEMPLTE)
         self.value = param
 
 
