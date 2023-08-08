@@ -29,7 +29,7 @@ class ScConnection:
         self.reconnect_retries: int = config.SERVER_RECONNECT_RETRIES
         self.reconnect_delay: float = config.SERVER_RECONNECT_RETRY_DELAY
 
-    def connect(self, url) -> None:
+    def connect(self, url: str) -> None:
         self._url = url
         client_thread = threading.Thread(target=self._run_ws_app, name="sc-client-session-thread")
         client_thread.start()
@@ -70,7 +70,7 @@ class ScConnection:
         self.connect(self._url)
         self._on_reconnect()
 
-    def _on_message(self, _, response: str) -> None:
+    def _on_message(self, _: websocket.WebSocketApp, response: str) -> None:
         self._logger.debug(f"Receive: {str(response)[:config.LOGGING_MAX_SIZE]}")
         response = Response.load(response)
         if response.event:
@@ -82,14 +82,14 @@ class ScConnection:
         else:
             self._responses_dict[response.id] = response
 
-    def _on_open(self, _) -> None:
+    def _on_open(self, _: websocket.WebSocketApp) -> None:
         self._logger.info("New connection opened")
 
-    def _on_error(self, _, error: Exception) -> None:
-        self._logger.error(error)
+    def _on_error(self, _: websocket.WebSocketApp, error: Exception) -> None:
+        self._logger.error(error, exc_info=True)
         self._error_handler(error)
 
-    def _on_close(self, _, _close_status_code, _close_msg) -> None:
+    def _on_close(self, _: websocket.WebSocketApp, *__) -> None:
         self._logger.info("Connection closed")
         self._ws_app = None
 
