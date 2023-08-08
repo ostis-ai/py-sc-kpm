@@ -57,7 +57,6 @@ class ScConnection:
     def disconnect(self) -> None:
         try:
             self._ws_app.close()
-            self._ws_app = None
         except AttributeError as e:
             self._logger.error(e, exc_info=True)
             raise e
@@ -87,7 +86,7 @@ class ScConnection:
         self._logger.info("New connection opened")
 
     def _on_error(self, _: websocket.WebSocketApp, error: Exception) -> None:
-        self._logger.error(error, exc_info=True)
+        self._logger.error(error)
         self._error_handler(error)
 
     def _on_close(self, _: websocket.WebSocketApp, *__) -> None:
@@ -116,21 +115,20 @@ class ScConnection:
 
     def _send_message(self, data: str, retries: int) -> None:
         while True:
-            try:
-                self._logger.debug(f"Send: {data[:config.LOGGING_MAX_SIZE]}")
+            if self.is_connected:
                 self._ws_app.send(data)
+                self._logger.debug(f"Send: {data[:config.LOGGING_MAX_SIZE]}")
                 return
-            except websocket.WebSocketConnectionClosedException as e:
-                if retries:
-                    self._logger.warning(
-                        f"Connection to sc-server has failed. "
-                        f"Trying to reconnect to sc-server socket in {self.reconnect_delay} seconds"
-                    )
-                    if not retries:
-                        raise ConnectionAbortedError("Sc-server takes a long time to respond") from e
-                    time.sleep(self.reconnect_delay)
-                    retries -= 1
-                    self.reconnect()
+            if retries:
+                self._logger.warning(
+                    f"Connection to sc-server has failed. "
+                    f"Trying to reconnect to sc-server socket in {self.reconnect_delay} seconds"
+                )
+                if not retries:
+                    raise ConnectionAbortedError("Sc-server takes a long time to respond")
+                time.sleep(self.reconnect_delay)
+                retries -= 1
+                self.reconnect()
 
     def send_message(self, request_type: common.ClientCommand, payload: Any) -> Response:
         with self._lock:
