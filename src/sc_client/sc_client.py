@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import logging
+from typing import Callable
 
 from sc_client._payload_factory import PayloadFactory
 from sc_client._response_processor import ResponseProcessor
 from sc_client._sc_connection import ScConnection
 from sc_client.constants import common
 from sc_client.constants.common import MESSAGE, REF, ClientCommand, RequestType
-from sc_client.constants.config import SERVER_RECONNECT_RETRIES, SERVER_RECONNECT_RETRY_DELAY
 from sc_client.exceptions import InvalidTypeError, ServerError
 from sc_client.models import (
     ScAddr,
@@ -79,12 +79,18 @@ class ScClient:
     def set_error_handler(self, callback) -> None:
         self._sc_connection.set_error_handler(callback)
 
-    def set_reconnect_handler(self, **reconnect_kwargs) -> None:
+    def set_reconnect_handler(
+        self,
+        reconnect_callback: Callable[[], None] = None,
+        post_reconnect_callback: Callable[[], None] = None,
+        reconnect_retries: int = None,
+        reconnect_retry_delay: float = None,
+    ) -> None:
         self._sc_connection.set_reconnect_handler(
-            reconnect_kwargs.get("reconnect_handler", self._sc_connection.default_reconnect_handler),
-            reconnect_kwargs.get("post_reconnect_handler"),
-            reconnect_kwargs.get("reconnect_retries", SERVER_RECONNECT_RETRIES),
-            reconnect_kwargs.get("reconnect_retry_delay", SERVER_RECONNECT_RETRY_DELAY),
+            reconnect_callback,
+            post_reconnect_callback,
+            reconnect_retries,
+            reconnect_retry_delay,
         )
 
     def check_elements(self, *addrs: ScAddr) -> list[ScType]:

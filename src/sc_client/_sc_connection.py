@@ -18,28 +18,29 @@ class ScConnection:
     def __init__(self) -> None:
         self._logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
         self._ws_app: websocket.WebSocketApp | None = None
+        self._url: str | None = None
         self._lock = threading.Lock()
-        self.responses_dict = {}
-        self.events_dict = {}
-        self.command_id = 0
-        self.error_handler: Callable[[Exception], None] = self.default_error_handler
-        self.reconnect_callback: Callable[[], None] = self.default_reconnect_handler
-        self.post_reconnect_callback: Callable[[], None] = lambda *args: None
+        self._responses_dict = {}
+        self._events_dict: dict[int, ScEvent] = {}
+        self._command_id = 0
+        self._error_handler: Callable[[Exception], None] = self._default_error_handler
+        self._on_reconnect: Callable[[], None] = self._default_reconnect_handler
+        self._post_reconnect_callback: Callable[[], None] = self._default_post_reconnect_callback
         self.reconnect_retries: int = config.SERVER_RECONNECT_RETRIES
-        self.reconnect_retry_delay: float = config.SERVER_RECONNECT_RETRY_DELAY
-        self.last_healthcheck_answer: str | None = None
+        self.reconnect_delay: float = config.SERVER_RECONNECT_RETRY_DELAY
 
     def connect(self, url) -> None:
-        client_thread = threading.Thread(target=self._run_ws_app, args=(url,), name="sc-client-session-thread")
+        self._url = url
+        client_thread = threading.Thread(target=self._run_ws_app, name="sc-client-session-thread")
         client_thread.start()
         time.sleep(config.SERVER_ESTABLISH_CONNECTION_TIME)
 
         if self.is_connected:
-            self.post_reconnect_callback()
+            self._post_reconnect_callback()
 
-    def _run_ws_app(self, url: str) -> None:
+    def _run_ws_app(self) -> None:
         self._ws_app = websocket.WebSocketApp(
-            url,
+            self._url,
             on_open=self._on_open,
             on_message=self._on_message,
             on_error=self._on_error,
@@ -50,91 +51,90 @@ class ScConnection:
             self._ws_app.run_forever()
         except websocket.WebSocketException as e:
             self._ws_app = None
-            self._on_error(self._ws_app, e)
+            self._logger.error(e, exc_info=True)
+            self._error_handler(e)
 
     def disconnect(self) -> None:
         try:
             self._ws_app.close()
             self._ws_app = None
         except AttributeError as e:
-            self._on_error(self._ws_app, e)
+            self._logger.error(e, exc_info=True)
+            raise e
 
     @property
     def is_connected(self) -> bool:
         return self._ws_app is not None
 
-    def default_reconnect_handler(self) -> None:
-        self.connect(self._ws_app.url)
-
-    def default_error_handler(self, error: Exception) -> None:
-        self._logger.error(error)
-        raise error
+    def reconnect(self) -> None:
+        self.connect(self._url)
+        self._on_reconnect()
 
     def _on_message(self, _, response: str) -> None:
         self._logger.debug(f"Receive: {str(response)[:config.LOGGING_MAX_SIZE]}")
         response = Response.load(response)
         if response.event:
-            threading.Thread(
-                target=self._emit_callback,
-                args=(response.id, response.payload),
-            ).start()
+            if event := self.get_event(response.id):
+                threading.Thread(
+                    target=event.callback,
+                    args=(ScAddr(addr) for addr in response.payload),
+                ).start()
         else:
-            self.responses_dict[response.id] = response
-
-    def _emit_callback(self, event_id: int, elems: list[int]) -> None:
-        event = self.events_dict.get(event_id)
-        if event:
-            event.callback(*[ScAddr(addr) for addr in elems])
+            self._responses_dict[response.id] = response
 
     def _on_open(self, _) -> None:
         self._logger.info("New connection opened")
 
     def _on_error(self, _, error: Exception) -> None:
-        self.error_handler(error)
+        self._logger.error(error)
+        self._error_handler(error)
 
     def _on_close(self, _, _close_status_code, _close_msg) -> None:
         self._logger.info("Connection closed")
         self._ws_app = None
 
     def set_error_handler(self, callback) -> None:
-        self.error_handler = callback
+        self._error_handler = callback
 
     def set_reconnect_handler(
-        self, reconnect_callback, post_reconnect_callback, reconnect_retries: int, reconnect_retry_delay: float
+        self,
+        reconnect_callback: Callable[[], None] = None,
+        post_reconnect_callback: Callable[[], None] = None,
+        reconnect_retries: int = None,
+        reconnect_retry_delay: float = None,
     ) -> None:
-        self.reconnect_callback = reconnect_callback
-        self.post_reconnect_callback = post_reconnect_callback
-        self.reconnect_retries = reconnect_retries
-        self.reconnect_retry_delay = reconnect_retry_delay
+        self._on_reconnect = reconnect_callback or self._on_reconnect
+        self._post_reconnect_callback = post_reconnect_callback or self._post_reconnect_callback
+        self.reconnect_retries = reconnect_retries or self.reconnect_retries
+        self.reconnect_delay = reconnect_retry_delay or self.reconnect_delay
 
     def receive_message(self, command_id: int) -> Response:
-        while command_id not in self.responses_dict and self.is_connected:
+        while (answer := self._responses_dict.get(command_id)) is None:  # and self.is_connected
             time.sleep(config.SERVER_ANSWER_CHECK_TIME)
-        return self.responses_dict[command_id]
+        return answer
 
-    def _send_message(self, data: str, retries: int, retry: int = 0) -> None:
-        try:
-            self._logger.debug(f"Send: {data[:config.LOGGING_MAX_SIZE]}")
-            if not self.is_connected:
-                self.reconnect_callback()
-            self._ws_app.send(data)
-        except websocket.WebSocketConnectionClosedException:
-            if self.reconnect_callback and retry < retries:
-                self._logger.warning(
-                    f"Connection to sc-server has failed. "
-                    f"Trying to reconnect to sc-server socket in {self.reconnect_retry_delay} seconds"
-                )
-                if retry > 0:
-                    time.sleep(self.reconnect_retry_delay)
-                self.reconnect_callback()
-                self._send_message(data, retries, retry + 1)
-            else:
-                self._on_error(self._ws_app, ConnectionAbortedError("Sc-server takes a long time to respond"))
+    def _send_message(self, data: str, retries: int) -> None:
+        while True:
+            try:
+                self._logger.debug(f"Send: {data[:config.LOGGING_MAX_SIZE]}")
+                self._ws_app.send(data)
+                return
+            except websocket.WebSocketConnectionClosedException as e:
+                if retries:
+                    self._logger.warning(
+                        f"Connection to sc-server has failed. "
+                        f"Trying to reconnect to sc-server socket in {self.reconnect_delay} seconds"
+                    )
+                    if not retries:
+                        raise ConnectionAbortedError("Sc-server takes a long time to respond") from e
+                    time.sleep(self.reconnect_delay)
+                    retries -= 1
+                    self.reconnect()
 
     def send_message(self, request_type: common.ClientCommand, payload: Any) -> Response:
         with self._lock:
-            self.command_id += 1
-            command_id = self.command_id
+            self._command_id += 1
+            command_id = self._command_id
         data = json.dumps(
             {
                 common.ID: command_id,
@@ -144,20 +144,27 @@ class ScConnection:
         )
         len_data = len(bytes(data, "utf-8"))
         if len_data > config.MAX_PAYLOAD_SIZE:
-            self._on_error(
-                self._ws_app, PayloadMaxSizeError(f"Data is too large: {len_data} > {config.MAX_PAYLOAD_SIZE} bytes")
-            )
+            raise PayloadMaxSizeError(f"Data is too large: {len_data} > {config.MAX_PAYLOAD_SIZE} bytes")
         self._send_message(data, self.reconnect_retries)
         response = self.receive_message(command_id)
         if not response:
-            self._on_error(self._ws_app, ConnectionAbortedError("Sc-server takes a long time to respond"))
+            raise ConnectionAbortedError("Sc-server takes a long time to respond")
         return response
 
     def get_event(self, event_id: int) -> ScEvent | None:
-        return self.events_dict.get(event_id)
+        return self._events_dict.get(event_id)
 
     def drop_event(self, event_id: int):
-        del self.events_dict[event_id]
+        del self._events_dict[event_id]
 
     def set_event(self, sc_event: ScEvent) -> None:
-        self.events_dict[sc_event.id] = sc_event
+        self._events_dict[sc_event.id] = sc_event
+
+    def _default_reconnect_handler(self) -> None:
+        pass
+
+    def _default_error_handler(self, _: Exception) -> None:
+        pass
+
+    def _default_post_reconnect_callback(self) -> None:
+        pass
