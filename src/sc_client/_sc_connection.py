@@ -76,6 +76,7 @@ class ScConnection:
         if response.event:
             if event := self.get_event(response.id):
                 threading.Thread(
+                    name=f"sc-event-{response.id}-thread",
                     target=event.callback,
                     args=(ScAddr(addr) for addr in response.payload),
                 ).start()
