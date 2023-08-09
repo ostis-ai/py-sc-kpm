@@ -8,7 +8,6 @@ from threading import Event
 from typing import Dict, List, Tuple, Union
 
 from sc_client import ScAddr, sc_client, sc_keynodes
-from sc_client._sc_keynodes import Idtf
 from sc_client.constants import sc_types
 from sc_client.constants.common import ScEventType
 from sc_client.models import ScConstruction, ScEventParams, ScTemplate
@@ -27,8 +26,8 @@ from sc_kpm.utils.common_utils import (
 COMMON_WAIT_TIME: float = 5
 
 
-def check_action_class(action_class: Union[ScAddr, Idtf], action_node: ScAddr) -> bool:
-    action_class = sc_keynodes[action_class] if isinstance(action_class, Idtf) else action_class
+def check_action_class(action_class: Union[ScAddr, str], action_node: ScAddr) -> bool:
+    action_class = sc_keynodes[action_class] if isinstance(action_class, str) else action_class
     templ = ScTemplate()
     templ.triple(action_class, sc_types.EDGE_ACCESS_VAR_POS_PERM, action_node)
     templ.triple(sc_keynodes[CommonIdentifiers.QUESTION], sc_types.EDGE_ACCESS_VAR_POS_PERM, action_node)
@@ -68,9 +67,9 @@ IsDynamic = bool
 
 def execute_agent(
     arguments: Dict[ScAddr, IsDynamic],
-    concepts: List[Idtf],
-    initiation: Idtf = QuestionStatus.QUESTION_INITIATED,
-    reaction: Idtf = QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY,
+    concepts: List[str],
+    initiation: str = QuestionStatus.QUESTION_INITIATED,
+    reaction: str = QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY,
     wait_time: float = COMMON_WAIT_TIME,
 ) -> Tuple[ScAddr, bool]:
     question = call_agent(arguments, concepts, initiation)
@@ -81,8 +80,8 @@ def execute_agent(
 
 def call_agent(
     arguments: Dict[ScAddr, IsDynamic],
-    concepts: List[Idtf],
-    initiation: Idtf = QuestionStatus.QUESTION_INITIATED,
+    concepts: List[str],
+    initiation: str = QuestionStatus.QUESTION_INITIATED,
 ) -> ScAddr:
     question = create_action(*concepts)
     add_action_arguments(question, arguments)
@@ -90,7 +89,7 @@ def call_agent(
     return question
 
 
-def create_action(*concepts: Idtf) -> ScAddr:
+def create_action(*concepts: str) -> ScAddr:
     construction = ScConstruction()
     construction.create_node(sc_types.NODE_CONST, ScAlias.ACTION_NODE)
     for concept in concepts:
@@ -119,8 +118,8 @@ def add_action_arguments(action_node: ScAddr, arguments: Dict[ScAddr, IsDynamic]
 
 def execute_action(
     action_node: ScAddr,
-    initiation: Idtf = QuestionStatus.QUESTION_INITIATED,
-    reaction: Idtf = QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY,
+    initiation: str = QuestionStatus.QUESTION_INITIATED,
+    reaction: str = QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY,
     wait_time: float = COMMON_WAIT_TIME,
 ) -> bool:
     call_action(action_node, initiation)
@@ -129,7 +128,7 @@ def execute_action(
     return result
 
 
-def call_action(action_node: ScAddr, initiation: Idtf = QuestionStatus.QUESTION_INITIATED) -> None:
+def call_action(action_node: ScAddr, initiation: str = QuestionStatus.QUESTION_INITIATED) -> None:
     initiation_node = sc_keynodes.resolve(initiation, sc_types.NODE_CONST_CLASS)
     create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, initiation_node, action_node)
 
@@ -152,7 +151,7 @@ def wait_agent(seconds: float, question_node: ScAddr, reaction_node: ScAddr = No
     # TODO: return status in 0.2.0
 
 
-def finish_action(action_node: ScAddr, status: Idtf = QuestionStatus.QUESTION_FINISHED) -> ScAddr:
+def finish_action(action_node: ScAddr, status: str = QuestionStatus.QUESTION_FINISHED) -> ScAddr:
     return create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, sc_keynodes[status], action_node)
 
 

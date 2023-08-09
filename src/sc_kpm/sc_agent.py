@@ -9,7 +9,6 @@ from logging import getLogger
 from typing import Optional, Union
 
 from sc_client import ScAddr, sc_client, sc_keynodes
-from sc_client._sc_keynodes import Idtf
 from sc_client.constants import sc_types
 from sc_client.constants.common import ScEventType
 from sc_client.exceptions import InvalidValueError
@@ -55,8 +54,8 @@ class ScAgentAbstract(ABC):
 
 
 class ScAgent(ScAgentAbstract, ABC):
-    def __init__(self, event_element: Union[Idtf, ScAddr], event_type: ScEventType) -> None:
-        if isinstance(event_element, Idtf):
+    def __init__(self, event_element: Union[str, ScAddr], event_type: ScEventType) -> None:
+        if isinstance(event_element, str):
             event_element = sc_keynodes.resolve(event_element, sc_types.NODE_CONST_CLASS)
         if not event_element.is_valid():
             self.logger.error("Failed to initialize ScAgent: event_class is invalid")
@@ -70,8 +69,8 @@ class ScAgent(ScAgentAbstract, ABC):
 class ScAgentClassic(ScAgent, ABC):
     def __init__(
         self,
-        action_class_name: Idtf,
-        event_element: Union[Idtf, ScAddr] = QuestionStatus.QUESTION_INITIATED,
+        action_class_name: str,
+        event_element: Union[str, ScAddr] = QuestionStatus.QUESTION_INITIATED,
         event_type: ScEventType = ScEventType.ADD_OUTGOING_EDGE,
     ) -> None:
         super().__init__(event_element, event_type)

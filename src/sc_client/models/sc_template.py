@@ -11,7 +11,6 @@ ScTemplateValueItem = Union[ScAddr, ScType, str]
 ScTemplateAliasedItem = Tuple[Union[ScAddr, ScType], str]
 ScTemplateParam = Union[ScTemplateValueItem, ScTemplateAliasedItem]
 ScTemplateParams = Dict[str, Union[ScAddr, str]]
-ScTemplateIdtf = str
 
 
 class ScTemplateValue:
@@ -52,8 +51,9 @@ class ScTemplate:
         src: ScTemplateParam,
         edge: ScTemplateParam,
         trg: ScTemplateParam,
-    ) -> None:
+    ) -> ScTemplate:
         self.triple_list.append(ScTemplateTriple(src, edge, trg))
+        return self
 
     def triple_with_relation(
         self,
@@ -62,12 +62,13 @@ class ScTemplate:
         trg: ScTemplateParam,
         edge2: ScTemplateParam,
         src2: ScTemplateParam,
-    ) -> None:
-        if not isinstance(edge, (tuple, list)):  # TODO: remove list support in version 0.3.0
+    ) -> ScTemplate:
+        if not isinstance(edge, tuple):
             edge_alias = f"edge_1_{len(self.triple_list)}"
             edge = (edge, edge_alias)
         self.triple(src, edge, trg)
         self.triple(src2, edge2, edge[1])
+        return self
 
 
 class ScTemplateResult:

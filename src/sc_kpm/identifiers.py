@@ -6,30 +6,29 @@ Distributed under the MIT License
 from dataclasses import dataclass
 
 from sc_client import sc_keynodes
-from sc_client._sc_keynodes import Idtf
 from sc_client.constants import sc_types
 
 
 @dataclass(frozen=True)
 class CommonIdentifiers:
-    QUESTION: Idtf = "question"
-    EXACT_VALUE: Idtf = "exact_value"
-    RREL_DYNAMIC_ARGUMENT: Idtf = "rrel_dynamic_argument"
-    RREL_ONE: Idtf = "rrel_1"
-    RREL_TWO: Idtf = "rrel_2"
-    RREL_LAST: Idtf = "rrel_last"
-    NREL_BASIC_SEQUENCE: Idtf = "nrel_basic_sequence"
-    NREL_SYSTEM_IDENTIFIER: Idtf = "nrel_system_identifier"
-    NREL_ANSWER: Idtf = "nrel_answer"
-    CONCEPT_FILENAME: Idtf = "concept_filename"
+    QUESTION: str = "question"
+    EXACT_VALUE: str = "exact_value"
+    RREL_DYNAMIC_ARGUMENT: str = "rrel_dynamic_argument"
+    RREL_ONE: str = "rrel_1"
+    RREL_TWO: str = "rrel_2"
+    RREL_LAST: str = "rrel_last"
+    NREL_BASIC_SEQUENCE: str = "nrel_basic_sequence"
+    NREL_SYSTEM_IDENTIFIER: str = "nrel_system_identifier"
+    NREL_ANSWER: str = "nrel_answer"
+    CONCEPT_FILENAME: str = "concept_filename"
 
 
 @dataclass(frozen=True)
 class QuestionStatus:
-    QUESTION_INITIATED: Idtf = "question_initiated"
-    QUESTION_FINISHED: Idtf = "question_finished"
-    QUESTION_FINISHED_SUCCESSFULLY: Idtf = "question_finished_successfully"
-    QUESTION_FINISHED_UNSUCCESSFULLY: Idtf = "question_finished_unsuccessfully"
+    QUESTION_INITIATED: str = "question_initiated"
+    QUESTION_FINISHED: str = "question_finished"
+    QUESTION_FINISHED_SUCCESSFULLY: str = "question_finished_successfully"
+    QUESTION_FINISHED_UNSUCCESSFULLY: str = "question_finished_unsuccessfully"
 
 
 @dataclass(frozen=True)

@@ -17,7 +17,6 @@ from sc_client.models import (
     SCs,
     SCsText,
     ScTemplate,
-    ScTemplateIdtf,
     ScTemplateParams,
     ScTemplateValue,
     ScType,
@@ -200,14 +199,12 @@ class ResolveKeynodesPayloadCreator(BasePayloadCreator):
 class TemplatePayloadCreator(BasePayloadCreator):
     def __call__(
         self,
-        template: ScTemplate | str | ScTemplateIdtf | ScAddr,
+        template: ScTemplate | str | ScAddr,
         params: ScTemplateParams,
         *_,
     ) -> Any:
-        if not isinstance(template, (ScTemplate, str, ScTemplateIdtf, ScAddr)):
-            raise exceptions.InvalidTypeError(
-                ErrorNotes.EXPECTED_OBJECT_TYPES, "ScTemplate, str, ScTemplateIdtf or ScArrd"
-            )
+        if not isinstance(template, (ScTemplate, str, ScAddr)):
+            raise exceptions.InvalidTypeError(ErrorNotes.EXPECTED_OBJECT_TYPES, "ScTemplate, str or ScArrd")
         if isinstance(template, ScAddr):
             payload_template = {
                 common.TYPE: common.Types.ADDR,

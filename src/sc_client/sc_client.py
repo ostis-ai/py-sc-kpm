@@ -18,7 +18,6 @@ from sc_client.models import (
     ScLinkContent,
     SCsText,
     ScTemplate,
-    ScTemplateIdtf,
     ScTemplateParams,
     ScTemplateResult,
     ScType,
@@ -127,14 +126,14 @@ class ScClient:
 
     def template_search(
         self,
-        template: ScTemplate | str | ScTemplateIdtf | ScAddr,
+        template: ScTemplate | str | ScAddr,
         params: ScTemplateParams = None,
     ) -> list[ScTemplateResult]:
         return self._run(common.ClientCommand.SEARCH_TEMPLATE, template, params)
 
     def template_generate(
         self,
-        template: ScTemplate | str | ScTemplateIdtf | ScAddr,
+        template: ScTemplate | str | ScAddr,
         params: ScTemplateParams = None,
     ) -> ScTemplateResult:
         return self._run(common.ClientCommand.GENERATE_TEMPLATE, template, params)

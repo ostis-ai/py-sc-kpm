@@ -6,19 +6,17 @@ from sc_client.exceptions import ErrorNotes, InvalidValueError
 from sc_client.models import ScAddr, ScIdtfResolveParams, ScType
 from sc_client.sc_client import ScClient
 
-Idtf = str
-
 
 class ScKeynodes:
     """Class which provides the ability to cache the identifier and ScAddr of keynodes stored in the KB."""
 
     def __init__(self, sc_client: ScClient) -> None:
         self._sc_client = sc_client
-        self._dict: Dict[Idtf, ScAddr] = {}
+        self._dict: Dict[str, ScAddr] = {}
         self._logger: Logger = getLogger(f"{__name__}.{self.__class__.__name__}")
         self._max_rrel_index: int = 10
 
-    def __getitem__(self, identifier: Idtf) -> ScAddr:
+    def __getitem__(self, identifier: str) -> ScAddr:
         """Get keynode, cannot be invalid ScAddr(0)"""
         addr = self.get(identifier)  # pylint: disable=no-value-for-parameter
         if not addr.is_valid():
@@ -26,17 +24,17 @@ class ScKeynodes:
             raise InvalidValueError(ErrorNotes.SC_ADDR_OF_IDENTIFIER_IS_INVALID, identifier)
         return addr
 
-    def delete(self, identifier: Idtf) -> bool:
+    def delete(self, identifier: str) -> bool:
         """Delete keynode from the kb and memory and return boolean status"""
         addr = self.__getitem__(identifier)  # pylint: disable=no-value-for-parameter
         del self._dict[identifier]
         return self._sc_client.delete_elements(addr)
 
-    def get(self, identifier: Idtf) -> ScAddr:
+    def get(self, identifier: str) -> ScAddr:
         """Get keynode, can be ScAddr(0)"""
         return self.resolve(identifier, None)  # pylint: disable=no-value-for-parameter
 
-    def resolve(self, identifier: Idtf, sc_type: Optional[ScType]) -> ScAddr:
+    def resolve(self, identifier: str, sc_type: Optional[ScType]) -> ScAddr:
         """Get keynode. If sc_type is valid, an element will be created in the KB"""
         addr = self._dict.get(identifier)
         if addr is None:
