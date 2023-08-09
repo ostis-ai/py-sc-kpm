@@ -2,9 +2,8 @@ from __future__ import annotations
 
 from typing import Iterator
 
-from sc_client import ScAddr, ScType, sc_client
-from sc_client.constants import sc_types
-from sc_client.models import ScConstruction, ScTemplate, ScTemplateResult
+from sc_client import ScAddr, ScConstruction, ScTemplate, ScTemplateResult, ScType, sc_types
+from sc_client.init import sc_client
 from sc_kpm.utils.common_utils import create_node
 
 

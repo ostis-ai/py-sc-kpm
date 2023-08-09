@@ -3,9 +3,8 @@ This source file is part of an OSTIS project. For the latest info, see https://g
 Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
-import sc_client
-from sc_client import sc_client, sc_keynodes
-from sc_client.constants import sc_types
+from sc_client import sc_types
+from sc_client.init import sc_client, sc_keynodes
 from sc_kpm.utils.common_utils import (
     check_edge,
     create_binary_relation,

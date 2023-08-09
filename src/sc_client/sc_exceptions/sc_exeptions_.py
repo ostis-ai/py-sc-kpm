@@ -1,4 +1,4 @@
-from sc_client.exceptions.messages import ErrorDefaultMessages
+from sc_client.sc_exceptions.messages import ErrorDefaultMessages
 
 
 class ScException(Exception):

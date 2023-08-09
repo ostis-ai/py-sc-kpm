@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from sc_client._sc_connection import ScConnection
 from sc_client.constants import common as c
+from sc_client.core._sc_connection import ScConnection
 from sc_client.models import Response, ScAddr, ScEvent, ScLinkContent, ScLinkContentType, ScTemplateResult, ScType
 
 

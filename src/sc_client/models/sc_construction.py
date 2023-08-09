@@ -8,9 +8,9 @@ from typing import Any, Union
 from sc_client.constants import common
 from sc_client.constants.common import ERRORS, EVENT, ID, PAYLOAD, STATUS
 from sc_client.constants.config import LINK_CONTENT_MAX_SIZE
-from sc_client.exceptions import ErrorNotes, InvalidTypeError, LinkContentOversizeError
 from sc_client.models import ScAddr
 from sc_client.models.sc_type import ScType
+from sc_client.sc_exceptions import ErrorNotes, InvalidTypeError, LinkContentOversizeError
 
 
 class ScConstruction:

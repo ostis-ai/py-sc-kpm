@@ -2,9 +2,9 @@ from logging import Logger, getLogger
 from typing import Dict, Optional
 
 from sc_client.constants.sc_types import NODE_CONST_ROLE
-from sc_client.exceptions import ErrorNotes, InvalidValueError
+from sc_client.core.sc_client_ import ScClient
 from sc_client.models import ScAddr, ScIdtfResolveParams, ScType
-from sc_client.sc_client import ScClient
+from sc_client.sc_exceptions import ErrorNotes, InvalidValueError
 
 
 class ScKeynodes:

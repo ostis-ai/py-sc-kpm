@@ -4,9 +4,8 @@ Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
 
-from sc_client import ScAddr, sc_client
-from sc_client.constants import sc_types
-from sc_client.models import ScTemplate
+from sc_client import ScAddr, ScTemplate, sc_types
+from sc_client.init import sc_client
 from sc_kpm.sc_sets.sc_set import ScSet
 from sc_kpm.utils.common_utils import create_node
 from tests.common_tests import BaseTestCase

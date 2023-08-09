@@ -3,9 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Dict, Iterator, Tuple, Union
 
-from sc_client.exceptions import ErrorNotes, InvalidTypeError
 from sc_client.models.sc_addr import ScAddr
 from sc_client.models.sc_type import ScType
+from sc_client.sc_exceptions import ErrorNotes, InvalidTypeError
 
 ScTemplateValueItem = Union[ScAddr, ScType, str]
 ScTemplateAliasedItem = Tuple[Union[ScAddr, ScType], str]

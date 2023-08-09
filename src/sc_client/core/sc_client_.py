@@ -3,12 +3,11 @@ from __future__ import annotations
 import logging
 from typing import Callable
 
-from sc_client._payload_factory import PayloadFactory
-from sc_client._response_processor import ResponseProcessor
-from sc_client._sc_connection import ScConnection
 from sc_client.constants import common
 from sc_client.constants.common import MESSAGE, REF, ClientCommand, RequestType
-from sc_client.exceptions import ErrorNotes, InvalidTypeError, ScServerError
+from sc_client.core._payload_factory import PayloadFactory
+from sc_client.core._response_processor import ResponseProcessor
+from sc_client.core._sc_connection import ScConnection
 from sc_client.models import (
     ScAddr,
     ScConstruction,
@@ -23,6 +22,7 @@ from sc_client.models import (
     ScType,
 )
 from sc_client.models.sc_construction import ScLinkContentData
+from sc_client.sc_exceptions import ErrorNotes, InvalidTypeError, ScServerError
 
 
 class ScClient:

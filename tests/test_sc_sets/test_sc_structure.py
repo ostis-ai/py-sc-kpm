@@ -4,9 +4,9 @@ Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
 
-from sc_client import sc_client
-from sc_client.constants import sc_types
-from sc_client.exceptions import InvalidTypeError
+from sc_client import sc_types
+from sc_client.init import sc_client
+from sc_client.sc_exceptions import InvalidTypeError
 from sc_kpm.sc_sets import ScSet, ScStructure
 from sc_kpm.utils.common_utils import create_node
 from tests.common_tests import BaseTestCase

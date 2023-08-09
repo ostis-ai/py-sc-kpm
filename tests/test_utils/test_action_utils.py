@@ -5,9 +5,8 @@ Distributed under the MIT License
 """
 import time
 
-from sc_client import sc_client, sc_keynodes
-from sc_client.constants import sc_types
-from sc_client.constants.common import ScEventType
+from sc_client import ScEventType, sc_types
+from sc_client.init import sc_client, sc_keynodes
 from sc_kpm import ScAgent, ScModule
 from sc_kpm.identifiers import CommonIdentifiers, QuestionStatus
 from sc_kpm.sc_result import ScResult

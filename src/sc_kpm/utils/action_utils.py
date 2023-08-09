@@ -7,10 +7,8 @@ Distributed under the MIT License
 from threading import Event
 from typing import Dict, List, Tuple, Union
 
-from sc_client import ScAddr, sc_client, sc_keynodes
-from sc_client.constants import sc_types
-from sc_client.constants.common import ScEventType
-from sc_client.models import ScConstruction, ScEventParams, ScTemplate
+from sc_client import ScAddr, ScConstruction, ScEventParams, ScEventType, ScTemplate, sc_types
+from sc_client.init import sc_client, sc_keynodes
 from sc_kpm.identifiers import CommonIdentifiers, QuestionStatus, ScAlias
 from sc_kpm.sc_result import ScResult
 from sc_kpm.sc_sets.sc_structure import ScStructure

@@ -1,8 +1,7 @@
 from typing import Iterator, List, Optional
 
-from sc_client import ScAddr, sc_client, sc_keynodes
-from sc_client.constants import sc_types
-from sc_client.models import ScTemplate, ScTemplateResult
+from sc_client import ScAddr, ScTemplate, ScTemplateResult, sc_types
+from sc_client.init import sc_client, sc_keynodes
 from sc_kpm.identifiers import CommonIdentifiers, ScAlias
 from sc_kpm.sc_sets.sc_set import ScSet
 from sc_kpm.utils.common_utils import create_edge, create_role_relation, search_role_relation_template

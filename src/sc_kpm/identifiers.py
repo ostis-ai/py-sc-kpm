@@ -5,8 +5,8 @@ Distributed under the MIT License
 """
 from dataclasses import dataclass
 
-from sc_client import sc_keynodes
-from sc_client.constants import sc_types
+from sc_client import sc_types
+from sc_client.init import sc_keynodes
 
 
 @dataclass(frozen=True)

@@ -1,8 +1,7 @@
 from typing import Iterator, List
 
-from sc_client import ScAddr, sc_client, sc_keynodes
-from sc_client.constants import sc_types
-from sc_client.models import ScTemplate
+from sc_client import ScAddr, ScTemplate, sc_types
+from sc_client.init import sc_client, sc_keynodes
 from sc_kpm.sc_sets.sc_set import ScSet
 
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from sc_client.exceptions import ErrorNotes, InvalidTypeError
+from sc_client.sc_exceptions import ErrorNotes, InvalidTypeError
 
 
 class ScAddr:

@@ -1,10 +1,9 @@
 from common_tests import BaseTestCase
 
-import sc_client
-from sc_client import ScAddr, sc_client, sc_keynodes
-from sc_client.constants import sc_types
-from sc_client.exceptions import InvalidValueError
+from sc_client import ScAddr, sc_types
+from sc_client.init import sc_client, sc_keynodes
 from sc_client.models import ScIdtfResolveParams
+from sc_client.sc_exceptions import InvalidValueError
 
 
 class KeynodesTests(BaseTestCase):

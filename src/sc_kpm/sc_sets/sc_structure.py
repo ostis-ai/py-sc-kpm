@@ -1,6 +1,6 @@
-from sc_client import ScAddr, ScType, sc_client
-from sc_client.constants import sc_types
-from sc_client.exceptions import InvalidTypeError
+from sc_client import ScAddr, ScType, sc_types
+from sc_client.init import sc_client
+from sc_client.sc_exceptions import InvalidTypeError
 from sc_kpm.sc_sets.sc_set import ScSet
 
 

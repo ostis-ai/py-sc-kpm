@@ -10,8 +10,8 @@ from typing import Any, Callable
 import websocket
 
 from sc_client.constants import common, config
-from sc_client.exceptions import PayloadMaxSizeError
 from sc_client.models import Response, ScAddr, ScEvent
+from sc_client.sc_exceptions import PayloadMaxSizeError
 
 
 class ScConnection:
