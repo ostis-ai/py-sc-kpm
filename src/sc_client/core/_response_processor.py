@@ -1,16 +1,19 @@
 from __future__ import annotations
 
+import abc
+
 from sc_client.constants import common as c
 from sc_client.core._sc_connection import ScConnection
 from sc_client.models import Response, ScAddr, ScEvent, ScLinkContent, ScLinkContentType, ScTemplateResult, ScType
 
 
-class BaseResponseProcessor:
+class BaseResponseProcessor(abc.ABC):
     def __init__(self, sc_connection: ScConnection) -> None:
         self._sc_connection = sc_connection
 
+    @abc.abstractmethod
     def __call__(self, response: Response, *args: any) -> any:
-        raise NotImplementedError
+        pass
 
 
 class CreateElementsResponseProcessor(BaseResponseProcessor):

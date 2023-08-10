@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import abc
 import re
 from typing import Any, get_origin
 
@@ -24,12 +25,10 @@ from sc_client.models.sc_construction import ScLinkContentData
 from sc_client.sc_exceptions import ErrorNotes
 
 
-class BasePayloadCreator:
-    def __init__(self):
-        pass
-
+class BasePayloadCreator(abc.ABC):
+    @abc.abstractmethod
     def __call__(self, *args) -> Any:
-        raise NotImplementedError
+        pass
 
 
 class CreateElementsPayloadCreator(BasePayloadCreator):

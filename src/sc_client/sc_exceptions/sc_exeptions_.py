@@ -1,7 +1,9 @@
+import abc
+
 from sc_client.sc_exceptions.messages import ErrorDefaultMessages
 
 
-class ScException(Exception):
+class ScException(Exception, abc.ABC):
     default_message: str
 
     def __init__(self, note: str = None, *note_args) -> None:
