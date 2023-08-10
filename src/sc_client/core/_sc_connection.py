@@ -20,7 +20,7 @@ class ScConnection:
         self._ws_app: websocket.WebSocketApp | None = None
         self._url: str | None = None
         self._lock = threading.Lock()
-        self._responses_dict = {}
+        self._responses_dict: dict[int, Response] = {}
         self._events_dict: dict[int, ScEvent] = {}
         self._command_id = 0
         self._error_handler: Callable[[Exception], None] = self._default_error_handler
@@ -30,12 +30,17 @@ class ScConnection:
         self.reconnect_delay: float = config.SERVER_RECONNECT_RETRY_DELAY
 
     def connect(self, url: str) -> None:
+        self.establish_connection(url)
+        if not self.is_connected():
+            raise ConnectionAbortedError("Cannot connect to sc-server")
+
+    def establish_connection(self, url: str) -> None:
         self._url = url
         client_thread = threading.Thread(target=self._run_ws_app, name="sc-client-session-thread")
         client_thread.start()
         time.sleep(config.SERVER_ESTABLISH_CONNECTION_TIME)
 
-        if self.is_connected:
+        if self.is_connected():
             self._post_reconnect_callback()
 
     def _run_ws_app(self) -> None:
@@ -46,7 +51,7 @@ class ScConnection:
             on_error=self._on_error,
             on_close=self._on_close,
         )
-        self._logger.info(f"Sc-server socket: {self._ws_app.url}")
+        self._logger.info(f"Trying to connect via websocket to the sc-server {repr(self._ws_app.url)}")
         try:
             self._ws_app.run_forever()
         except websocket.WebSocketException as e:
@@ -58,22 +63,17 @@ class ScConnection:
         try:
             self._ws_app.close()
         except AttributeError as e:
-            self._logger.error(e, exc_info=True)
+            self._logger.warning("Already disconnected")
             raise e
 
-    @property
     def is_connected(self) -> bool:
         return self._ws_app is not None
 
-    def reconnect(self) -> None:
-        self.connect(self._url)
-        self._on_reconnect()
-
     def _on_message(self, _: websocket.WebSocketApp, response: str) -> None:
-        self._logger.debug(f"Receive: {str(response)[:config.LOGGING_MAX_SIZE]}")
         response = Response.load(response)
         if response.event:
             if event := self.get_event(response.id):
+                self._logger.debug(f"Started {str(event)}")
                 threading.Thread(
                     name=f"sc-event-{response.id}-thread",
                     target=event.callback,
@@ -83,7 +83,7 @@ class ScConnection:
             self._responses_dict[response.id] = response
 
     def _on_open(self, _: websocket.WebSocketApp) -> None:
-        self._logger.info("New connection opened")
+        self._logger.info("Connection is successful")
 
     def _on_error(self, _: websocket.WebSocketApp, error: Exception) -> None:
         self._logger.error(error)
@@ -108,28 +108,6 @@ class ScConnection:
         self.reconnect_retries = reconnect_retries or self.reconnect_retries
         self.reconnect_delay = reconnect_retry_delay or self.reconnect_delay
 
-    def receive_message(self, command_id: int) -> Response:
-        while (answer := self._responses_dict.get(command_id)) is None:  # and self.is_connected
-            time.sleep(config.SERVER_ANSWER_CHECK_TIME)
-        return answer
-
-    def _send_message(self, data: str, retries: int) -> None:
-        while True:
-            if self.is_connected:
-                self._ws_app.send(data)
-                self._logger.debug(f"Send: {data[:config.LOGGING_MAX_SIZE]}")
-                return
-            if retries:
-                self._logger.warning(
-                    f"Connection to sc-server has failed. "
-                    f"Trying to reconnect to sc-server socket in {self.reconnect_delay} seconds"
-                )
-                if not retries:
-                    raise ConnectionAbortedError("Sc-server takes a long time to respond")
-                time.sleep(self.reconnect_delay)
-                retries -= 1
-                self.reconnect()
-
     def send_message(self, request_type: common.ClientCommand, payload: Any) -> Response:
         with self._lock:
             self._command_id += 1
@@ -144,11 +122,32 @@ class ScConnection:
         len_data = len(bytes(data, "utf-8"))
         if len_data > config.MAX_PAYLOAD_SIZE:
             raise PayloadMaxSizeError(f"Data is too large: {len_data} > {config.MAX_PAYLOAD_SIZE} bytes")
-        self._send_message(data, self.reconnect_retries)
-        response = self.receive_message(command_id)
-        if not response:
-            raise ConnectionAbortedError("Sc-server takes a long time to respond")  # never uses
+        self._send_with_reconnect(data)
+        response = self._receive(command_id)
+        if response is None:
+            raise ConnectionAbortedError("Sc-server takes a long time to respond")
         return response
+
+    def _send_with_reconnect(self, data: str) -> None:
+        retries: int = self.reconnect_retries
+        while True:
+            try:
+                self._ws_app.send(data)
+                return
+            except (websocket.WebSocketConnectionClosedException, AttributeError) as e:
+                if not retries:
+                    raise ConnectionAbortedError("Sc-server takes a long time to respond") from e
+                retries -= 1
+                self._logger.warning(f"Trying to reconnect in {self.reconnect_delay} seconds (retries left: {retries})")
+                time.sleep(self.reconnect_delay)
+                self.establish_connection(self._url)
+                if self.is_connected():
+                    self._on_reconnect()
+
+    def _receive(self, command_id: int) -> Response:
+        while (answer := self._responses_dict.get(command_id)) is None and self.is_connected():
+            time.sleep(config.SERVER_ANSWER_CHECK_TIME)
+        return answer
 
     def get_event(self, event_id: int) -> ScEvent | None:
         return self._events_dict.get(event_id)

@@ -130,8 +130,8 @@ class CommonTests(BaseTestCase):
             self.assertFalse(is_executing_successful())
 
         with self.server.register_modules():
-            thread = threading.Thread(target=execute_and_send_sigint, daemon=True)
+            thread = threading.Thread(target=execute_and_send_sigint)
             thread.start()
             self.server.serve()
-
+        thread.join()
         self.server.remove_modules(module)

@@ -70,7 +70,7 @@ class ScClient:
         self._sc_connection.connect(url)
 
     def is_connected(self) -> bool:
-        return self._sc_connection.is_connected
+        return self._sc_connection.is_connected()
 
     def disconnect(self) -> None:
         self._sc_connection.disconnect()
