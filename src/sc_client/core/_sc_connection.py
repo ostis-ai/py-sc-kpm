@@ -11,7 +11,8 @@ import websocket
 
 from sc_client.constants import common, config
 from sc_client.models import Response, ScAddr, ScEvent
-from sc_client.sc_exceptions import PayloadMaxSizeError
+from sc_client.sc_exceptions import ErrorNotes, PayloadMaxSizeError
+from sc_client.sc_exceptions.sc_exeptions_ import ScConnectionError
 
 
 class ScConnection:
@@ -22,7 +23,7 @@ class ScConnection:
         self._lock = threading.Lock()
         self._responses_dict: dict[int, Response] = {}
         self._events_dict: dict[int, ScEvent] = {}
-        self._command_id = 0
+        self._command_id: int = 0
         self._error_handler: Callable[[Exception], None] = self._default_error_handler
         self._on_reconnect: Callable[[], None] = self._default_reconnect_handler
         self._post_reconnect_callback: Callable[[], None] = self._default_post_reconnect_callback
@@ -32,7 +33,7 @@ class ScConnection:
     def connect(self, url: str) -> None:
         self.establish_connection(url)
         if not self.is_connected():
-            raise ConnectionAbortedError("Cannot connect to sc-server")
+            raise ScConnectionError
 
     def establish_connection(self, url: str) -> None:
         self._url = url
@@ -124,8 +125,6 @@ class ScConnection:
             raise PayloadMaxSizeError(f"Data is too large: {len_data} > {config.MAX_PAYLOAD_SIZE} bytes")
         self._send_with_reconnect(data)
         response = self._receive(command_id)
-        if response is None:
-            raise ConnectionAbortedError("Sc-server takes a long time to respond")
         return response
 
     def _send_with_reconnect(self, data: str) -> None:
@@ -136,7 +135,7 @@ class ScConnection:
                 return
             except (websocket.WebSocketConnectionClosedException, AttributeError) as e:
                 if not retries:
-                    raise ConnectionAbortedError("Sc-server takes a long time to respond") from e
+                    raise ScConnectionError(ErrorNotes.SC_SERVER_TAKES_A_LONG_TIME_TO_RESPOND) from e
                 retries -= 1
                 self._logger.warning(f"Trying to reconnect in {self.reconnect_delay} seconds (retries left: {retries})")
                 time.sleep(self.reconnect_delay)
@@ -147,6 +146,9 @@ class ScConnection:
     def _receive(self, command_id: int) -> Response:
         while (answer := self._responses_dict.get(command_id)) is None and self.is_connected():
             time.sleep(config.SERVER_ANSWER_CHECK_TIME)
+        if answer is None:
+            raise ScConnectionError(ErrorNotes.SC_SERVER_TAKES_A_LONG_TIME_TO_RESPOND)
+        del self._responses_dict[command_id]
         return answer
 
     def get_event(self, event_id: int) -> ScEvent | None:

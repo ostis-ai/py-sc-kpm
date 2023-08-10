@@ -11,6 +11,10 @@ class ScException(Exception, abc.ABC):
         super().__init__(self.default_message if not note else f"{self.default_message}: {note.format(*note_args)}")
 
 
+class ScConnectionError(ScException, ConnectionAbortedError):
+    default_message = ErrorDefaultMessages.CANNOT_CONNECT_TO_SC_SERVER
+
+
 class InvalidValueError(ScException):
     default_message = ErrorDefaultMessages.INVALID_VALUE
 

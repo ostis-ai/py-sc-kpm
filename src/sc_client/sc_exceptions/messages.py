@@ -1,6 +1,7 @@
 class ErrorDefaultMessages:
     """Common description of exceptions"""
 
+    CANNOT_CONNECT_TO_SC_SERVER = "Cannot connect to sc-server"
     INVALID_STATE = "Invalid state"
     INVALID_VALUE = "Invalid value"
     INVALID_TYPE = "Invalid type"
@@ -13,6 +14,7 @@ class ErrorDefaultMessages:
 class ErrorNotes:
     """Exception notes that go after default messages"""
 
+    SC_SERVER_TAKES_A_LONG_TIME_TO_RESPOND = "Sc-server takes a long time to respond"
     INT_TYPE_INITIALIZATION = "You must use int type for initialization"
     SC_ADDR_OF_IDENTIFIER_IS_INVALID = "ScAddr of {} is invalid"
     EXPECTED_OBJECT_TYPES = "Expected object types: {}"
