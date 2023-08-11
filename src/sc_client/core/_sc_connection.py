@@ -109,7 +109,7 @@ class ScConnection:
         self.reconnect_retries = reconnect_retries or self.reconnect_retries
         self.reconnect_delay = reconnect_retry_delay or self.reconnect_delay
 
-    def send_message(self, request_type: common.ClientCommand, payload: Any) -> Response:
+    def send_message(self, request_type: common.RequestType, payload: Any) -> Response:
         with self._lock:
             self._command_id += 1
             command_id = self._command_id

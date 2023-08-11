@@ -31,7 +31,7 @@ class ScClient:
         self._sc_connection = ScConnection()
         self._payload_factory = PayloadFactory()
         self._response_processor = ResponseProcessor(self._sc_connection)
-        self._executor_mapper = {
+        self._executor_mapper: dict[ClientCommand, RequestType] = {
             ClientCommand.CREATE_ELEMENTS: RequestType.CREATE_ELEMENTS,
             ClientCommand.CREATE_ELEMENTS_BY_SCS: RequestType.CREATE_ELEMENTS_BY_SCS,
             ClientCommand.CHECK_ELEMENTS: RequestType.CHECK_ELEMENTS,

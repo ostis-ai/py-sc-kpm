@@ -119,7 +119,7 @@ class EventsDestroyResponseProcessor(BaseResponseProcessor):
 
 
 class ResponseProcessor:
-    def __init__(self, sc_connection: ScConnection):
+    def __init__(self, sc_connection: ScConnection) -> None:
         self._response_request_mapper: dict[int, BaseResponseProcessor] = {
             c.ClientCommand.CREATE_ELEMENTS: CreateElementsResponseProcessor(sc_connection),
             c.ClientCommand.CREATE_ELEMENTS_BY_SCS: CreateElementsBySCsResponseProcessor(sc_connection),
