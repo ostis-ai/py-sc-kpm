@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Callable
+from typing import Awaitable, Callable
 
 from sc_client.constants.common import ScEventType
 from sc_client.models.sc_addr import ScAddr
 
-ScEventCallbackFunc = Callable[[ScAddr, ScAddr, ScAddr], Enum]
+ScEventCallbackFunc = Callable[[ScAddr, ScAddr, ScAddr], Awaitable[Enum]]
 
 
 @dataclass
