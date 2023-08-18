@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import re
+import time
 from typing import Awaitable, Callable, get_origin
 
 from sc_client.constants import common, sc_types
@@ -36,9 +37,6 @@ class AsyncScClient:
 
     async def connect(self, url: str) -> None:
         await self._sc_connection.connect(url)
-
-    async def handle_messages(self) -> None:
-        await self._sc_connection.handle_messages()
 
     def is_connected(self) -> bool:
         return self._sc_connection.is_connected()
@@ -351,19 +349,18 @@ class AsyncScClient:
         raise error
 
 
-async def run():
+async def main():
     client = AsyncScClient()
     await client.connect("ws://localhost:8090/ws_json")
-    await asyncio.gather(client.handle_messages(), something(client))
+    constr = ScConstruction()
+    constr.create_node(sc_types.NODE_CONST)
+    start = time.time()
+    res = await asyncio.gather(*[client.create_elements(constr) for _ in range(100)])
+    timedelta = time.time() - start
+    print(f"Created element: {res}\nin {timedelta} sec")
     await client.disconnect()
 
 
-async def something(client: AsyncScClient):
-    constr = ScConstruction()
-    constr.create_node(sc_types.NODE_CONST)
-    res = await asyncio.gather(client.create_elements(constr), client.create_elements(constr))
-    print(f"Created element: {res}")
-
-
 if __name__ == "__main__":
-    asyncio.run(run())
+    logging.basicConfig(level=logging.DEBUG, force=True, format="%(asctime)s | %(levelname)s | %(name)s | %(message)s")
+    asyncio.run(main())

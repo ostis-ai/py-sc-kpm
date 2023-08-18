@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import logging
 import re
+import time
 from typing import Callable, get_origin
 
-from sc_client.constants import common
+from sc_client.constants import common, sc_types
 from sc_client.constants.common import CommandTypes, RequestType
 from sc_client.core.sc_connection import ScConnection
 from sc_client.models import (
@@ -345,3 +346,20 @@ class ScClient:
         error = ScServerError(error_msg)
         self._logger.error(error, exc_info=True)
         raise error
+
+
+def main():
+    client = ScClient()
+    client.connect("ws://localhost:8090/ws_json")
+    constr = ScConstruction()
+    constr.create_node(sc_types.NODE_CONST)
+    start = time.time()
+    res = [client.create_elements(constr) for _ in range(100)]
+    timedelta = time.time() - start
+    print(f"Created element: {res}\nin {timedelta} sec")
+    client.disconnect()
+
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG, force=True, format="%(asctime)s | %(levelname)s | %(name)s | %(message)s")
+    main()

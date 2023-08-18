@@ -15,8 +15,6 @@ from sc_client.models import Response
 from sc_client.sc_exceptions import ErrorNotes, PayloadMaxSizeError, ScServerError
 from sc_client.sc_exceptions.sc_exeptions_ import ScConnectionError
 
-logging.basicConfig(level=logging.DEBUG, force=True)
-
 
 class AsyncScConnection:
     def __init__(self) -> None:
@@ -41,9 +39,14 @@ class AsyncScConnection:
             self._websocket = await websockets.client.connect(self._url)
             self._logger.info("connected")
             await self.on_open()
+            await self._start_handle_messages()
         except ConnectionRefusedError as e:
             self._logger.error("Cannot to connect to sc-server")
             raise ScServerError(ErrorNotes.CANNOT_CONNECT_TO_SC_SERVER) from e
+
+    async def _start_handle_messages(self):
+        asyncio.create_task(self.handle_messages())
+        await asyncio.sleep(0)
 
     async def handle_messages(self) -> None:
         try:
@@ -145,19 +148,3 @@ class AsyncScConnection:
     async def _on_reconnect_default(self) -> None:
         pass
         # self._logger.info("_on_reconnect_default")
-
-
-async def run():
-    client = AsyncScConnection()
-    await client.connect("ws://localhost:8090/ws_json")
-    await asyncio.gather(client.handle_messages(), something(client))
-
-
-async def something(client: AsyncScConnection):
-    logging.info("something")
-    await asyncio.sleep(2)
-    await client.disconnect()
-
-
-if __name__ == "__main__":
-    asyncio.run(run())
