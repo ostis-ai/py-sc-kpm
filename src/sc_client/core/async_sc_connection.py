@@ -39,16 +39,13 @@ class AsyncScConnection:
             self._websocket = await websockets.client.connect(self._url)
             self._logger.info("connected")
             await self.on_open()
-            await self._start_handle_messages()
+            asyncio.create_task(self._handle_messages())
+            await asyncio.sleep(0)
         except ConnectionRefusedError as e:
             self._logger.error("Cannot to connect to sc-server")
             raise ScServerError(ErrorNotes.CANNOT_CONNECT_TO_SC_SERVER) from e
 
-    async def _start_handle_messages(self):
-        asyncio.create_task(self.handle_messages())
-        await asyncio.sleep(0)
-
-    async def handle_messages(self) -> None:
+    async def _handle_messages(self) -> None:
         try:
             async for message in self._websocket:
                 await self._on_message(str(message))
@@ -59,6 +56,26 @@ class AsyncScConnection:
             self._logger.error(e, exc_info=True)
             await self.on_error(e)
             raise ScServerError(ErrorNotes.CONNECTION_TO_SC_SERVER_LOST) from e
+
+    async def _on_message(self, response: str) -> None:
+        response = Response.load(response)
+        if response.event:
+            if event := self.get_event(response.id):
+                self._logger.debug(f"Started {str(event)}")
+                src, edge, trg = (ScAddr(addr) for addr in response.payload)
+                asyncio.create_task(event.callback(src, edge, trg))
+                await asyncio.sleep(0)
+        else:
+            self._responses_dict[response.id] = response
+
+    def set_event(self, sc_event: ScEvent) -> None:
+        self._events_dict[sc_event.id] = sc_event
+
+    def get_event(self, event_id: int) -> ScEvent | None:
+        return self._events_dict.get(event_id)
+
+    def drop_event(self, event_id: int) -> None:
+        del self._events_dict[event_id]
 
     async def disconnect(self) -> None:
         if self.is_connected():
@@ -114,24 +131,6 @@ class AsyncScConnection:
             raise ScConnectionError(ErrorNotes.CONNECTION_TO_SC_SERVER_LOST)
         del self._responses_dict[command_id]
         return answer
-
-    async def _on_message(self, response: str) -> None:
-        response = Response.load(response)
-        if response.event:
-            if event := self.get_event(response.id):
-                self._logger.debug(f"Started {str(event)}")
-                await event.callback(*(ScAddr(addr) for addr in response.payload))
-        else:
-            self._responses_dict[response.id] = response
-
-    def set_event(self, sc_event: ScEvent) -> None:
-        self._events_dict[sc_event.id] = sc_event
-
-    def get_event(self, event_id: int) -> ScEvent | None:
-        return self._events_dict.get(event_id)
-
-    def drop_event(self, event_id: int) -> None:
-        del self._events_dict[event_id]
 
     async def _on_open_default(self):
         pass
