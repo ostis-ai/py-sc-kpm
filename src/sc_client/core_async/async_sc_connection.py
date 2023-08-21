@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-from typing import Awaitable, Callable
+from typing import Awaitable, Callable, Iterator
 
 import websockets
 import websockets.client
@@ -25,13 +25,14 @@ class AsyncScConnection:
         self._responses_dict: dict[int, Response] = {}
         self._events_dict: dict[int, ScEvent] = {}
         self._command_id: int = 0
-        self.reconnect_retries: int = config.SERVER_RECONNECT_RETRIES
-        self.reconnect_delay: float = config.SERVER_RECONNECT_RETRY_DELAY
 
         self.on_open: Callable[[], Awaitable[None]] = self._on_open_default
         self.on_close: Callable[[], Awaitable[None]] = self._on_close_default
         self.on_error: Callable[[Exception], Awaitable[None]] = self._on_error_default
         self.on_reconnect: Callable[[], Awaitable[None]] = self._on_reconnect_default
+
+        self.reconnect_retries: int = config.SERVER_RECONNECT_RETRIES
+        self.reconnect_delay: float = config.SERVER_RECONNECT_RETRY_DELAY
 
     async def connect(self, url: str = None) -> None:
         self._url = url or self._url
@@ -50,8 +51,7 @@ class AsyncScConnection:
             async for message in self._websocket:
                 await self._on_message(str(message))
         except ConnectionClosedOK:
-            # Everything is OK
-            return
+            return  # Connection closed by user
         except ConnectionClosed as e:
             self._logger.error(e, exc_info=True)
             await self.on_error(e)
@@ -62,8 +62,8 @@ class AsyncScConnection:
         if response.event:
             if event := self.get_event(response.id):
                 self._logger.debug(f"Started {str(event)}")
-                src, edge, trg = (ScAddr(addr) for addr in response.payload)
-                asyncio.create_task(event.callback(src, edge, trg))
+                iter_payload: Iterator[ScAddr] = iter(response.payload)
+                asyncio.create_task(event.callback(next(iter_payload), next(iter_payload), next(iter_payload)))
                 await asyncio.sleep(0)
         else:
             self._responses_dict[response.id] = response
@@ -85,7 +85,7 @@ class AsyncScConnection:
         else:
             self._logger.info("Connection was already closed")
 
-    def is_connected(self):
+    def is_connected(self) -> bool:
         return self._websocket.open
 
     async def send_message(self, request_type: common.RequestType, payload: any) -> Response:
@@ -132,18 +132,14 @@ class AsyncScConnection:
         del self._responses_dict[command_id]
         return answer
 
-    async def _on_open_default(self):
+    async def _on_open_default(self) -> None:
         pass
-        # self._logger.info("_on_open_default")
 
-    async def _on_close_default(self):
+    async def _on_close_default(self) -> None:
         pass
-        # self._logger.info("_on_close_default")
 
     async def _on_error_default(self, e: Exception) -> None:
-        # pass
-        self._logger.error(e)
+        pass
 
     async def _on_reconnect_default(self) -> None:
         pass
-        # self._logger.info("_on_reconnect_default")
