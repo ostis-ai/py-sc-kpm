@@ -8,11 +8,11 @@ from sc_client.constants import common
 from sc_client.constants.common import CommandTypes, RequestType
 from sc_client.core_async.async_sc_connection import AsyncScConnection
 from sc_client.models import (
+    AsyncScEvent,
+    AsyncScEventParams,
     Response,
     ScAddr,
     ScConstruction,
-    ScEvent,
-    ScEventParams,
     ScIdtfResolveParams,
     ScLinkContent,
     ScLinkContentData,
@@ -303,32 +303,32 @@ class AsyncScClient:
             result[common.ALIAS] = item.alias
         return result
 
-    async def events_create(self, *events: ScEventParams) -> list[ScEvent]:
-        if not all(isinstance(event, ScEventParams) for event in events):
-            raise InvalidTypeError(ErrorNotes.EXPECTED_OBJECT_TYPES, "ScEventParams")
-        payload_create = [{common.TYPE: event.event_type.value, common.ADDR: event.addr.value} for event in events]
+    async def events_create(self, *params: AsyncScEventParams) -> list[AsyncScEvent]:
+        if not all(isinstance(param, AsyncScEventParams) for param in params):
+            raise InvalidTypeError(ErrorNotes.EXPECTED_OBJECT_TYPES, "AsyncScEventParams")
+        payload_create = [{common.TYPE: param.event_type.value, common.ADDR: param.addr.value} for param in params]
         payload = {CommandTypes.CREATE: payload_create}
         response = await self._send_message(RequestType.EVENTS, payload)
-        result: list[ScEvent] = []
-        for count, event in enumerate(events):
+        result: list[AsyncScEvent] = []
+        for count, event in enumerate(params):
             command_id = response.payload[count]
-            sc_event = ScEvent(command_id, event.event_type, event.callback)
+            sc_event = AsyncScEvent(command_id, event.event_type, event.callback)
             self._sc_connection.set_event(sc_event)
             result.append(sc_event)
         return result
 
-    async def events_destroy(self, *events: ScEvent) -> bool:
-        if not all(isinstance(event, ScEvent) for event in events):
-            raise InvalidTypeError(ErrorNotes.EXPECTED_OBJECT_TYPES, "ScEvent")
+    async def events_destroy(self, *events: AsyncScEvent) -> bool:
+        if not all(isinstance(event, AsyncScEvent) for event in events):
+            raise InvalidTypeError(ErrorNotes.EXPECTED_OBJECT_TYPES, "AsyncScEvent")
         payload = {CommandTypes.DELETE: [event.id for event in events]}
         response = await self._send_message(RequestType.EVENTS, payload)
         for event in events:
             self._sc_connection.drop_event(event.id)
         return response.status
 
-    def is_event_valid(self, event: ScEvent) -> bool:
-        if not isinstance(event, ScEvent):
-            raise InvalidTypeError(ErrorNotes.EXPECTED_OBJECT_TYPES, "ScEvent")
+    def is_event_valid(self, event: AsyncScEvent) -> bool:
+        if not isinstance(event, AsyncScEvent):
+            raise InvalidTypeError(ErrorNotes.EXPECTED_OBJECT_TYPES, "AsyncScEvent")
         return bool(self._sc_connection.get_event(event.id))
 
     async def _send_message(self, request_type: common.RequestType, payload: any) -> Response:

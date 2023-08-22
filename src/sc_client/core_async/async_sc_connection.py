@@ -9,9 +9,8 @@ import websockets
 import websockets.client
 from websockets.exceptions import ConnectionClosed, ConnectionClosedOK
 
-from sc_client import ScAddr, ScEvent
 from sc_client.constants import common, config
-from sc_client.models import Response
+from sc_client.models import AsyncScEvent, Response, ScAddr
 from sc_client.sc_exceptions import ErrorNotes, PayloadMaxSizeError, ScServerError
 from sc_client.sc_exceptions.sc_exeptions_ import ScConnectionError
 
@@ -23,7 +22,7 @@ class AsyncScConnection:
         self._websocket = websockets.client.WebSocketClientProtocol()
 
         self._responses_dict: dict[int, Response] = {}
-        self._events_dict: dict[int, ScEvent] = {}
+        self._events_dict: dict[int, AsyncScEvent] = {}
         self._command_id: int = 0
 
         self.on_open: Callable[[], Awaitable[None]] = self._on_open_default
@@ -68,10 +67,10 @@ class AsyncScConnection:
         else:
             self._responses_dict[response.id] = response
 
-    def set_event(self, sc_event: ScEvent) -> None:
+    def set_event(self, sc_event: AsyncScEvent) -> None:
         self._events_dict[sc_event.id] = sc_event
 
-    def get_event(self, event_id: int) -> ScEvent | None:
+    def get_event(self, event_id: int) -> AsyncScEvent | None:
         return self._events_dict.get(event_id)
 
     def drop_event(self, event_id: int) -> None:
