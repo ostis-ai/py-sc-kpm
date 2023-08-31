@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.2.0]
+### Changed
+- Removed reconnection for py-sc-client 0.3.0
+
 ## [v0.1.2]
 ### Fixed
 - Wait agent bug: it failed if action finished before
