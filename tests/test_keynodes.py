@@ -1,11 +1,10 @@
 from common_tests import BaseTestCase
-from sc_client import client
-from sc_client.client import check_elements, delete_elements
 from sc_client.constants import sc_types
-from sc_client.constants.exceptions import InvalidValueError
 from sc_client.models import ScAddr, ScIdtfResolveParams
+from sc_client.sc_exceptions import InvalidValueError
 
 from sc_kpm import ScKeynodes
+from sc_kpm.client_ import client
 
 
 class KeynodesTests(BaseTestCase):
@@ -24,7 +23,7 @@ class KeynodesTests(BaseTestCase):
     def test_resolve_keynode(self):
         idtf = "idtf_new_keynode"
         addr = ScKeynodes.resolve(idtf, sc_types.NODE_CONST)
-        self.assertTrue(delete_elements(addr))
+        self.assertTrue(client.delete_elements(addr))
         self.assertTrue(addr.is_valid())
 
     def test_delete_keynode(self):
@@ -40,7 +39,7 @@ class KeynodesTests(BaseTestCase):
     def test_rrel(self):
         rrel_1 = ScKeynodes.rrel_index(1)
         self.assertTrue(rrel_1.is_valid())
-        self.assertTrue(check_elements(rrel_1)[0].is_role())
+        self.assertTrue(client.check_elements(rrel_1)[0].is_role())
 
     def test_large_rrel(self):
         self.assertRaises(KeyError, ScKeynodes.rrel_index, ScKeynodes._max_rrel_index + 1)

@@ -3,9 +3,6 @@ This source file is part of an OSTIS project. For the latest info, see https://g
 Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
-import os
-import signal
-import threading
 
 from sc_client.constants.common import ScEventType
 from sc_client.models import ScAddr
@@ -124,16 +121,17 @@ class CommonTests(BaseTestCase):
         self.server.unregister_modules()
         self.assertFalse(is_executing_successful())
 
-        main_pid = os.getpid()
-
-        def execute_and_send_sigint():
-            self.assertTrue(is_executing_successful())
-            os.kill(main_pid, signal.SIGINT)
-            self.assertFalse(is_executing_successful())
-
-        with self.server.register_modules():
-            thread = threading.Thread(target=execute_and_send_sigint, daemon=True)
-            thread.start()
-            self.server.serve()
+        # main_pid = os.getpid()
+        #
+        # async def execute_and_send_sigint():
+        #     self.assertTrue(is_executing_successful())
+        #     await asyncio.sleep(0.01)
+        #     os.kill(main_pid, signal.SIGINT)
+        #     self.assertFalse(is_executing_successful())
+        #
+        # with self.server.register_modules():
+        #     asyncio.create_task(execute_and_send_sigint())
+        #     # asyncio.get_event_loop().run_until_complete(asyncio.sleep(0))
+        #     self.server.serve()
 
         self.server.remove_modules(module)

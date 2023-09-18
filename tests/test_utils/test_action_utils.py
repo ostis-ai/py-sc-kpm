@@ -5,11 +5,11 @@ Distributed under the MIT License
 """
 import time
 
-from sc_client.client import delete_elements
 from sc_client.constants import sc_types
 from sc_client.constants.common import ScEventType
 
 from sc_kpm import ScAgent, ScKeynodes, ScModule
+from sc_kpm.client_ import client
 from sc_kpm.identifiers import CommonIdentifiers, QuestionStatus
 from sc_kpm.sc_result import ScResult
 from sc_kpm.utils.action_utils import (
@@ -58,7 +58,7 @@ class TestActionUtils(BaseTestCase):
         create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, question, test_node)
         self.assertTrue(check_action_class(action_class_node, test_node))
         self.assertTrue(check_action_class(action_class_idtf, test_node))
-        delete_elements(class_edge)
+        client.delete_elements(class_edge)
         self.assertFalse(check_action_class(action_class_node, test_node))
         self.assertFalse(check_action_class(action_class_idtf, test_node))
 

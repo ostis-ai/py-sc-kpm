@@ -4,11 +4,11 @@ Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
 
-from sc_client.client import delete_elements, template_search
 from sc_client.constants import sc_types
 from sc_client.models import ScAddr, ScTemplate
 
 from sc_kpm import ScKeynodes
+from sc_kpm.client_ import client
 from sc_kpm.identifiers import CommonIdentifiers, ScAlias
 from sc_kpm.sc_sets.sc_oriented_set import ScOrientedSet
 from sc_kpm.utils.common_utils import create_link, create_node
@@ -49,8 +49,8 @@ class ScOrientedSetTestCase(BaseTestCase):
             sc_types.EDGE_ACCESS_VAR_POS_PERM >> ScAlias.RELATION_EDGE,
             ScKeynodes[CommonIdentifiers.RREL_LAST],
         )
-        rrel_last_edge = template_search(template)[0].get(ScAlias.RELATION_EDGE)
-        delete_elements(rrel_last_edge)
+        rrel_last_edge = client.template_search(template)[0].get(ScAlias.RELATION_EDGE)
+        client.delete_elements(rrel_last_edge)
         oriented_set_continue = ScOrientedSet(set_node=oriented_set.set_node)
         oriented_set_continue.add(element3)
         self.assertEqual(len(oriented_set_continue), 3)
@@ -140,5 +140,5 @@ class ScOrientedSetTestCase(BaseTestCase):
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
             ScKeynodes[CommonIdentifiers.NREL_BASIC_SEQUENCE],
         )
-        results = template_search(template)
+        results = client.template_search(template)
         self.assertEqual(len(results), 1)
