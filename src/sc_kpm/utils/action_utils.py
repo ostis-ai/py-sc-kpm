@@ -7,15 +7,13 @@ Distributed under the MIT License
 from threading import Event
 from typing import Dict, List, Tuple, Union
 
-from sc_client import client
-from sc_client.client import events_create, events_destroy
 from sc_client.constants import sc_types
 from sc_client.constants.common import ScEventType
 from sc_client.models import ScAddr, ScConstruction, ScEventParams, ScTemplate
 
+from sc_kpm.client_ import client
 from sc_kpm.identifiers import CommonIdentifiers, QuestionStatus, ScAlias
 from sc_kpm.sc_keynodes import Idtf, ScKeynodes
-from sc_kpm.sc_result import ScResult
 from sc_kpm.sc_sets.sc_structure import ScStructure
 from sc_kpm.utils.common_utils import (
     check_edge,
@@ -107,6 +105,7 @@ def create_action(*concepts: Idtf) -> ScAddr:
 
 def add_action_arguments(action_node: ScAddr, arguments: Dict[ScAddr, IsDynamic]) -> None:
     rrel_dynamic_arg = ScKeynodes[CommonIdentifiers.RREL_DYNAMIC_ARGUMENT]
+    index: int
     argument: ScAddr
     for index, (argument, is_dynamic) in enumerate(arguments.items(), 1):
         if argument.is_valid():
@@ -140,17 +139,16 @@ def wait_agent(seconds: float, question_node: ScAddr, reaction_node: ScAddr = No
     reaction_node = reaction_node or ScKeynodes[QuestionStatus.QUESTION_FINISHED]
     finish_event = Event()
 
-    def event_callback(_: ScAddr, __: ScAddr, trg: ScAddr) -> ScResult:
+    def event_callback(_: ScAddr, __: ScAddr, trg: ScAddr) -> None:
         if trg != reaction_node:
-            return ScResult.SKIP
+            return
         finish_event.set()
-        return ScResult.OK
 
     event_params = ScEventParams(question_node, ScEventType.ADD_INGOING_EDGE, event_callback)
-    sc_event = events_create(event_params)[0]
+    sc_event = client.events_create(event_params)[0]
     if not check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, reaction_node, question_node):
         finish_event.wait(seconds)
-    events_destroy(sc_event)
+    client.events_destroy(sc_event)
     # TODO: return status in 0.2.0
 
 

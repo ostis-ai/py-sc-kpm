@@ -11,8 +11,7 @@ from abc import ABC, abstractmethod
 from logging import Logger, getLogger
 from typing import Callable
 
-from sc_client import client
-
+from sc_kpm.client_ import client
 from sc_kpm.identifiers import _IdentifiersResolver
 from sc_kpm.sc_module import ScModuleAbstract
 

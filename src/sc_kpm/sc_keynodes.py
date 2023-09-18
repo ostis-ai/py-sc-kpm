@@ -7,11 +7,11 @@ Distributed under the MIT License
 from logging import Logger, getLogger
 from typing import Dict, Optional
 
-from sc_client import client
-from sc_client.client import delete_elements
-from sc_client.constants.exceptions import InvalidValueError
 from sc_client.constants.sc_types import NODE_CONST_ROLE, ScType
 from sc_client.models import ScAddr, ScIdtfResolveParams
+from sc_client.sc_exceptions import InvalidValueError
+
+from sc_kpm.client_ import client
 
 Idtf = str
 
@@ -40,7 +40,7 @@ class ScKeynodesMeta(type):
         """Delete keynode from the kb and memory and return boolean status"""
         addr = cls.__getitem__(identifier)  # pylint: disable=no-value-for-parameter
         del cls._dict[identifier]
-        return delete_elements(addr)
+        return client.delete_elements(addr)
 
     def get(cls, identifier: Idtf) -> ScAddr:
         """Get keynode, can be ScAddr(0)"""

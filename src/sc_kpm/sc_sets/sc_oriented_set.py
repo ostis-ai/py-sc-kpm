@@ -1,9 +1,9 @@
 from typing import Iterator, List, Optional
 
-from sc_client.client import delete_elements, template_generate, template_search
 from sc_client.constants import sc_types
 from sc_client.models import ScAddr, ScTemplate, ScTemplateResult
 
+from sc_kpm.client_ import client
 from sc_kpm.identifiers import CommonIdentifiers, ScAlias
 from sc_kpm.sc_keynodes import ScKeynodes
 from sc_kpm.sc_sets.sc_set import ScSet
@@ -73,10 +73,12 @@ class ScOrientedSet(ScSet):
             sc_types.EDGE_ACCESS_VAR_POS_PERM >> ScAlias.RELATION_EDGE,
             ScKeynodes[CommonIdentifiers.RREL_LAST],
         )
-        last_elem_templates = template_search(template)
+        last_elem_templates = client.template_search(template)
         if last_elem_templates:
             last_elem_template = last_elem_templates[0]
-            delete_elements(last_elem_template.get(ScAlias.RELATION_EDGE))  # Delete edge between rrel_last and edge
+            client.delete_elements(
+                last_elem_template.get(ScAlias.RELATION_EDGE)
+            )  # Delete edge between rrel_last and edge
             return last_elem_template.get(ScAlias.ACCESS_EDGE)
 
         # Search unmarked last edge
@@ -102,7 +104,7 @@ class ScOrientedSet(ScSet):
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
             ScKeynodes[CommonIdentifiers.NREL_BASIC_SEQUENCE],
         )
-        return template_generate(template).get(ScAlias.ACCESS_EDGE)
+        return client.template_generate(template).get(ScAlias.ACCESS_EDGE)
 
     @staticmethod
     def _mark_edge_with_rrel_last(last_edge: ScAddr) -> None:
@@ -118,5 +120,5 @@ class ScOrientedSet(ScSet):
             ScKeynodes[CommonIdentifiers.NREL_BASIC_SEQUENCE],
         )
         templ.triple(self._set_node, ScAlias.ACCESS_EDGE, sc_types.UNKNOWN >> ScAlias.ELEMENT)
-        search_results = template_search(templ)
+        search_results = client.template_search(templ)
         return search_results[0] if search_results else None

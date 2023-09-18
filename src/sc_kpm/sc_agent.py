@@ -8,12 +8,12 @@ from abc import ABC, abstractmethod
 from logging import getLogger
 from typing import Optional, Union
 
-from sc_client import client
 from sc_client.constants import sc_types
 from sc_client.constants.common import ScEventType
-from sc_client.constants.exceptions import InvalidValueError
 from sc_client.models import ScAddr, ScEvent, ScEventParams
+from sc_client.sc_exceptions import InvalidValueError
 
+from sc_kpm.client_ import client
 from sc_kpm.identifiers import QuestionStatus
 from sc_kpm.sc_keynodes import Idtf, ScKeynodes
 from sc_kpm.sc_result import ScResult
@@ -47,8 +47,9 @@ class ScAgentAbstract(ABC):
         self._event = None
         self.logger.info("Unregistered ScEvent: %s - %s", repr(self._event_element), repr(self._event_type))
 
-    def _callback(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
-        return self.on_event(event_element, event_edge, action_element)
+    def _callback(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr):
+        result = self.on_event(event_element, event_edge, action_element)
+        self.logger.info(result)
 
     @abstractmethod
     def on_event(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:

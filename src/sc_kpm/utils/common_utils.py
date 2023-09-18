@@ -6,12 +6,12 @@ Distributed under the MIT License
 
 from typing import List, Optional, Union
 
-from sc_client import client
+from sc_client import ScType
 from sc_client.constants import sc_types
-from sc_client.constants.sc_types import ScType
 from sc_client.models import ScAddr, ScConstruction, ScLinkContent, ScLinkContentType, ScTemplate, ScTemplateResult
 from sc_client.models.sc_construction import ScLinkContentData
 
+from sc_kpm.client_ import client
 from sc_kpm.identifiers import CommonIdentifiers, ScAlias
 from sc_kpm.sc_keynodes import Idtf, ScKeynodes
 

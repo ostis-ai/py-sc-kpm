@@ -1,8 +1,9 @@
-from sc_client.client import check_elements
-from sc_client.constants import ScType, sc_types
-from sc_client.constants.exceptions import InvalidTypeError
+from sc_client import ScType
+from sc_client.constants import sc_types
 from sc_client.models import ScAddr
+from sc_client.sc_exceptions import InvalidTypeError
 
+from sc_kpm.client_ import client
 from sc_kpm.sc_sets.sc_set import ScSet
 
 
@@ -17,7 +18,7 @@ class ScStructure(ScSet):
         if set_node_type is None:
             set_node_type = sc_types.NODE_CONST_STRUCT
         if set_node is not None:
-            set_node_type = check_elements(set_node)[0]
+            set_node_type = client.check_elements(set_node)[0]
         if not set_node_type.is_struct():
             raise InvalidTypeError
         super().__init__(*elements, set_node=set_node, set_node_type=set_node_type)
