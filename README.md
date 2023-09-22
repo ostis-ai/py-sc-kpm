@@ -272,7 +272,7 @@ Methods and properties:
 from sc_client.constants import sc_types
 from sc_client.models import ScAddr
 
-from sc_kpm.sc_sets import ScSet
+from aio_sc_kpm.sc_sets import ScSet
 from sc_kpm.utils import create_node, create_nodes
 
 # Example elements to add
@@ -329,7 +329,7 @@ The same logic as in `ScSet`, but *set_node_type* if set NODE_CONST_STRUCT.
 There are checks that set node has struct sc-type:
 
 ```python
-from sc_kpm.sc_sets import ScStructure
+from aio_sc_kpm.sc_sets import ScStructure
 
 sc_struct = ScStructure(..., set_node=..., set_node_type=...)
 
@@ -360,9 +360,8 @@ No access by index.
 ```python
 from sc_client.constants import sc_types
 
-from sc_kpm.sc_sets import ScOrientedSet
+from aio_sc_kpm.sc_sets import ScOrientedSet
 from sc_kpm.utils import create_nodes
-
 
 elements = create_nodes(*[sc_types.NODE_CONST] * 5)
 numbered_set = ScOrientedSet(*elements)
@@ -382,9 +381,8 @@ Easy access to elements by index (index i is marked with rrel(i + 1))
 ```python
 from sc_client.constants import sc_types
 
-from sc_kpm.sc_sets import ScNumberedSet
+from aio_sc_kpm.sc_sets import ScNumberedSet
 from sc_kpm.utils import create_nodes
-
 
 elements = create_nodes(*[sc_types.NODE_CONST] * 5)
 numbered_set = ScNumberedSet(*elements)
@@ -711,7 +709,7 @@ Create and get structure with output of action
 from sc_client.constants import sc_types
 from sc_kpm.utils import create_node
 from sc_kpm.utils.action_utils import create_action_answer, get_action_answer
-from sc_kpm.sc_sets import ScStructure
+from aio_sc_kpm.sc_sets import ScStructure
 
 action_node = create_node(sc_types.NODE_CONST_STRUCT)
 answer_element = create_node(sc_types.NODE_CONST_STRUCT)

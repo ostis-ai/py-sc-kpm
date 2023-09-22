@@ -7,9 +7,9 @@ Distributed under the MIT License
 from sc_client.constants import sc_types
 from sc_client.models import ScAddr, ScTemplate
 
+from aio_sc_kpm.sc_sets.asc_numbered_set import ScNumberedSet
 from sc_kpm import ScKeynodes
 from sc_kpm.client_ import client
-from sc_kpm.sc_sets.sc_numbered_set import ScNumberedSet
 from sc_kpm.utils.common_utils import create_link, create_node, create_nodes
 from tests.common_tests import BaseTestCase
 

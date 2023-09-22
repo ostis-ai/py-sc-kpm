@@ -8,54 +8,46 @@ A counterweight you can customize it in more details.
 
 import logging
 
-from sc_client.constants.common import ScEventType
-from sc_client.models import ScAddr, ScLinkContentType
+from sc_client.models import ScLinkContentType
 
-from sc_kpm import ScAgent, ScModule, ScResult, ScServer
-from sc_kpm.sc_sets import ScStructure
-from sc_kpm.utils import create_link, get_link_content_data
-from sc_kpm.utils.action_utils import (
-    create_action_answer,
-    execute_agent,
-    finish_action_with_status,
-    get_action_answer,
-    get_action_arguments,
-)
+from sc_kpm import ScServer
+from sc_kpm.utils import create_link
+from sc_kpm.utils.action_utils import execute_agent
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s | %(levelname)s | %(name)s | %(message)s", datefmt="[%d-%b-%y %H:%M:%S]"
 )
 
 
-class SumAgent(ScAgent):
-    def on_event(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
-        self.logger.info("SumAgent was called")
-        result = self.run(action_element)
-        is_successful = result == ScResult.OK
-        finish_action_with_status(action_element, is_successful)
-        self.logger.info("SumAgent finished %s", "successfully" if is_successful else "unsuccessfully")
-        return result
-
-    def run(self, action_node: ScAddr) -> ScResult:
-        self.logger.info("SumAgent began to run")
-        arg1_link, arg2_link = get_action_arguments(action_node, 2)
-        if not arg1_link or not arg2_link:
-            return ScResult.ERROR_INVALID_PARAMS
-        arg1_content = get_link_content_data(arg1_link)
-        arg2_content = get_link_content_data(arg2_link)
-        if not isinstance(arg1_content, int) or not isinstance(arg2_content, int):
-            return ScResult.ERROR_INVALID_TYPE
-        create_action_answer(action_node, create_link(arg1_content + arg2_content, ScLinkContentType.INT))
-        return ScResult.OK
+# class SumAgent(ScAgent):
+#     def on_event(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
+#         self.logger.info("SumAgent was called")
+#         result = self.run(action_element)
+#         is_successful = result == ScResult.OK
+#         finish_action_with_status(action_element, is_successful)
+#         self.logger.info("SumAgent finished %s", "successfully" if is_successful else "unsuccessfully")
+#         return result
+#
+#     def run(self, action_node: ScAddr) -> ScResult:
+#         self.logger.info("SumAgent began to run")
+#         arg1_link, arg2_link = get_action_arguments(action_node, 2)
+#         if not arg1_link or not arg2_link:
+#             return ScResult.ERROR_INVALID_PARAMS
+#         arg1_content = get_link_content_data(arg1_link)
+#         arg2_content = get_link_content_data(arg2_link)
+#         if not isinstance(arg1_content, int) or not isinstance(arg2_content, int):
+#             return ScResult.ERROR_INVALID_TYPE
+#         create_action_answer(action_node, create_link(arg1_content + arg2_content, ScLinkContentType.INT))
+#         return ScResult.OK
 
 
 def main():
     server = ScServer("ws://localhost:8090/ws_json")
     with server.connect():
         action_class_name = "sum"
-        agent = SumAgent(action_class_name, ScEventType.ADD_OUTGOING_EDGE)
-        module = ScModule(agent)
-        server.add_modules(module)
+        # agent = SumAgent(action_class_name, ScEventType.ADD_OUTGOING_EDGE)
+        # module = ScModule(agent)
+        # server.add_modules(module)
         with server.register_modules():
             question, is_successful = execute_agent(
                 arguments={
@@ -63,14 +55,14 @@ def main():
                     create_link(3, ScLinkContentType.INT): False,
                 },
                 concepts=[],
-                initiation=action_class_name,
+                initiation="sum_action_class",
                 wait_time=1,
             )
             assert is_successful
-            answer_struct = get_action_answer(question)
-            answer_link = (ScStructure(set_node=answer_struct)).elements_set.pop()  # get one element
-            answer_content = get_link_content_data(answer_link)
-            logging.info("Answer received: %s", repr(answer_content))
+            # answer_struct = get_action_answer(question)
+            # answer_link = (ScStructure(set_node=answer_struct)).elements_set.pop()  # get one element
+            # answer_content = get_link_content_data(answer_link)
+            # logging.info("Answer received: %s", repr(answer_content))
 
 
 if __name__ == "__main__":

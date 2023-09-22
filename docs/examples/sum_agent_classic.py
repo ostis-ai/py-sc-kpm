@@ -10,9 +10,9 @@ import logging
 
 from sc_client.models import ScAddr, ScLinkContentType
 
+from aio_sc_kpm.sc_sets import ScStructure
 from sc_kpm import ScAgentClassic, ScModule, ScResult, ScServer
 from sc_kpm.identifiers import CommonIdentifiers
-from sc_kpm.sc_sets import ScStructure
 from sc_kpm.utils import create_link, get_link_content_data
 from sc_kpm.utils.action_utils import (
     create_action_answer,

@@ -7,8 +7,8 @@ Distributed under the MIT License
 from sc_client.constants import sc_types
 from sc_client.sc_exceptions import InvalidTypeError
 
+from aio_sc_kpm.sc_sets import ScSet, ScStructure
 from sc_kpm.client_ import client
-from sc_kpm.sc_sets import ScSet, ScStructure
 from sc_kpm.utils.common_utils import create_node
 from tests.common_tests import BaseTestCase
 
