@@ -10,12 +10,13 @@ from typing import Optional, Union
 
 from sc_client.constants import sc_types
 from sc_client.constants.common import ScEventType
-from sc_client.models import AsyncScEventParams, ScAddr, ScEvent
+from sc_client.core.asc_client_instance import asc_client
+from sc_client.models import AScEventParams, ScAddr, ScEvent
 from sc_client.sc_exceptions import InvalidValueError
 
-from aio_sc_kpm.asc_keynodes import Idtf, keynodes
-from aio_sc_kpm.client_ import client
+from aio_sc_kpm.asc_keynodes import Idtf, asc_keynodes
 from sc_kpm.identifiers import QuestionStatus
+from sc_kpm.sc_keynodes_ import sc_keynodes
 from sc_kpm.sc_result import ScResult
 from sc_kpm.utils.action_utils import check_action_class
 
@@ -35,15 +36,15 @@ class AScAgentAbstract(ABC):
         if self._event is not None:
             self.logger.warning("Almost registered")
             return
-        event_params = AsyncScEventParams(self._event_element, self._event_type, self._callback)
-        self._event = await client.events_create(event_params)[0]
+        event_params = AScEventParams(self._event_element, self._event_type, self._callback)
+        self._event = await asc_client.events_create(event_params)[0]
         self.logger.info("Registered with ScEvent: %s - %s", repr(self._event_element), repr(self._event_type))
 
     async def _unregister(self) -> None:
         if self._event is None:
             self.logger.warning("ScEvent was already destroyed or not registered")
             return
-        await client.events_destroy(self._event)
+        await asc_client.events_destroy(self._event)
         self._event = None
         self.logger.info("Unregistered ScEvent: %s - %s", repr(self._event_element), repr(self._event_type))
 
@@ -60,7 +61,7 @@ class AScAgent(AScAgentAbstract, ABC):
     def __init__(self, event_element: Union[Idtf, ScAddr], event_type: ScEventType) -> None:
         if isinstance(event_element, Idtf):
             event_element = asyncio.get_event_loop().run_until_complete(
-                keynodes.resolve(event_element, sc_types.NODE_CONST_CLASS)
+                sc_keynodes.resolve(event_element, sc_types.NODE_CONST_CLASS)
             )
         if not event_element.is_valid():
             self.logger.error("Failed to initialize ScAgent: event_class is invalid")
@@ -81,13 +82,13 @@ class AScAgentClassic(AScAgent, ABC):
         super().__init__(event_element, event_type)
         self._action_class_name = action_class_name
         self._action_class = asyncio.get_event_loop().run_until_complete(
-            keynodes.resolve(action_class_name, sc_types.NODE_CONST_CLASS)
+            asc_keynodes.resolve(action_class_name, sc_types.NODE_CONST_CLASS)
         )
 
     def __repr__(self) -> str:
         description = f"ClassicScAgent(action_class_name={repr(self._action_class_name)}"
         question_initiated = asyncio.get_event_loop().run_until_complete(
-            keynodes.get(QuestionStatus.QUESTION_INITIATED)
+            asc_keynodes.get(QuestionStatus.QUESTION_INITIATED)
         )
         if self._event_element != question_initiated:
             description = f"{description}, event_class={repr(self._event_element)}"

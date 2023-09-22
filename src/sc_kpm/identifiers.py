@@ -7,7 +7,7 @@ from dataclasses import dataclass
 
 from sc_client.constants import sc_types
 
-from sc_kpm.sc_keynodes import Idtf, ScKeynodes
+from sc_kpm.sc_keynodes_ import Idtf, sc_keynodes
 
 
 @dataclass(frozen=True)
@@ -71,6 +71,6 @@ class _IdentifiersResolver:
         }
 
         for idtf, sc_type in types_map.items():
-            ScKeynodes.resolve(idtf, sc_type)
+            sc_keynodes.resolve(idtf, sc_type)
 
         cls.is_resolved = True

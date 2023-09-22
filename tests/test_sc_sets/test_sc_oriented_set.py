@@ -5,12 +5,13 @@ Distributed under the MIT License
 """
 
 from sc_client.constants import sc_types
+from sc_client.core.sc_client_instance import sc_client
 from sc_client.models import ScAddr, ScTemplate
 
-from aio_sc_kpm.sc_sets import ScOrientedSet
 from sc_kpm import ScKeynodes
-from sc_kpm.client_ import client
 from sc_kpm.identifiers import CommonIdentifiers, ScAlias
+from sc_kpm.sc_keynodes_ import sc_keynodes
+from sc_kpm.sc_sets import ScOrientedSet
 from sc_kpm.utils.common_utils import create_link, create_node
 from tests.common_tests import BaseTestCase
 
@@ -47,10 +48,10 @@ class ScOrientedSetTestCase(BaseTestCase):
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
             sc_types.UNKNOWN,
             sc_types.EDGE_ACCESS_VAR_POS_PERM >> ScAlias.RELATION_EDGE,
-            ScKeynodes[CommonIdentifiers.RREL_LAST],
+            sc_keynodes[CommonIdentifiers.RREL_LAST],
         )
-        rrel_last_edge = client.template_search(template)[0].get(ScAlias.RELATION_EDGE)
-        client.delete_elements(rrel_last_edge)
+        rrel_last_edge = sc_client.template_search(template)[0].get(ScAlias.RELATION_EDGE)
+        sc_client.delete_elements(rrel_last_edge)
         oriented_set_continue = ScOrientedSet(set_node=oriented_set.set_node)
         oriented_set_continue.add(element3)
         self.assertEqual(len(oriented_set_continue), 3)
@@ -126,7 +127,7 @@ class ScOrientedSetTestCase(BaseTestCase):
             sc_types.EDGE_ACCESS_VAR_POS_PERM >> edge1,
             start_element,
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
-            ScKeynodes.rrel_index(1),
+            sc_keynodes.rrel_index(1),
         )
         template.triple(
             set_node,
@@ -138,7 +139,7 @@ class ScOrientedSetTestCase(BaseTestCase):
             sc_types.EDGE_D_COMMON_VAR,
             edge2,
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
-            ScKeynodes[CommonIdentifiers.NREL_BASIC_SEQUENCE],
+            sc_keynodes[CommonIdentifiers.NREL_BASIC_SEQUENCE],
         )
-        results = client.template_search(template)
+        results = sc_client.template_search(template)
         self.assertEqual(len(results), 1)

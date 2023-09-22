@@ -4,9 +4,9 @@ from typing import Iterator
 
 from sc_client import ScType
 from sc_client.constants import sc_types
+from sc_client.core.asc_client_instance import asc_client
 from sc_client.models import ScAddr, ScConstruction, ScTemplate, ScTemplateResult
 
-from aio_sc_kpm.client_ import client
 from aio_sc_kpm.utils import create_node
 
 
@@ -21,7 +21,7 @@ class AScSet:
         self._set_node = set_node
 
     @classmethod
-    async def create(cls, *elements: ScAddr, set_node: ScAddr = None, set_node_type: ScType = None):
+    async def create(cls, *elements: ScAddr, set_node: ScAddr = None, set_node_type: ScType = None) -> AScSet:
         if set_node is None:
             if set_node_type is None:
                 set_node_type = sc_types.NODE_CONST
@@ -36,7 +36,7 @@ class AScSet:
             construction = ScConstruction()
             for element in elements:
                 construction.create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, self._set_node, element)
-            await client.create_elements(construction)
+            await asc_client.create_elements(construction)
 
     @property
     def set_node(self) -> ScAddr:
@@ -74,16 +74,16 @@ class AScSet:
         templ = ScTemplate()
         for element in elements:
             templ.triple(self._set_node, sc_types.EDGE_ACCESS_VAR_POS_PERM, element)
-        template_results = await client.template_search(templ)
-        await client.delete_elements(*(res[1] for res in template_results))
+        template_results = await asc_client.template_search(templ)
+        await asc_client.delete_elements(*(res[1] for res in template_results))
 
     async def clear(self) -> None:
         """Remove the connections between set_node and all elements"""
         template_results = await self._elements_search_results()
-        client.delete_elements(*(res[1] for res in template_results))
+        asc_client.delete_elements(*(res[1] for res in template_results))
 
     async def _elements_search_results(self) -> list[ScTemplateResult]:
         """Template search of all elements"""
         templ = ScTemplate()
         templ.triple(self._set_node, sc_types.EDGE_ACCESS_VAR_POS_PERM, sc_types.UNKNOWN)
-        return await client.template_search(templ)
+        return await asc_client.template_search(templ)

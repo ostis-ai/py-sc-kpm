@@ -5,10 +5,9 @@ Distributed under the MIT License
 """
 
 from sc_kpm import utils
-from sc_kpm.client_ import client
 from sc_kpm.logging import set_root_config
 from sc_kpm.sc_agent import ScAgent, ScAgentClassic
-from sc_kpm.sc_keynodes import ScKeynodes
+from sc_kpm.sc_keynodes_ import ScKeynodes
 from sc_kpm.sc_module import ScModule
 from sc_kpm.sc_result import ScResult
 from sc_kpm.sc_server import ScServer

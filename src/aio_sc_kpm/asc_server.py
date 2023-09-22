@@ -10,7 +10,8 @@ import signal
 from logging import Logger, getLogger
 from typing import Awaitable, Callable
 
-from aio_sc_kpm.client_ import client
+from sc_client.core.asc_client_instance import asc_client
+
 from sc_kpm.identifiers import _IdentifiersResolver
 from sc_kpm.sc_module import ScModuleAbstract
 
@@ -29,14 +30,14 @@ class AScServer:
 
     async def connect(self) -> _Finisher:
         """Connect to server"""
-        await client.connect(self._url)
+        await asc_client.connect(self._url)
         self.logger.info("Connected by url: %s", repr(self._url))
         _IdentifiersResolver.resolve()
         return _Finisher(self.disconnect, self.logger)
 
     async def disconnect(self) -> None:
         """Disconnect from the server"""
-        await client.disconnect()
+        await asc_client.disconnect()
         self.logger.info("Disconnected from url: %s", repr(self._url))
 
     async def add_modules(self, *modules: ScModuleAbstract) -> None:
@@ -91,7 +92,7 @@ class AScServer:
         await self.disconnect()
 
     async def _register(self, *modules: ScModuleAbstract) -> None:
-        if not client.is_connected():
+        if not asc_client.is_connected():
             self.logger.error("Failed to register: connection lost")
             raise ConnectionError(f"Connection to url {repr(self._url)} lost")
         for module in modules:
@@ -101,7 +102,7 @@ class AScServer:
             module._register()  # pylint: disable=protected-access
 
     async def _unregister(self, *modules: ScModuleAbstract) -> None:
-        if not client.is_connected():
+        if not asc_client.is_connected():
             self.logger.error("Failed to unregister: connection to %s lost", repr(self._url))
             raise ConnectionError(f"Connection to {repr(self._url)} lost")
         for module in modules:

@@ -1,10 +1,10 @@
 from typing import Iterator, List
 
 from sc_client.constants import sc_types
+from sc_client.core.asc_client_instance import asc_client
 from sc_client.models import ScAddr, ScTemplate
 
-from aio_sc_kpm.asc_keynodes import keynodes
-from aio_sc_kpm.client_ import client
+from aio_sc_kpm.asc_keynodes import asc_keynodes
 from aio_sc_kpm.sc_sets.asc_set import AScSet
 
 
@@ -26,9 +26,9 @@ class AScNumberedSet(AScSet):
                     sc_types.EDGE_ACCESS_VAR_POS_PERM,
                     element,
                     sc_types.EDGE_ACCESS_VAR_POS_PERM,
-                    keynodes.rrel_index(index),
+                    await asc_keynodes.rrel_index(index),
                 )
-            client.template_generate(template)
+            asc_client.template_generate(template)
 
     async def __aiter__(self) -> Iterator[ScAddr]:
         return iter(await self.elements_list)
@@ -44,7 +44,7 @@ class AScNumberedSet(AScSet):
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
             sc_types.NODE_VAR_ROLE,
         )
-        results = await client.template_search(templ)
+        results = await asc_client.template_search(templ)
         sorted_results = sorted((result for result in results), key=lambda res: res[4].value)
         # Sort rrel elements addrs
         return [result[2] for result in sorted_results]
@@ -56,9 +56,9 @@ class AScNumberedSet(AScSet):
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
             sc_types.UNKNOWN,
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
-            keynodes.rrel_index(i + 1),
+            await asc_keynodes.rrel_index(i + 1),
         )
-        results = await client.template_search(templ)
+        results = await asc_client.template_search(templ)
         if not results:
             raise KeyError("No element by index")
         return results[0][2]

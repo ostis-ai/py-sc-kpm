@@ -5,10 +5,10 @@ Distributed under the MIT License
 """
 
 from sc_client.constants import sc_types
+from sc_client.core.sc_client_instance import sc_client
 from sc_client.models import ScAddr, ScTemplate
 
-from aio_sc_kpm.sc_sets import ScSet
-from sc_kpm.client_ import client
+from sc_kpm.sc_sets import ScSet
 from sc_kpm.utils.common_utils import create_node
 from tests.common_tests import BaseTestCase
 
@@ -25,14 +25,14 @@ class ScSetTestCase(BaseTestCase):
         element1 = create_node(sc_types.NODE_CONST)
         element2 = create_node(sc_types.NODE_CONST)
         sc_set = ScSet(element1, element2)
-        self.assertEqual(client.check_elements(sc_set.set_node)[0], sc_types.NODE_CONST)
+        self.assertEqual(sc_client.check_elements(sc_set.set_node)[0], sc_types.NODE_CONST)
         self._assert_two_elements_set_template(sc_set.set_node, element1, element2)
 
     def test_create_with_set_type(self):
         element1 = create_node(sc_types.NODE_CONST)
         element2 = create_node(sc_types.NODE_CONST)
         sc_set = ScSet(element1, element2, set_node_type=sc_types.NODE_CONST_STRUCT)
-        self.assertEqual(client.check_elements(sc_set.set_node)[0], sc_types.NODE_CONST_STRUCT)
+        self.assertEqual(sc_client.check_elements(sc_set.set_node)[0], sc_types.NODE_CONST_STRUCT)
         self._assert_two_elements_set_template(sc_set.set_node, element1, element2)
 
     def test_create_copy_set_node(self):
@@ -63,7 +63,7 @@ class ScSetTestCase(BaseTestCase):
         element2 = create_node(sc_types.NODE_CONST)
         sc_set = ScSet(element1)
         sc_set.add(element2)
-        self.assertEqual(client.check_elements(sc_set.set_node)[0], sc_types.NODE_CONST)
+        self.assertEqual(sc_client.check_elements(sc_set.set_node)[0], sc_types.NODE_CONST)
         self._assert_two_elements_set_template(sc_set.set_node, element1, element2)
 
     def test_add_element_twice(self):
@@ -124,5 +124,5 @@ class ScSetTestCase(BaseTestCase):
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
             element2,
         )
-        results = client.template_search(template)
+        results = sc_client.template_search(template)
         self.assertEqual(len(results), 1)

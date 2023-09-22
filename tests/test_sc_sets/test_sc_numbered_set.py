@@ -5,11 +5,12 @@ Distributed under the MIT License
 """
 
 from sc_client.constants import sc_types
+from sc_client.core.sc_client_instance import sc_client
 from sc_client.models import ScAddr, ScTemplate
 
-from aio_sc_kpm.sc_sets.asc_numbered_set import ScNumberedSet
 from sc_kpm import ScKeynodes
-from sc_kpm.client_ import client
+from sc_kpm.sc_keynodes_ import sc_keynodes
+from sc_kpm.sc_sets import ScNumberedSet
 from sc_kpm.utils.common_utils import create_link, create_node, create_nodes
 from tests.common_tests import BaseTestCase
 
@@ -32,7 +33,7 @@ class ScNumberedSetTestCase(BaseTestCase):
         element1 = create_node(sc_types.NODE_CONST)
         element2 = create_node(sc_types.NODE_CONST)
         sc_set = ScNumberedSet(element1, element2, set_node_type=sc_types.NODE_CONST_STRUCT)
-        self.assertEqual(client.check_elements(sc_set.set_node)[0], sc_types.NODE_CONST_STRUCT)
+        self.assertEqual(sc_client.check_elements(sc_set.set_node)[0], sc_types.NODE_CONST_STRUCT)
         self._assert_two_elements_num_set_template(sc_set.set_node, element1, element2)
 
     def test_create_large(self):
@@ -130,14 +131,14 @@ class ScNumberedSetTestCase(BaseTestCase):
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
             element1,
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
-            ScKeynodes.rrel_index(1),
+            sc_keynodes.rrel_index(1),
         )
         template.triple_with_relation(
             set_node,
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
             element2,
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
-            ScKeynodes.rrel_index(2),
+            sc_keynodes.rrel_index(2),
         )
-        results = client.template_search(template)
+        results = sc_client.template_search(template)
         self.assertEqual(len(results), 1)

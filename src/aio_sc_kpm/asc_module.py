@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from logging import getLogger
 
-from sc_kpm.sc_agent import ScAgentAbstract
+from aio_sc_kpm.asc_agent import AScAgentAbstract
 
 
 class AScModule:
@@ -16,21 +16,21 @@ class AScModule:
     You can add and remove agents while module is registered or unregistered.
     """
 
-    def __init__(self, *agents: ScAgentAbstract) -> None:
-        self._agents: set[ScAgentAbstract] = {*agents}
+    def __init__(self, *agents: AScAgentAbstract) -> None:
+        self._agents: set[AScAgentAbstract] = {*agents}
         self._is_registered: bool = False
         self.logger = getLogger(f"{self.__module__}.{self.__class__.__name__}")
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({', '.join(map(repr, self._agents))})"
 
-    async def add_agent(self, agent: ScAgentAbstract) -> None:
+    async def add_agent(self, agent: AScAgentAbstract) -> None:
         """Add an agent to the module and register it if the module is registered"""
         if self._is_registered:
             await agent._register()  # pylint: disable=protected-access
         self._agents.add(agent)
 
-    async def remove_agent(self, agent: ScAgentAbstract) -> None:
+    async def remove_agent(self, agent: AScAgentAbstract) -> None:
         """Remove agent from the module and unregister it if module is registered"""
         if self._is_registered:
             await agent._unregister()  # pylint: disable=protected-access

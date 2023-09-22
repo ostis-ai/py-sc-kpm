@@ -21,7 +21,8 @@ disable=
         logging-fstring-interpolation,
         unbalanced-tuple-unpacking,
         too-many-public-methods,
-        useless-super-delegation
+        useless-super-delegation,
+        duplicate-code
 
 [BASIC]
 

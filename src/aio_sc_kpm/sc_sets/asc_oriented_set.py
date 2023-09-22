@@ -1,14 +1,14 @@
 from typing import Iterator, List, Optional
 
 from sc_client.constants import sc_types
+from sc_client.core.asc_client_instance import asc_client
 from sc_client.models import ScAddr, ScTemplate, ScTemplateResult
 
-from aio_sc_kpm.asc_keynodes import keynodes
-from aio_sc_kpm.client_ import client
+from aio_sc_kpm.asc_keynodes import asc_keynodes
 from aio_sc_kpm.sc_sets.asc_set import AScSet
 from aio_sc_kpm.utils import create_edge, create_role_relation, search_role_relation_template
-from sc_kpm import ScKeynodes
 from sc_kpm.identifiers import CommonIdentifiers, ScAlias
+from sc_kpm.sc_keynodes_ import sc_keynodes
 
 
 class AScOrientedSet(AScSet):
@@ -36,7 +36,7 @@ class AScOrientedSet(AScSet):
     async def __aiter__(self) -> Iterator[ScAddr]:
         """Iterate by ScOrientedSet elements"""
         start_template = await search_role_relation_template(
-            self._set_node, keynodes.get_valid(CommonIdentifiers.RREL_ONE)
+            self._set_node, await asc_keynodes.get_valid(CommonIdentifiers.RREL_ONE)
         )
         if not start_template:
             return
@@ -63,7 +63,9 @@ class AScOrientedSet(AScSet):
 
     async def _create_first_element_edge(self, element: ScAddr) -> ScAddr:
         """Create marked with rrel_1 edge to first element"""
-        return await create_role_relation(self._set_node, element, keynodes.get_valid(CommonIdentifiers.RREL_ONE))
+        return await create_role_relation(
+            self._set_node, element, await asc_keynodes.get_valid(CommonIdentifiers.RREL_ONE)
+        )
 
     async def _get_last_edge_and_delete_rrel_last(self) -> Optional[ScAddr]:
         """Search last edge of ScOrientedSet is it exists"""
@@ -74,19 +76,19 @@ class AScOrientedSet(AScSet):
             sc_types.EDGE_ACCESS_VAR_POS_PERM >> ScAlias.ACCESS_EDGE,
             sc_types.UNKNOWN,
             sc_types.EDGE_ACCESS_VAR_POS_PERM >> ScAlias.RELATION_EDGE,
-            keynodes.get_valid(CommonIdentifiers.RREL_LAST),
+            await asc_keynodes.get_valid(CommonIdentifiers.RREL_LAST),
         )
-        last_elem_templates = await client.template_search(template)
+        last_elem_templates = await asc_client.template_search(template)
         if last_elem_templates:
             last_elem_template = last_elem_templates[0]
-            await client.delete_elements(
+            await asc_client.delete_elements(
                 last_elem_template.get(ScAlias.RELATION_EDGE)
             )  # Delete edge between rrel_last and edge
             return last_elem_template.get(ScAlias.ACCESS_EDGE)
 
         # Search unmarked last edge
         next_elem_result = await search_role_relation_template(
-            self._set_node, keynodes.get_valid(CommonIdentifiers.RREL_ONE)
+            self._set_node, await asc_keynodes.get_valid(CommonIdentifiers.RREL_ONE)
         )
         while True:
             next_edge = next_elem_result.get(ScAlias.ACCESS_EDGE)
@@ -107,14 +109,14 @@ class AScOrientedSet(AScSet):
             sc_types.EDGE_D_COMMON_VAR,
             ScAlias.ACCESS_EDGE,
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
-            ScKeynodes[CommonIdentifiers.NREL_BASIC_SEQUENCE],
+            sc_keynodes[CommonIdentifiers.NREL_BASIC_SEQUENCE],
         )
-        return (await client.template_generate(template)).get(ScAlias.ACCESS_EDGE)
+        return (await asc_client.template_generate(template)).get(ScAlias.ACCESS_EDGE)
 
     @staticmethod
     async def _mark_edge_with_rrel_last(last_edge: ScAddr) -> None:
         await create_edge(
-            sc_types.EDGE_ACCESS_CONST_POS_PERM, keynodes.get_valid(CommonIdentifiers.RREL_LAST), last_edge
+            sc_types.EDGE_ACCESS_CONST_POS_PERM, await asc_keynodes.get_valid(CommonIdentifiers.RREL_LAST), last_edge
         )
 
     async def _search_next_element_template(self, cur_element_edge: ScAddr) -> Optional[ScTemplateResult]:
@@ -124,8 +126,8 @@ class AScOrientedSet(AScSet):
             sc_types.EDGE_D_COMMON_VAR,
             sc_types.EDGE_ACCESS_VAR_POS_PERM >> ScAlias.ACCESS_EDGE,
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
-            keynodes.get_valid(CommonIdentifiers.NREL_BASIC_SEQUENCE),
+            await asc_keynodes.get_valid(CommonIdentifiers.NREL_BASIC_SEQUENCE),
         )
         templ.triple(self._set_node, ScAlias.ACCESS_EDGE, sc_types.UNKNOWN >> ScAlias.ELEMENT)
-        search_results = await client.template_search(templ)
+        search_results = await asc_client.template_search(templ)
         return search_results[0] if search_results else None
