@@ -6,11 +6,11 @@ Distributed under the MIT License
 
 from sc_client.constants.common import ScEventType
 from sc_client.models import ScAddr
+from test_sc_kpm.common_tests import BaseTestCase
 
 from sc_kpm import ScAgent, ScAgentClassic, ScModule, ScResult
 from sc_kpm.identifiers import CommonIdentifiers
 from sc_kpm.utils.action_utils import execute_agent, finish_action_with_status
-from tests.common_tests import BaseTestCase
 
 WAIT_TIME = 1
 

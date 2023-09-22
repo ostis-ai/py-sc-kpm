@@ -1,7 +1,7 @@
-from common_tests import BaseTestCase
 from sc_client.constants import sc_types
 from sc_client.core.sc_client_instance import sc_client
 from sc_client.models import ScConstruction, ScLinkContent, ScLinkContentType
+from test_sc_kpm.common_tests import BaseTestCase
 
 from sc_kpm.utils import create_links
 from sc_kpm.utils.iteration_utils import iter_link_contents_data, iter_links_data

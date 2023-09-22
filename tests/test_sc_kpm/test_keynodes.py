@@ -1,8 +1,8 @@
-from common_tests import BaseTestCase
 from sc_client.constants import sc_types
 from sc_client.core.sc_client_instance import sc_client
 from sc_client.models import ScAddr, ScIdtfResolveParams
 from sc_client.sc_exceptions import InvalidValueError
+from test_sc_kpm.common_tests import BaseTestCase
 
 from sc_kpm.sc_keynodes_ import sc_keynodes
 
