@@ -4,8 +4,8 @@ from sc_client.constants import sc_types
 from sc_client.core.asc_client_instance import asc_client
 from sc_client.models import ScAddr, ScTemplate
 
-from aio_sc_kpm.asc_keynodes import asc_keynodes
-from aio_sc_kpm.sc_sets.asc_set import AScSet
+from asc_kpm.asc_keynodes_ import asc_keynodes
+from asc_kpm.asc_sets.asc_set import AScSet
 
 
 class AScNumberedSet(AScSet):

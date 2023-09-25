@@ -7,7 +7,7 @@ from sc_client.constants import sc_types
 from sc_client.core.asc_client_instance import asc_client
 from sc_client.models import ScAddr, ScConstruction, ScTemplate, ScTemplateResult
 
-from aio_sc_kpm.utils import create_node
+from asc_kpm.utils.aio_common_utils import create_node
 
 
 class AScSet:
@@ -21,7 +21,7 @@ class AScSet:
         self._set_node = set_node
 
     @classmethod
-    async def create(cls, *elements: ScAddr, set_node: ScAddr = None, set_node_type: ScType = None) -> AScSet:
+    async def create(cls, *elements: ScAddr, set_node: ScAddr = None, set_node_type: ScType = None):
         if set_node is None:
             if set_node_type is None:
                 set_node_type = sc_types.NODE_CONST

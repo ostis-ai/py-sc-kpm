@@ -12,7 +12,7 @@ from sc_client.core.asc_client_instance import asc_client
 from sc_client.models import ScAddr, ScConstruction, ScLinkContent, ScLinkContentType, ScTemplate, ScTemplateResult
 from sc_client.models.sc_construction import ScLinkContentData
 
-from aio_sc_kpm.asc_keynodes import Idtf, asc_keynodes
+from asc_kpm.asc_keynodes_ import Idtf, asc_keynodes
 from sc_kpm.identifiers import CommonIdentifiers, ScAlias
 
 

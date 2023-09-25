@@ -12,9 +12,9 @@ from sc_client.constants.common import ScEventType
 from sc_client.core.asc_client_instance import asc_client
 from sc_client.models import AScEventParams, ScAddr, ScConstruction, ScTemplate
 
-from aio_sc_kpm.asc_keynodes import Idtf, asc_keynodes
-from aio_sc_kpm.sc_sets import AScStructure
-from aio_sc_kpm.utils.aio_common_utils import (
+from asc_kpm.asc_keynodes_ import Idtf, asc_keynodes
+from asc_kpm.asc_sets import AScStructure
+from asc_kpm.utils.aio_common_utils import (
     check_edge,
     create_edge,
     create_node,

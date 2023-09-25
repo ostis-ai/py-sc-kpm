@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from logging import getLogger
 
-from aio_sc_kpm.asc_agent import AScAgentAbstract
+from asc_kpm.asc_agent import AScAgentAbstract
 
 
 class AScModule:

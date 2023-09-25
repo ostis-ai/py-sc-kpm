@@ -20,7 +20,7 @@ class AScKeynodes:
 
     def __init__(self) -> None:
         self._dict: Dict[Idtf, ScAddr] = {}
-        self._logger: Logger = getLogger(f"{__name__}.{self.__name__}")
+        self._logger: Logger = getLogger(f"{__name__}.{self.__class__.__name__}")
         self._max_rrel_index: int = 10
 
     async def get_valid(self, identifier: Idtf) -> ScAddr:
@@ -33,7 +33,7 @@ class AScKeynodes:
 
     async def delete(self, identifier: Idtf) -> bool:
         """Delete keynode from the kb and memory and return boolean status"""
-        addr = self.get_valid(identifier)
+        addr = await self.get_valid(identifier)
         del self._dict[identifier]
         return await asc_client.delete_elements(addr)
 

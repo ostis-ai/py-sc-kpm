@@ -1,0 +1,150 @@
+"""
+This source file is part of an OSTIS project. For the latest info, see https://github.com/ostis-ai
+Distributed under the MIT License
+(See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
+"""
+import time
+
+from sc_client.constants import sc_types
+from sc_client.constants.common import ScEventType
+from sc_client.core.sc_client_instance import sc_client
+from test_sc_kpm.common_tests import BaseTestCase
+
+from sc_kpm import ScAgent, ScModule
+from sc_kpm.identifiers import CommonIdentifiers, QuestionStatus
+from sc_kpm.sc_keynodes_ import sc_keynodes
+from sc_kpm.sc_result import ScResult
+from sc_kpm.utils.action_utils import (
+    add_action_arguments,
+    call_action,
+    call_agent,
+    check_action_class,
+    create_action,
+    execute_action,
+    execute_agent,
+    finish_action_with_status,
+    wait_agent,
+)
+from sc_kpm.utils.common_utils import check_edge, create_edge, create_node
+
+test_node_idtf = "test_node"
+
+
+class ScAgentTest(ScAgent):
+    def on_event(self, _src, _edge, target_node) -> ScResult:
+        self.logger.info(f"Agent's started")
+        finish_action_with_status(target_node)
+        return ScResult.OK
+
+
+class ScModuleTest(ScModule):
+    def __init__(self):
+        super().__init__(
+            ScAgentTest(test_node_idtf, ScEventType.ADD_OUTGOING_EDGE),
+            ScAgentTest(test_node_idtf, ScEventType.ADD_INGOING_EDGE),
+        )
+
+
+class TestActionUtils(BaseTestCase):
+    def test_validate_action(self):
+        action_class_idtf = "test_action_class"
+        action_class_node = sc_keynodes.resolve(action_class_idtf, sc_types.NODE_CONST)
+        question = sc_keynodes[CommonIdentifiers.QUESTION]
+        test_node = create_node(sc_types.NODE_CONST)
+        self.assertFalse(check_action_class(action_class_node, test_node))
+        self.assertFalse(check_action_class(action_class_idtf, test_node))
+        class_edge = create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, action_class_node, test_node)
+        self.assertFalse(check_action_class(action_class_node, test_node))
+        self.assertFalse(check_action_class(action_class_idtf, test_node))
+        create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, question, test_node)
+        self.assertTrue(check_action_class(action_class_node, test_node))
+        self.assertTrue(check_action_class(action_class_idtf, test_node))
+        sc_client.delete_elements(class_edge)
+        self.assertFalse(check_action_class(action_class_node, test_node))
+        self.assertFalse(check_action_class(action_class_idtf, test_node))
+
+    def test_execute_agent(self):
+        module = ScModuleTest()
+        self.server.add_modules(module)
+        with self.server.register_modules():
+            assert execute_agent({}, [], test_node_idtf)[1]
+        self.server.remove_modules(module)
+
+    def test_call_agent(self):
+        module = ScModuleTest()
+        self.server.add_modules(module)
+        with self.server.register_modules():
+            question = call_agent({}, [], test_node_idtf)
+            wait_agent(1, question, sc_keynodes[QuestionStatus.QUESTION_FINISHED])
+            result = check_edge(
+                sc_types.EDGE_ACCESS_VAR_POS_PERM, sc_keynodes[QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY], question
+            )
+            self.assertTrue(result)
+        self.server.remove_modules(module)
+
+    def test_wrong_execute_agent(self):
+        module = ScModuleTest()
+        self.server.add_modules(module)
+        with self.server.register_modules():
+            self.assertFalse(execute_agent({}, [], "wrong_agent", wait_time=1)[1])
+        self.server.remove_modules(module)
+
+    def test_execute_action(self):
+        module = ScModuleTest()
+        self.server.add_modules(module)
+        with self.server.register_modules():
+            action_node = create_action()
+            add_action_arguments(action_node, {})
+            assert execute_action(action_node, test_node_idtf)
+        self.server.remove_modules(module)
+
+    def test_call_action(self):
+        module = ScModuleTest()
+        self.server.add_modules(module)
+        with self.server.register_modules():
+            action_node = create_action()
+            add_action_arguments(action_node, {})
+            call_action(action_node, test_node_idtf)
+            wait_agent(1, action_node, sc_keynodes[QuestionStatus.QUESTION_FINISHED])
+            result = check_edge(
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                sc_keynodes[QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY],
+                action_node,
+            )
+            self.assertTrue(result)
+        self.server.remove_modules(module)
+
+    def test_wrong_execute_action(self):
+        module = ScModuleTest()
+        self.server.add_modules(module)
+        with self.server.register_modules():
+            action_node = create_action()
+            add_action_arguments(action_node, {})
+            self.assertFalse(execute_action(action_node, "wrong_agent", wait_time=1))
+        self.server.remove_modules(module)
+
+    def test_wait_action(self):
+        module = ScModuleTest()
+        self.server.add_modules(module)
+        with self.server.register_modules():
+            action_node = create_action()
+            timeout = 0.5
+            # Action is not finished while waiting
+            start_time = time.time()
+            wait_agent(timeout, action_node, sc_keynodes[QuestionStatus.QUESTION_FINISHED])
+            timedelta = time.time() - start_time
+            self.assertGreater(timedelta, timeout)
+            # Action is finished while waiting
+            call_action(action_node, test_node_idtf)
+            start_time = time.time()
+            wait_agent(timeout, action_node, sc_keynodes[QuestionStatus.QUESTION_FINISHED])
+            timedelta = time.time() - start_time
+            self.assertLess(timedelta, timeout)
+            # Action finished before waiting
+            call_action(action_node, test_node_idtf)
+            time.sleep(0.1)
+            start_time = time.time()
+            wait_agent(timeout, action_node, sc_keynodes[QuestionStatus.QUESTION_FINISHED])
+            timedelta = time.time() - start_time
+            self.assertLess(timedelta, timeout)
+        self.server.remove_modules(module)

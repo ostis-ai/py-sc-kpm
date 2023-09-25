@@ -4,9 +4,9 @@ from sc_client.constants import sc_types
 from sc_client.core.asc_client_instance import asc_client
 from sc_client.models import ScAddr, ScTemplate, ScTemplateResult
 
-from aio_sc_kpm.asc_keynodes import asc_keynodes
-from aio_sc_kpm.sc_sets.asc_set import AScSet
-from aio_sc_kpm.utils import create_edge, create_role_relation, search_role_relation_template
+from asc_kpm.asc_keynodes_ import asc_keynodes
+from asc_kpm.asc_sets.asc_set import AScSet
+from asc_kpm.utils.aio_common_utils import create_edge, create_role_relation, search_role_relation_template
 from sc_kpm.identifiers import CommonIdentifiers, ScAlias
 from sc_kpm.sc_keynodes_ import sc_keynodes
 
