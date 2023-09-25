@@ -63,7 +63,7 @@ async def create_binary_relation(edge_type: ScType, src: ScAddr, trg: ScAddr, *r
     construction.create_edge(edge_type, src, trg, ScAlias.RELATION_EDGE)
     for relation in relations:
         construction.create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, relation, ScAlias.RELATION_EDGE)
-    return await asc_client.create_elements(construction)[0]
+    return (await asc_client.create_elements(construction))[0]
 
 
 async def create_role_relation(src: ScAddr, trg: ScAddr, *rrel_nodes: ScAddr) -> ScAddr:

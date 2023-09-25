@@ -51,90 +51,92 @@ class TestActionUtils(AsyncioScKpmTestCase):
         for result_item in result:
             assert result_item.is_node() and result_item.is_const()
 
-    def test_link_utils(self):
+    async def test_link_utils(self):
         link_content = "my link content"
-        link = create_link(link_content)
+        link = await create_link(link_content)
         assert link.is_valid()
-        assert get_link_content_data(link) == link_content
+        assert await get_link_content_data(link) == link_content
 
         link_counter = 10
-        link_list = create_links(*[link_content for _ in range(link_counter)])
+        link_list = await create_links(*[link_content for _ in range(link_counter)])
         assert len(link_list) == link_counter
         for link in link_list:
             assert link.is_valid()
 
-        result = sc_client.check_elements(*link_list)
+        result = await asc_client.check_elements(*link_list)
         for result_item in result:
             assert result_item.is_valid() and result_item.is_link()
 
-    def test_edge_utils(self):
-        source, target = create_nodes(sc_types.NODE_CONST_CLASS, sc_types.NODE_CONST)
-        empty = get_edge(source, target, sc_types.EDGE_ACCESS_VAR_POS_PERM)
+    async def test_edge_utils(self):
+        source, target = await create_nodes(sc_types.NODE_CONST_CLASS, sc_types.NODE_CONST)
+        empty = await get_edge(source, target, sc_types.EDGE_ACCESS_VAR_POS_PERM)
         assert empty.is_valid() is False
 
-        edge = create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, source, target)
+        edge = await create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, source, target)
         assert edge.is_valid()
-        same_edge = get_edge(source, target, sc_types.EDGE_ACCESS_VAR_POS_PERM)
+        same_edge = await get_edge(source, target, sc_types.EDGE_ACCESS_VAR_POS_PERM)
         assert same_edge.is_valid() and same_edge.value == edge.value
-        assert check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, source, target)
+        assert await check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, source, target)
 
-        source, target, target2 = create_nodes(sc_types.NODE_CONST_CLASS, sc_types.NODE_CONST, sc_types.NODE_CONST)
-        edges = create_edges(sc_types.EDGE_ACCESS_CONST_POS_PERM, source, target, target2)
+        source, target, target2 = await create_nodes(
+            sc_types.NODE_CONST_CLASS, sc_types.NODE_CONST, sc_types.NODE_CONST
+        )
+        edges = await create_edges(sc_types.EDGE_ACCESS_CONST_POS_PERM, source, target, target2)
         assert all(edge_.is_valid() for edge_ in edges)
-        same_target1 = get_edge(source, target, sc_types.EDGE_ACCESS_VAR_POS_PERM)
-        same_target2 = get_edge(source, target2, sc_types.EDGE_ACCESS_VAR_POS_PERM)
+        same_target1 = await get_edge(source, target, sc_types.EDGE_ACCESS_VAR_POS_PERM)
+        same_target2 = await get_edge(source, target2, sc_types.EDGE_ACCESS_VAR_POS_PERM)
         assert edges == [same_target1, same_target2]
 
         edge_counter = 10
         for _ in range(edge_counter):
-            create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, source, target)
-        result = get_edges(source, target, sc_types.EDGE_ACCESS_VAR_POS_PERM)
+            await create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, source, target)
+        result = await get_edges(source, target, sc_types.EDGE_ACCESS_VAR_POS_PERM)
         assert len(result) == edge_counter + 1
         for edge in result:
             assert edge.is_valid()
 
-    def test_relation_utils(self):
-        src, rrel_trg, nrel_trg = create_nodes(sc_types.NODE_CONST, sc_types.NODE_CONST, sc_types.NODE_CONST)
-        rrel_node = create_node(sc_types.NODE_CONST_ROLE)
-        nrel_node = create_node(sc_types.NODE_CONST_NOROLE)
+    async def test_relation_utils(self):
+        src, rrel_trg, nrel_trg = await create_nodes(sc_types.NODE_CONST, sc_types.NODE_CONST, sc_types.NODE_CONST)
+        rrel_node = await create_node(sc_types.NODE_CONST_ROLE)
+        nrel_node = await create_node(sc_types.NODE_CONST_NOROLE)
 
-        rrel_edge_1 = create_binary_relation(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, rrel_trg, rrel_node)
-        rrel_edge_2 = create_role_relation(src, rrel_trg, rrel_node)
-        nrel_edge_1 = create_binary_relation(sc_types.EDGE_D_COMMON_CONST, src, nrel_trg, nrel_node)
-        nrel_edge_2 = create_norole_relation(src, nrel_trg, nrel_node)
+        rrel_edge_1 = await create_binary_relation(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, rrel_trg, rrel_node)
+        rrel_edge_2 = await create_role_relation(src, rrel_trg, rrel_node)
+        nrel_edge_1 = await create_binary_relation(sc_types.EDGE_D_COMMON_CONST, src, nrel_trg, nrel_node)
+        nrel_edge_2 = await create_norole_relation(src, nrel_trg, nrel_node)
         edges = [rrel_edge_1, rrel_edge_2, nrel_edge_1, nrel_edge_2]
         for edge in edges:
             assert edge.is_valid()
 
-        result = sc_client.check_elements(*edges)
+        result = await asc_client.check_elements(*edges)
         for result_item in result:
             assert result_item.is_valid() and result_item.is_edge() and result_item.is_const()
         assert result[0].is_pos() and result[1].is_pos()
         assert result[2].is_pos() is False and result[3].is_pos() is False
 
-        expected_rrel_target = get_element_by_role_relation(src, rrel_node)
-        expected_empty = get_element_by_role_relation(src, nrel_node)
+        expected_rrel_target = await get_element_by_role_relation(src, rrel_node)
+        expected_empty = await get_element_by_role_relation(src, nrel_node)
         assert expected_rrel_target.is_valid()
         assert expected_rrel_target.value == rrel_trg.value
         assert expected_empty.is_valid() is False
 
-        expected_nrel_target = get_element_by_norole_relation(src, nrel_node)
-        expected_empty = get_element_by_norole_relation(src, rrel_node)
+        expected_nrel_target = await get_element_by_norole_relation(src, nrel_node)
+        expected_empty = await get_element_by_norole_relation(src, rrel_node)
         assert expected_nrel_target.is_valid()
         assert expected_nrel_target.value == nrel_trg.value
         assert expected_empty.is_valid() is False
 
-    def test_get_system_idtf(self):
+    async def test_get_system_idtf(self):
         test_idtf = "rrel_1"
-        test_node = sc_keynodes[test_idtf]
-        assert get_system_idtf(test_node) == test_idtf
+        test_node = await asc_keynodes.get_valid(test_idtf)
+        assert await get_system_idtf(test_node) == test_idtf
 
-    def test_deletion_utils(self):
-        src, rrel_trg, nrel_trg = create_nodes(sc_types.NODE_CONST, sc_types.NODE_CONST, sc_types.NODE_CONST)
-        rrel_edge = create_binary_relation(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, rrel_trg)
-        nrel_edge = create_norole_relation(src, nrel_trg)
-        assert delete_edges(src, rrel_trg, sc_types.EDGE_ACCESS_VAR_POS_PERM)
-        assert sc_client.delete_elements(nrel_edge, src, rrel_trg, nrel_trg)
+    async def test_deletion_utils(self):
+        src, rrel_trg, nrel_trg = await create_nodes(sc_types.NODE_CONST, sc_types.NODE_CONST, sc_types.NODE_CONST)
+        rrel_edge = await create_binary_relation(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, rrel_trg)
+        nrel_edge = await create_norole_relation(src, nrel_trg)
+        assert await delete_edges(src, rrel_trg, sc_types.EDGE_ACCESS_VAR_POS_PERM)
+        assert await asc_client.delete_elements(nrel_edge, src, rrel_trg, nrel_trg)
 
-        result = sc_client.check_elements(rrel_edge)[0]
+        result = (await asc_client.check_elements(rrel_edge))[0]
         assert result.is_valid() is False
