@@ -6,7 +6,7 @@ Distributed under the MIT License
 
 from __future__ import annotations
 
-import signal
+import asyncio
 from logging import Logger, getLogger
 from typing import Awaitable, Callable
 
@@ -110,8 +110,11 @@ class AScServer:
 
     def serve(self) -> None:
         """Serve agents until a SIGINT signal (^C, or stop in IDE) is received"""
-        signal.signal(signal.SIGINT, lambda *_: self.logger.info("^C SIGINT was interrupted"))
-        signal.pause()
+        self.logger.info("* Serving ScServer...")
+        try:
+            asyncio.get_event_loop().run_forever()
+        except KeyboardInterrupt:
+            self.logger.info("^C SIGINT was interrupted")
 
 
 class _AFinisher:
