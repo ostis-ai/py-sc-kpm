@@ -28,10 +28,11 @@ class AScNumberedSet(AScSet):
                     sc_types.EDGE_ACCESS_VAR_POS_PERM,
                     await asc_keynodes.rrel_index(index),
                 )
-            asc_client.template_generate(template)
+            await asc_client.template_generate(template)
 
     async def __aiter__(self) -> Iterator[ScAddr]:
-        return iter(await self.elements_list)
+        for element in await self.elements_list:
+            yield element
 
     @property
     async def elements_list(self) -> List[ScAddr]:
@@ -49,7 +50,7 @@ class AScNumberedSet(AScSet):
         # Sort rrel elements addrs
         return [result[2] for result in sorted_results]
 
-    async def of(self, i: int) -> ScAddr:
+    async def at(self, i: int) -> ScAddr:
         templ = ScTemplate()
         templ.triple_with_relation(
             self._set_node,

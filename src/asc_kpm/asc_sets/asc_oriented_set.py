@@ -8,7 +8,6 @@ from asc_kpm.asc_keynodes_ import asc_keynodes
 from asc_kpm.asc_sets.asc_set import AScSet
 from asc_kpm.utils.aio_common_utils import create_edge, create_role_relation, search_role_relation_template
 from sc_kpm.identifiers import CommonIdentifiers, ScAlias
-from sc_kpm.sc_keynodes_ import sc_keynodes
 
 
 class AScOrientedSet(AScSet):
@@ -25,9 +24,9 @@ class AScOrientedSet(AScSet):
         if elements:
             elements_iterator = iter(elements)
             current_edge = (
-                self._create_first_element_edge(next(elements_iterator))
-                if self.is_empty()
-                else self._get_last_edge_and_delete_rrel_last()
+                await self._create_first_element_edge(next(elements_iterator))
+                if await self.is_empty()
+                else await self._get_last_edge_and_delete_rrel_last()
             )
             for element in elements_iterator:
                 current_edge = await self._create_next_edge(current_edge, element)
@@ -109,7 +108,7 @@ class AScOrientedSet(AScSet):
             sc_types.EDGE_D_COMMON_VAR,
             ScAlias.ACCESS_EDGE,
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
-            sc_keynodes[CommonIdentifiers.NREL_BASIC_SEQUENCE],
+            await asc_keynodes.get_valid(CommonIdentifiers.NREL_BASIC_SEQUENCE),
         )
         return (await asc_client.template_generate(template)).get(ScAlias.ACCESS_EDGE)
 

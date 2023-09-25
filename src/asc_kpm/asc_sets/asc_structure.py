@@ -19,7 +19,7 @@ class AScStructure(AScSet):
         if set_node_type is None:
             set_node_type = sc_types.NODE_CONST_STRUCT
         if set_node is not None:
-            set_node_type = asc_client.check_elements(set_node)[0]
+            set_node_type = (await asc_client.check_elements(set_node))[0]
         if not set_node_type.is_struct():
             raise InvalidTypeError
         return await super().create(*elements, set_node=set_node, set_node_type=set_node_type)

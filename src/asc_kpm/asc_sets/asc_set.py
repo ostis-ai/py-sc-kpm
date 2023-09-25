@@ -25,7 +25,7 @@ class AScSet:
         if set_node is None:
             if set_node_type is None:
                 set_node_type = sc_types.NODE_CONST
-        set_node = await create_node(set_node_type)
+            set_node = await create_node(set_node_type)
         sc_set = cls(set_node)
         await sc_set.add(*elements)
         return sc_set
@@ -63,7 +63,11 @@ class AScSet:
 
     async def __aiter__(self) -> Iterator[ScAddr]:
         """Iterate by ScSet elements"""
-        return iter(await self.elements_set)
+        for element in await self.elements_set:
+            yield element
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        pass
 
     async def contains(self, element: ScAddr) -> bool:
         """Check if ScSet contains element"""
@@ -80,7 +84,7 @@ class AScSet:
     async def clear(self) -> None:
         """Remove the connections between set_node and all elements"""
         template_results = await self._elements_search_results()
-        asc_client.delete_elements(*(res[1] for res in template_results))
+        await asc_client.delete_elements(*(res[1] for res in template_results))
 
     async def _elements_search_results(self) -> list[ScTemplateResult]:
         """Template search of all elements"""
