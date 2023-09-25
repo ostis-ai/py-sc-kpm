@@ -23,8 +23,8 @@ class CommonTests(AsyncioScKpmTestCase):
             ACTION_CLASS_NAME = "test_agent"
 
             @classmethod
-            async def register(cls, **kwargs):
-                return await super().register(cls.ACTION_CLASS_NAME, ScEventType.ADD_OUTGOING_EDGE)
+            async def ainit(cls, **kwargs):
+                return await super().ainit(cls.ACTION_CLASS_NAME, ScEventType.ADD_OUTGOING_EDGE)
 
             async def on_event(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
                 await finish_action_with_status(action_element, True)
@@ -34,15 +34,15 @@ class CommonTests(AsyncioScKpmTestCase):
             ACTION_CLASS_NAME = "test_agent_classic"
 
             @classmethod
-            async def register(cls, **kwargs):
-                return await super().register(cls.ACTION_CLASS_NAME)
+            async def ainit(cls, **kwargs):
+                return await super().ainit(cls.ACTION_CLASS_NAME)
 
             async def on_event(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
                 await finish_action_with_status(action_element, True)
                 return ScResult.OK
 
-        module = AScModule(await Agent.register(), await AgentClassic.register())
-        self.server.add_modules(module)
+        module = await AScModule.ainit(await Agent.ainit(), await AgentClassic.ainit())
+        await self.server.add_modules(module)
         kwargs = dict(
             arguments={},
             concepts=[],
@@ -56,12 +56,12 @@ class CommonTests(AsyncioScKpmTestCase):
         )
         self.assertFalse((await execute_agent(**kwargs))[1])
         self.assertFalse((await execute_agent(**kwargs_classic))[1])
-        with self.server.register_modules():
+        async with await self.server.register_modules():
             self.assertTrue((await execute_agent(**kwargs))[1])
             self.assertTrue((await execute_agent(**kwargs_classic))[1])
         self.assertFalse((await execute_agent(**kwargs))[1])
         self.assertFalse((await execute_agent(**kwargs_classic))[1])
-        self.server.remove_modules(module)
+        await self.server.remove_modules(module)
 
     # def test_sc_module(self):
     #     class TestAgent(AScAgent):

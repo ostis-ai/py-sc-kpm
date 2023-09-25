@@ -3,8 +3,8 @@ This source file is part of an OSTIS project. For the latest info, see https://g
 Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
-
-from threading import Event
+import asyncio
+from asyncio import Future
 from typing import Dict, List, Tuple, Union
 
 from sc_client.constants import sc_types
@@ -104,7 +104,7 @@ async def create_action(*concepts: Idtf) -> ScAddr:
             await asc_keynodes.resolve(concept, sc_types.NODE_CONST_CLASS),
             ScAlias.ACTION_NODE,
         )
-    action_node = await asc_client.create_elements(construction)[0]
+    action_node = (await asc_client.create_elements(construction))[0]
     return action_node
 
 
@@ -114,7 +114,7 @@ async def add_action_arguments(action_node: ScAddr, arguments: Dict[ScAddr, IsDy
     argument: ScAddr
     for index, (argument, is_dynamic) in enumerate(arguments.items(), 1):
         if argument.is_valid():
-            rrel_i = asc_keynodes.rrel_index(index)
+            rrel_i = await asc_keynodes.rrel_index(index)
             if is_dynamic:
                 dynamic_node = await create_node(sc_types.NODE_CONST)
                 await create_role_relation(action_node, dynamic_node, rrel_dynamic_arg, rrel_i)
@@ -142,17 +142,22 @@ async def call_action(action_node: ScAddr, initiation: Idtf = QuestionStatus.QUE
 
 async def wait_agent(seconds: float, question_node: ScAddr, reaction_node: ScAddr = None) -> None:
     reaction_node = reaction_node or await asc_keynodes.get_valid(QuestionStatus.QUESTION_FINISHED)
-    finish_event = Event()
+    finish_future = Future()
 
     async def event_callback(_: ScAddr, __: ScAddr, trg: ScAddr) -> None:
         if trg != reaction_node:
             return
-        finish_event.set()
+        finish_future.set_result(True)
 
+    async def timer():
+        await asyncio.sleep(seconds)
+        finish_future.set_result(False)
+
+    asyncio.create_task(timer())
     event_params = AScEventParams(question_node, ScEventType.ADD_INGOING_EDGE, event_callback)
-    sc_event = await asc_client.events_create(event_params)[0]
+    sc_event = (await asc_client.events_create(event_params))[0]
     if not await check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, reaction_node, question_node):
-        finish_event.wait(seconds)
+        await finish_future
     await asc_client.events_destroy(sc_event)
     # TODO: return status in 0.2.0
 

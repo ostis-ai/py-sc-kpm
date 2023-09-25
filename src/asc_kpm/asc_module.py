@@ -21,6 +21,10 @@ class AScModule:
         self._is_registered: bool = False
         self.logger = getLogger(f"{self.__module__}.{self.__class__.__name__}")
 
+    @classmethod
+    async def ainit(cls, *agents: AScAgentAbstract):
+        return cls(*agents)
+
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({', '.join(map(repr, self._agents))})"
 

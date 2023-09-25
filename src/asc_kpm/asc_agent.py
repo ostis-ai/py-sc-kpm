@@ -3,7 +3,6 @@ This source file is part of an OSTIS project. For the latest info, see https://g
 Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
-import asyncio
 import logging
 from abc import ABC, abstractmethod
 from logging import getLogger
@@ -38,7 +37,7 @@ class AScAgentAbstract(ABC):
             self.logger.warning("Almost registered")
             return
         event_params = AScEventParams(self._event_element, self._event_type, self._callback)
-        self._event = await asc_client.events_create(event_params)[0]
+        self._event = (await asc_client.events_create(event_params))[0]
         self.logger.info("Registered with ScEvent: %s - %s", repr(self._event_element), repr(self._event_type))
 
     async def _unregister(self) -> None:
@@ -60,11 +59,9 @@ class AScAgentAbstract(ABC):
 
 class AScAgent(AScAgentAbstract, ABC):
     @classmethod
-    async def register(cls, event_element: Union[Idtf, ScAddr], event_type: ScEventType):
+    async def ainit(cls, event_element: Union[Idtf, ScAddr], event_type: ScEventType):
         if isinstance(event_element, Idtf):
-            event_element = asyncio.get_event_loop().run_until_complete(
-                await asc_keynodes.resolve(event_element, sc_types.NODE_CONST_CLASS)
-            )
+            event_element = await asc_keynodes.resolve(event_element, sc_types.NODE_CONST_CLASS)
         cls.logger = getLogger(f"{cls.__module__}.{cls.__name__}")
         if not event_element.is_valid():
             cls.logger.error("Failed to initialize ScAgent: event_class is invalid")
@@ -80,13 +77,13 @@ class AScAgentClassic(AScAgent, ABC):
     _action_class: ScAddr
 
     @classmethod
-    async def register(
+    async def ainit(
         cls,
         action_class_name: Idtf,
         event_element: Union[Idtf, ScAddr] = QuestionStatus.QUESTION_INITIATED,
         event_type: ScEventType = ScEventType.ADD_OUTGOING_EDGE,
     ):
-        instance = await super().register(event_element, event_type)
+        instance = await super().ainit(event_element, event_type)
         instance._action_class_name = action_class_name
         instance._action_class = await asc_keynodes.resolve(action_class_name, sc_types.NODE_CONST_CLASS)
         return instance

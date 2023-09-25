@@ -7,14 +7,12 @@ import time
 
 from sc_client.constants import sc_types
 from sc_client.constants.common import ScEventType
-from sc_client.core.sc_client_instance import sc_client
-from test_sc_kpm.common_tests import BaseTestCase
+from sc_client.core.asc_client_instance import asc_client
+from test_asc_kpm.base_test_case import AsyncioScKpmTestCase
 
-from sc_kpm import ScAgent, ScModule
-from sc_kpm.identifiers import CommonIdentifiers, QuestionStatus
-from sc_kpm.sc_keynodes_ import sc_keynodes
-from sc_kpm.sc_result import ScResult
-from sc_kpm.utils.action_utils import (
+from asc_kpm import AScAgent, AScModule
+from asc_kpm.asc_keynodes_ import asc_keynodes
+from asc_kpm.utils.aio_action_utils import (
     add_action_arguments,
     call_action,
     call_agent,
@@ -25,126 +23,132 @@ from sc_kpm.utils.action_utils import (
     finish_action_with_status,
     wait_agent,
 )
-from sc_kpm.utils.common_utils import check_edge, create_edge, create_node
+from asc_kpm.utils.aio_common_utils import check_edge, create_edge, create_node
+from sc_kpm.identifiers import CommonIdentifiers, QuestionStatus
+from sc_kpm.sc_result import ScResult
 
 test_node_idtf = "test_node"
 
 
-class ScAgentTest(ScAgent):
-    def on_event(self, _src, _edge, target_node) -> ScResult:
+class AScAgentTest(AScAgent):
+    async def on_event(self, _src, _edge, target_node) -> ScResult:
         self.logger.info(f"Agent's started")
-        finish_action_with_status(target_node)
+        await finish_action_with_status(target_node)
         return ScResult.OK
 
 
-class ScModuleTest(ScModule):
-    def __init__(self):
-        super().__init__(
-            ScAgentTest(test_node_idtf, ScEventType.ADD_OUTGOING_EDGE),
-            ScAgentTest(test_node_idtf, ScEventType.ADD_INGOING_EDGE),
+class AScModuleTest(AScModule):
+    @classmethod
+    async def ainit(cls):
+        return await super().ainit(
+            await AScAgentTest.ainit(test_node_idtf, ScEventType.ADD_OUTGOING_EDGE),
+            await AScAgentTest.ainit(test_node_idtf, ScEventType.ADD_INGOING_EDGE),
         )
 
 
-class TestActionUtils(BaseTestCase):
-    def test_validate_action(self):
+class TestActionUtils(AsyncioScKpmTestCase):
+    async def test_validate_action(self):
         action_class_idtf = "test_action_class"
-        action_class_node = sc_keynodes.resolve(action_class_idtf, sc_types.NODE_CONST)
-        question = sc_keynodes[CommonIdentifiers.QUESTION]
-        test_node = create_node(sc_types.NODE_CONST)
-        self.assertFalse(check_action_class(action_class_node, test_node))
-        self.assertFalse(check_action_class(action_class_idtf, test_node))
-        class_edge = create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, action_class_node, test_node)
-        self.assertFalse(check_action_class(action_class_node, test_node))
-        self.assertFalse(check_action_class(action_class_idtf, test_node))
-        create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, question, test_node)
-        self.assertTrue(check_action_class(action_class_node, test_node))
-        self.assertTrue(check_action_class(action_class_idtf, test_node))
-        sc_client.delete_elements(class_edge)
-        self.assertFalse(check_action_class(action_class_node, test_node))
-        self.assertFalse(check_action_class(action_class_idtf, test_node))
+        action_class_node = await asc_keynodes.resolve(action_class_idtf, sc_types.NODE_CONST)
+        question = await asc_keynodes.get_valid(CommonIdentifiers.QUESTION)
+        test_node = await create_node(sc_types.NODE_CONST)
+        self.assertFalse(await check_action_class(action_class_node, test_node))
+        self.assertFalse(await check_action_class(action_class_idtf, test_node))
+        class_edge = await create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, action_class_node, test_node)
+        self.assertFalse(await check_action_class(action_class_node, test_node))
+        self.assertFalse(await check_action_class(action_class_idtf, test_node))
+        await create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, question, test_node)
+        self.assertTrue(await check_action_class(action_class_node, test_node))
+        self.assertTrue(await check_action_class(action_class_idtf, test_node))
+        await asc_client.delete_elements(class_edge)
+        self.assertFalse(await check_action_class(action_class_node, test_node))
+        self.assertFalse(await check_action_class(action_class_idtf, test_node))
 
-    def test_execute_agent(self):
-        module = ScModuleTest()
-        self.server.add_modules(module)
-        with self.server.register_modules():
-            assert execute_agent({}, [], test_node_idtf)[1]
-        self.server.remove_modules(module)
+    async def test_execute_agent(self):
+        module = await AScModuleTest.ainit()
+        await self.server.add_modules(module)
+        async with await self.server.register_modules():
+            results = await execute_agent({}, [], test_node_idtf)
+            assert results[1]
+        await self.server.remove_modules(module)
 
-    def test_call_agent(self):
-        module = ScModuleTest()
-        self.server.add_modules(module)
-        with self.server.register_modules():
-            question = call_agent({}, [], test_node_idtf)
-            wait_agent(1, question, sc_keynodes[QuestionStatus.QUESTION_FINISHED])
-            result = check_edge(
-                sc_types.EDGE_ACCESS_VAR_POS_PERM, sc_keynodes[QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY], question
+    async def test_call_agent(self):
+        module = await AScModuleTest.ainit()
+        await self.server.add_modules(module)
+        async with await self.server.register_modules():
+            question = await call_agent({}, [], test_node_idtf)
+            await wait_agent(1, question, await asc_keynodes.get_valid(QuestionStatus.QUESTION_FINISHED))
+            result = await check_edge(
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                await asc_keynodes.get_valid(QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY),
+                question,
             )
             self.assertTrue(result)
-        self.server.remove_modules(module)
+        await self.server.remove_modules(module)
 
-    def test_wrong_execute_agent(self):
-        module = ScModuleTest()
-        self.server.add_modules(module)
-        with self.server.register_modules():
-            self.assertFalse(execute_agent({}, [], "wrong_agent", wait_time=1)[1])
-        self.server.remove_modules(module)
+    async def test_wrong_execute_agent(self):
+        module = await AScModuleTest.ainit()
+        await self.server.add_modules(module)
+        async with await self.server.register_modules():
+            self.assertFalse((await execute_agent({}, [], "wrong_agent", wait_time=1))[1])
+        await self.server.remove_modules(module)
 
-    def test_execute_action(self):
-        module = ScModuleTest()
-        self.server.add_modules(module)
-        with self.server.register_modules():
-            action_node = create_action()
-            add_action_arguments(action_node, {})
-            assert execute_action(action_node, test_node_idtf)
-        self.server.remove_modules(module)
+    async def test_execute_action(self):
+        module = await AScModuleTest.ainit()
+        await self.server.add_modules(module)
+        async with await self.server.register_modules():
+            action_node = await create_action()
+            await add_action_arguments(action_node, {})
+            assert await execute_action(action_node, test_node_idtf)
+        await self.server.remove_modules(module)
 
-    def test_call_action(self):
-        module = ScModuleTest()
-        self.server.add_modules(module)
-        with self.server.register_modules():
-            action_node = create_action()
-            add_action_arguments(action_node, {})
-            call_action(action_node, test_node_idtf)
-            wait_agent(1, action_node, sc_keynodes[QuestionStatus.QUESTION_FINISHED])
-            result = check_edge(
+    async def test_call_action(self):
+        module = await AScModuleTest.ainit()
+        await self.server.add_modules(module)
+        async with await self.server.register_modules():
+            action_node = await create_action()
+            await add_action_arguments(action_node, {})
+            await call_action(action_node, test_node_idtf)
+            await wait_agent(1, action_node, await asc_keynodes.get_valid(QuestionStatus.QUESTION_FINISHED))
+            result = await check_edge(
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
-                sc_keynodes[QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY],
+                await asc_keynodes.get_valid(QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY),
                 action_node,
             )
             self.assertTrue(result)
-        self.server.remove_modules(module)
+        await self.server.remove_modules(module)
 
-    def test_wrong_execute_action(self):
-        module = ScModuleTest()
-        self.server.add_modules(module)
-        with self.server.register_modules():
-            action_node = create_action()
-            add_action_arguments(action_node, {})
-            self.assertFalse(execute_action(action_node, "wrong_agent", wait_time=1))
-        self.server.remove_modules(module)
+    async def test_wrong_execute_action(self):
+        module = await AScModuleTest.ainit()
+        await self.server.add_modules(module)
+        async with await self.server.register_modules():
+            action_node = await create_action()
+            await add_action_arguments(action_node, {})
+            self.assertFalse(await execute_action(action_node, "wrong_agent", wait_time=1))
+        await self.server.remove_modules(module)
 
-    def test_wait_action(self):
-        module = ScModuleTest()
-        self.server.add_modules(module)
-        with self.server.register_modules():
-            action_node = create_action()
+    async def test_wait_action(self):
+        module = await AScModuleTest.ainit()
+        await self.server.add_modules(module)
+        async with await self.server.register_modules():
+            action_node = await create_action()
             timeout = 0.5
             # Action is not finished while waiting
             start_time = time.time()
-            wait_agent(timeout, action_node, sc_keynodes[QuestionStatus.QUESTION_FINISHED])
+            await wait_agent(timeout, action_node, await asc_keynodes.get_valid(QuestionStatus.QUESTION_FINISHED))
             timedelta = time.time() - start_time
             self.assertGreater(timedelta, timeout)
             # Action is finished while waiting
-            call_action(action_node, test_node_idtf)
+            await call_action(action_node, test_node_idtf)
             start_time = time.time()
-            wait_agent(timeout, action_node, sc_keynodes[QuestionStatus.QUESTION_FINISHED])
+            await wait_agent(timeout, action_node, await asc_keynodes.get_valid(QuestionStatus.QUESTION_FINISHED))
             timedelta = time.time() - start_time
             self.assertLess(timedelta, timeout)
             # Action finished before waiting
-            call_action(action_node, test_node_idtf)
+            await call_action(action_node, test_node_idtf)
             time.sleep(0.1)
             start_time = time.time()
-            wait_agent(timeout, action_node, sc_keynodes[QuestionStatus.QUESTION_FINISHED])
+            await wait_agent(timeout, action_node, await asc_keynodes.get_valid(QuestionStatus.QUESTION_FINISHED))
             timedelta = time.time() - start_time
             self.assertLess(timedelta, timeout)
-        self.server.remove_modules(module)
+        await self.server.remove_modules(module)
