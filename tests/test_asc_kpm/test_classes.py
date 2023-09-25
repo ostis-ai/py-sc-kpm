@@ -43,99 +43,104 @@ class CommonTests(AsyncioScKpmTestCase):
 
         module = await AScModule.ainit(await Agent.ainit(), await AgentClassic.ainit())
         await self.server.add_modules(module)
-        kwargs = dict(
+        arguments = dict(
             arguments={},
             concepts=[],
             initiation=Agent.ACTION_CLASS_NAME,
             wait_time=WAIT_TIME,
         )
-        kwargs_classic = dict(
+        arguments_classic = dict(
             arguments={},
             concepts=[CommonIdentifiers.QUESTION, AgentClassic.ACTION_CLASS_NAME],
             wait_time=WAIT_TIME,
         )
-        self.assertFalse((await execute_agent(**kwargs))[1])
-        self.assertFalse((await execute_agent(**kwargs_classic))[1])
+        self.assertFalse((await execute_agent(**arguments))[1])
+        self.assertFalse((await execute_agent(**arguments_classic))[1])
         async with await self.server.register_modules():
-            self.assertTrue((await execute_agent(**kwargs))[1])
-            self.assertTrue((await execute_agent(**kwargs_classic))[1])
-        self.assertFalse((await execute_agent(**kwargs))[1])
-        self.assertFalse((await execute_agent(**kwargs_classic))[1])
+            self.assertTrue((await execute_agent(**arguments))[1])
+            self.assertTrue((await execute_agent(**arguments_classic))[1])
+        self.assertFalse((await execute_agent(**arguments))[1])
+        self.assertFalse((await execute_agent(**arguments_classic))[1])
         await self.server.remove_modules(module)
 
-    # def test_sc_module(self):
-    #     class TestAgent(AScAgent):
-    #         def on_event(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
-    #             finish_action_with_status(action_element, True)
-    #             return ScResult.OK
-    #
-    #     def is_executing_successful(i: int) -> bool:
-    #         return await execute_agent(
-    #             arguments={},
-    #             concepts=[],
-    #             initiation=f"agent{i}",
-    #             wait_time=WAIT_TIME,
-    #         )[1]
-    #
-    #     agent1 = TestAgent("agent1", ScEventType.ADD_OUTGOING_EDGE)
-    #     agent2 = TestAgent("agent2", ScEventType.ADD_OUTGOING_EDGE)
-    #     agent3 = TestAgent("agent3", ScEventType.ADD_OUTGOING_EDGE)
-    #
-    #     module1 = AScModule(agent1)
-    #     module2 = AScModule(agent2)
-    #     self.server.add_modules(module1)
-    #     module1.add_agent(agent3)
-    #     with self.server.register_modules():
-    #         self.assertTrue(is_executing_successful(1))
-    #         self.assertFalse(is_executing_successful(2))
-    #         self.assertTrue(is_executing_successful(3))
-    #
-    #         self.server.add_modules(module2)
-    #         self.assertTrue(is_executing_successful(2))
-    #
-    #         module1.remove_agent(agent3)
-    #         self.assertTrue(is_executing_successful(1))
-    #         self.assertFalse(is_executing_successful(3))
-    #         self.server.remove_modules(module1, module2)
-    #
-    # def test_sc_server(self):
-    #     class TestAgent(AScAgent):
-    #         ACTION_CLASS_NAME = "some_agent"
-    #
-    #         def __init__(self):
-    #             super().__init__(self.ACTION_CLASS_NAME, ScEventType.ADD_OUTGOING_EDGE)
-    #
-    #         def on_event(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
-    #             finish_action_with_status(action_element, True)
-    #             return ScResult.OK
-    #
-    #     def is_executing_successful() -> bool:
-    #         return await execute_agent(
-    #             arguments={},
-    #             concepts=[],
-    #             initiation=TestAgent.ACTION_CLASS_NAME,
-    #             wait_time=WAIT_TIME,
-    #         )[1]
-    #
-    #     module = AScModule(TestAgent())
-    #     self.server.add_modules(module)
-    #     self.assertFalse(is_executing_successful())
-    #     self.server.register_modules()
-    #     self.assertTrue(is_executing_successful())
-    #     self.server.unregister_modules()
-    #     self.assertFalse(is_executing_successful())
-    #
-    #     # main_pid = os.getpid()
-    #     #
-    #     # async def execute_and_send_sigint():
-    #     #     self.assertTrue(is_executing_successful())
-    #     #     await asyncio.sleep(0.01)
-    #     #     os.kill(main_pid, signal.SIGINT)
-    #     #     self.assertFalse(is_executing_successful())
-    #     #
-    #     # with self.server.register_modules():
-    #     #     asyncio.create_task(execute_and_send_sigint())
-    #     #     # asyncio.get_event_loop().run_until_complete(asyncio.sleep(0))
-    #     #     self.server.serve()
-    #
-    #     self.server.remove_modules(module)
+    async def test_sc_module(self):
+        class TestAgent(AScAgent):
+            async def on_event(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
+                await finish_action_with_status(action_element, True)
+                return ScResult.OK
+
+        async def is_executing_successful(i: int) -> bool:
+            return (
+                await execute_agent(
+                    arguments={},
+                    concepts=[],
+                    initiation=f"agent{i}",
+                    wait_time=WAIT_TIME,
+                )
+            )[1]
+
+        agent1 = await TestAgent.ainit("agent1", ScEventType.ADD_OUTGOING_EDGE)
+        agent2 = await TestAgent.ainit("agent2", ScEventType.ADD_OUTGOING_EDGE)
+        agent3 = await TestAgent.ainit("agent3", ScEventType.ADD_OUTGOING_EDGE)
+
+        module1 = await AScModule.ainit(agent1)
+        module2 = await AScModule.ainit(agent2)
+        await self.server.add_modules(module1)
+        await module1.add_agent(agent3)
+        async with await self.server.register_modules():
+            self.assertTrue(await is_executing_successful(1))
+            self.assertFalse(await is_executing_successful(2))
+            self.assertTrue(await is_executing_successful(3))
+
+            await self.server.add_modules(module2)
+            self.assertTrue(await is_executing_successful(2))
+
+            await module1.remove_agent(agent3)
+            self.assertTrue(await is_executing_successful(1))
+            self.assertFalse(await is_executing_successful(3))
+            await self.server.remove_modules(module1, module2)
+
+    async def test_sc_server(self):
+        class TestAgent(AScAgent):
+            ACTION_CLASS_NAME = "some_agent"
+
+            @classmethod
+            async def ainit(cls, **kwargs):
+                return await super().ainit(cls.ACTION_CLASS_NAME, ScEventType.ADD_OUTGOING_EDGE)
+
+            async def on_event(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
+                await finish_action_with_status(action_element, True)
+                return ScResult.OK
+
+        async def is_executing_successful() -> bool:
+            return (
+                await execute_agent(
+                    arguments={},
+                    concepts=[],
+                    initiation=TestAgent.ACTION_CLASS_NAME,
+                    wait_time=WAIT_TIME,
+                )
+            )[1]
+
+        module = await AScModule.ainit(await TestAgent.ainit())
+        await self.server.add_modules(module)
+        self.assertFalse(await is_executing_successful())
+        await self.server.register_modules()
+        self.assertTrue(await is_executing_successful())
+        await self.server.unregister_modules()
+        self.assertFalse(await is_executing_successful())
+
+        # main_pid = os.getpid()
+        #
+        # async def execute_and_send_sigint():
+        #     self.assertTrue(is_executing_successful())
+        #     await asyncio.sleep(0.01)
+        #     os.kill(main_pid, signal.SIGINT)
+        #     self.assertFalse(is_executing_successful())
+        #
+        # with self.server.register_modules():
+        #     asyncio.create_task(execute_and_send_sigint())
+        #     # asyncio.get_event_loop().run_until_complete(asyncio.sleep(0))
+        #     self.server.serve()
+
+        await self.server.remove_modules(module)
