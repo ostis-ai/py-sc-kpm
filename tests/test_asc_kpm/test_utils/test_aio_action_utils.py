@@ -67,7 +67,7 @@ class TestActionUtils(AsyncioScKpmTestCase):
     async def test_execute_agent(self):
         module = await AScModuleTest.ainit()
         await self.server.add_modules(module)
-        async with await self.server.register_modules():
+        async with self.server.register_modules():
             results = await execute_agent({}, [], test_node_idtf)
             assert results[1]
         await self.server.remove_modules(module)
@@ -75,7 +75,7 @@ class TestActionUtils(AsyncioScKpmTestCase):
     async def test_call_agent(self):
         module = await AScModuleTest.ainit()
         await self.server.add_modules(module)
-        async with await self.server.register_modules():
+        async with self.server.register_modules():
             question = await call_agent({}, [], test_node_idtf)
             await wait_agent(1, question, await asc_keynodes.get_valid(QuestionStatus.QUESTION_FINISHED))
             result = await check_edge(
@@ -89,14 +89,14 @@ class TestActionUtils(AsyncioScKpmTestCase):
     async def test_wrong_execute_agent(self):
         module = await AScModuleTest.ainit()
         await self.server.add_modules(module)
-        async with await self.server.register_modules():
+        async with self.server.register_modules():
             self.assertFalse((await execute_agent({}, [], "wrong_agent", wait_time=1))[1])
         await self.server.remove_modules(module)
 
     async def test_execute_action(self):
         module = await AScModuleTest.ainit()
         await self.server.add_modules(module)
-        async with await self.server.register_modules():
+        async with self.server.register_modules():
             action_node = await create_action()
             await add_action_arguments(action_node, {})
             assert await execute_action(action_node, test_node_idtf)
@@ -105,7 +105,7 @@ class TestActionUtils(AsyncioScKpmTestCase):
     async def test_call_action(self):
         module = await AScModuleTest.ainit()
         await self.server.add_modules(module)
-        async with await self.server.register_modules():
+        async with self.server.register_modules():
             action_node = await create_action()
             await add_action_arguments(action_node, {})
             await call_action(action_node, test_node_idtf)
@@ -121,7 +121,7 @@ class TestActionUtils(AsyncioScKpmTestCase):
     async def test_wrong_execute_action(self):
         module = await AScModuleTest.ainit()
         await self.server.add_modules(module)
-        async with await self.server.register_modules():
+        async with self.server.register_modules():
             action_node = await create_action()
             await add_action_arguments(action_node, {})
             self.assertFalse(await execute_action(action_node, "wrong_agent", wait_time=1))
@@ -130,7 +130,7 @@ class TestActionUtils(AsyncioScKpmTestCase):
     async def test_wait_action(self):
         module = await AScModuleTest.ainit()
         await self.server.add_modules(module)
-        async with await self.server.register_modules():
+        async with self.server.register_modules():
             action_node = await create_action()
             timeout = 0.5
             # Action is not finished while waiting
