@@ -24,9 +24,6 @@ class ScKeynodes:
         self._logger: Logger = getLogger(f"{__name__}.{self.__class__.__name__}")
         self._max_rrel_index: int = 10
 
-    def __call__(self, *args, **kwargs) -> None:
-        raise TypeError(f"Use {self.__name__} without initialization")
-
     def __getitem__(self, identifier: Idtf) -> ScAddr:
         """Get keynode, cannot be invalid ScAddr(0)"""
         addr = self.get(identifier)

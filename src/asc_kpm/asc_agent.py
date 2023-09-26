@@ -76,6 +76,8 @@ class AScAgentClassic(AScAgent, ABC):
     _action_class_name: Idtf
     _action_class: ScAddr
 
+    # pylint: disable=protected-access
+    # pylint: disable=arguments-differ
     @classmethod
     async def ainit(
         cls,

@@ -3,7 +3,6 @@ This source file is part of an OSTIS project. For the latest info, see https://g
 Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
-from dataclasses import dataclass
 from typing import List, Optional, Tuple
 
 from sc_client import ScType
@@ -13,7 +12,6 @@ from asc_kpm.asc_keynodes_ import asc_keynodes
 from sc_kpm.sc_keynodes_ import Idtf, sc_keynodes
 
 
-@dataclass(frozen=True)
 class CommonIdentifiers:
     QUESTION: Idtf = "question"
     EXACT_VALUE: Idtf = "exact_value"
@@ -27,7 +25,6 @@ class CommonIdentifiers:
     CONCEPT_FILENAME: Idtf = "concept_filename"
 
 
-@dataclass(frozen=True)
 class QuestionStatus:
     QUESTION_INITIATED: Idtf = "question_initiated"
     QUESTION_FINISHED: Idtf = "question_finished"
@@ -35,7 +32,6 @@ class QuestionStatus:
     QUESTION_FINISHED_UNSUCCESSFULLY: Idtf = "question_finished_unsuccessfully"
 
 
-@dataclass(frozen=True)
 class ScAlias:
     ACTION_NODE: str = "_action_node"
     RELATION_EDGE: str = "_relation_edge"

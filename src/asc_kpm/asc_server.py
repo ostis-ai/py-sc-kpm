@@ -12,7 +12,7 @@ from typing import Awaitable, Callable
 
 from sc_client.core.asc_client_instance import asc_client
 
-from asc_kpm import AScModule
+from asc_kpm.asc_module import AScModule
 from sc_kpm.identifiers import _IdentifiersResolver
 
 
