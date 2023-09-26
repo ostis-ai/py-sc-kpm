@@ -6,7 +6,7 @@ Distributed under the MIT License
 
 from asc_kpm import utils
 from asc_kpm.asc_agent import AScAgent, AScAgentClassic
-from asc_kpm.asc_keynodes_ import AScKeynodes
+from asc_kpm.asc_keynodes_ import asc_keynodes
 from asc_kpm.asc_module import AScModule
 from asc_kpm.asc_server import AScServer
 from sc_kpm import set_root_config

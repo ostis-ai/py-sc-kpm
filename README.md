@@ -8,19 +8,36 @@ named [py-sc-client](https://github.com/ostis-ai/py-sc-client).
 This module is compatible with 0.7.0 version
 of [OSTIS Technology platform](https://github.com/ostis-ai/ostis-web-platform).
 
+## Installation py-sc-kpm
+
+py-sc-kpm is available on [PyPI](https://pypi.org/project/py-sc-kpm/):
+
+```sh
+$ pip install py-sc-kpm
+```
+
+py-sc-kpm officially supports Python 3.8+.
+
 # API Reference
 
 1. [Classes](#classes)
-   + [ScKeynodes](#sckeynodes)
-   + [ScAgent](#scagent-and-scagentclassic)
-   + [ScModule](#scmodule)
-   + [ScServer](#scserver)
+    + [sc_keynodes](#sc_keynodes)
+    + [ScAgent](#scagent-and-scagentclassic)
+    + [ScModule](#scmodule)
+    + [ScServer](#scserver)
 2. [Utils](#utils)
-   + [Common utils](#common-utils)
-   + [Creating utils](#creating-utils)
-   + [Retrieve utils](#retrieve-utils)
-   + [Action utils](#action-utils)
+    + [Common utils](#common-utils)
+    + [Creating utils](#creating-utils)
+    + [Retrieve utils](#retrieve-utils)
+    + [Action utils](#action-utils)
 3. [Use-cases](#use-cases)
+
+## Asynchrony
+
+Py-sc-kpm supports sync and async implementations. They are independent of each other:
+
+- `sc_kpm` - Synchronous
+- `asc_kpm` - Asynchronous
 
 ## Classes
 
@@ -29,29 +46,36 @@ The library contains the python implementation of useful classes and functions t
 ### ScKeynodes
 
 Class which provides the ability to cache the identifier and ScAddr of keynodes stored in the KB.
+There are sync and async global instances: `asc_keynodes` and `sc_keynodes
 
 ```python
 from sc_client.constants import sc_types
-from sc_kpm import ScKeynodes
+from sc_kpm import sc_keynodes
+from asc_kpm import asc_keynodes
 
 # Get the provided identifier
-ScKeynodes["identifier_of_keynode"]  # Returns an ScAddr of the given identifier
+sc_keynodes["identifier_of_keynode"]  # Returns an ScAddr of the given identifier
+await asc_keynodes.get_valid("identifier_of_keynode")
 
 # Get the unprovided identifier
-ScKeynodes["not_stored_in_kb"]  # Raises InvalidValueError if an identifier doesn't exist in the KB
-ScKeynodes.get("not_stored_in_kb")  # Returns an invalid ScAddr(0) in the same situation
+sc_keynodes["not_stored_in_kb"]  # Raises InvalidValueError if an identifier doesn't exist in the KB
+sc_keynodes.get("not_stored_in_kb")  # Returns an invalid ScAddr(0) in the same situation
+await asc_keynodes.get("not_stored_in_kb")
 
 # Resolve identifier
-ScKeynodes.resolve("my_class_node", sc_types.NODE_CONST_CLASS)  # Returns the element if it exists, otherwise creates
-ScKeynodes.resolve("some_node", None)  # Returns the element if it exists, otherwise returns an invalid ScAddr(0)
+sc_keynodes.resolve("my_class_node", sc_types.NODE_CONST_CLASS)  # Returns the element if it exists, otherwise creates
+sc_keynodes.resolve("some_node", None)  # Returns the element if it exists, otherwise returns an invalid ScAddr(0)
+await asc_keynodes.resolve("one_more_node", sc_types.NODE_CONST)
 
 # Delete identifier
-ScKeynodes.delete("identifier_to_delete")  # Delete keynode from kb and ScKeynodes cache
+sc_keynodes.delete("identifier_to_delete")  # Delete keynode from kb and sc_keynodes cache
+await asc_keynodes.delete("identifier_to_delete")
 
 # Get rrel node
-ScKeynodes.rrel_index(1)  # Returns valid ScAddr of 'rrel_1'
-ScKeynodes.rrel_index(11)  # Raises KeyError if index more than 10
-ScKeynodes.rrel_index("some_str")  # Raises TypeError if index is not int
+sc_keynodes.rrel_index(1)  # Returns valid ScAddr of 'rrel_1'
+await asc_keynodes.rrel_index(2)
+sc_keynodes.rrel_index(11)  # Raises KeyError if index more than 10
+sc_keynodes.rrel_index("some_str")  # Raises TypeError if index is not int
 ```
 
 ### ScAgent and ScAgentClassic
@@ -61,6 +85,7 @@ A classes for handling a single ScEvent. Define your agents like this:
 ```python
 from sc_client.models import ScAddr
 from sc_kpm import ScAgent, ScAgentClassic, ScResult
+from asc_kpm import AScAgent, AScAgentClassic
 
 
 class ScAgentTest(ScAgent):
@@ -74,6 +99,19 @@ class ScAgentClassicTest(ScAgentClassic):
         # ScAgentClassic automatically checks its action
         ...
         return ScResult.OK
+
+
+class AScAgentTest(AScAgent):
+    async def on_event(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
+        return ScResult.OK
+
+
+class AScAgentClassicTest(AScAgentClassic):
+    async def on_event(self, class_node: ScAddr, edge: ScAddr, action_node: ScAddr) -> ScResult:
+        # ScAgentClassic automatically checks its action
+        ...
+        return ScResult.OK
+
 ```
 
 For the ScAgent initialization you should define the sc-element and the type of the ScEvent.
@@ -85,16 +123,24 @@ you should define the identifier of the action class node and arguments of the S
 
 **ClassicScAgent checks its action element automatically and doesn't run `on_event` method if checking fails.**
 
+for async agent you must use async method ainit
+
 ```python
 from sc_client.constants import sc_types
 from sc_client.constants.common import ScEventType
-from sc_kpm import ScKeynodes
+from sc_kpm import sc_keynodes
 
-action_class = ScKeynodes.resolve("test_class", sc_types.NODE_CONST_CLASS)
+action_class = sc_keynodes.resolve("test_class", sc_types.NODE_CONST_CLASS)
 agent = ScAgentTest(action_class, ScEventType.ADD_OUTGOING_EDGE)
 
 classic_agent = ScAgentClassicTest("classic_test_class")
 classic_agent_ingoing = ScAgentClassicTest("classic_test_class", ScEventType.ADD_INGOING_EDGE)
+
+aio_action_class = sc_keynodes.resolve("aio_test_class", sc_types.NODE_CONST_CLASS)
+agent = await AScAgentTest.ainit(aio_action_class, ScEventType.ADD_OUTGOING_EDGE)
+
+classic_agent = await AScAgentClassicTest.ainit("aio_classic_test_class")
+classic_agent_ingoing = await AScAgentClassicTest.ainit("aio_classic_test_class", ScEventType.ADD_INGOING_EDGE)
 ```
 
 ### ScModule
@@ -115,7 +161,22 @@ module.add_agent(agent3)
 module.remove_agent(agent3)
 ```
 
-_Note: you don't need remove agents in the end of program._
+Async version:
+
+```python
+from asc_kpm import AScModule
+
+module = await AScModule.ainit(
+    agent1,
+    agent2,
+)
+...
+await module.add_agent(agent3)
+...
+await module.remove_agent(agent3)
+```
+
+_Note: you don't need remove agents at the end of program._
 
 ### ScServer
 
@@ -133,6 +194,18 @@ server.connect()
 server.disconnect()
 ```
 
+Asyncio
+
+```python
+from asc_kpm import AScServer
+
+SC_SERVER_URL = "ws://localhost:8090/ws_json"
+server = AScServer(SC_SERVER_URL)
+await server.connect()
+...
+await server.disconnect()
+```
+
 Or with-statement. We recommend it because it easier to use, and it's safe:
 
 ```python
@@ -141,6 +214,15 @@ from sc_kpm import ScServer
 SC_SERVER_URL = "ws://localhost:8090/ws_json"
 server = ScServer(SC_SERVER_URL)
 with server.connect():
+    ...
+```
+
+```python
+from asc_kpm import AScServer
+
+SC_SERVER_URL = "ws://localhost:8090/ws_json"
+server = ScServer(SC_SERVER_URL)
+async with server.connect():
     ...
 ```
 
@@ -155,6 +237,15 @@ with server.connect():
     server.remove_modules(module)
 ```
 
+```python
+...
+async with server.connect():
+    module = await ScModule.ainit(...)
+    await server.add_modules(module)
+    ...
+    await server.remove_modules(module)
+```
+
 But the modules are still not registered. For this use register_modules/unregister_modules methods:
 
 ```python
@@ -166,6 +257,15 @@ with server.connect():
     server.unregister_modules()
 ```
 
+```python
+...
+async with server.connect():
+    ...
+    await server.register_modules()
+    ...
+    await server.unregister_modules()
+```
+
 Or one mode with-statement.
 We also recommend to use so because it guarantees a safe agents unregistration if errors occur:
 
@@ -174,6 +274,14 @@ We also recommend to use so because it guarantees a safe agents unregistration i
 with server.connect():
     ...
     with server.register_modules():
+        ...
+```
+
+```python
+...
+async with server.connect():
+    ...
+    async with server.register_modules():
         ...
 ```
 
@@ -188,6 +296,15 @@ server.start()
 server.stop()
 ```
 
+```python
+async with server.start():
+    ...
+# or
+await server.start()
+...
+await server.stop()
+```
+
 There is also method for stopping program until a SIGINT signal (or ^C, or terminate in IDE) is received.
 So you can leave agents registered for a long time:
 
@@ -196,6 +313,15 @@ So you can leave agents registered for a long time:
 with server.connect():
     # Creating some agents
     with server.register_modules():
+        # Registration some agents
+        server.serve()  # Agents will be active until ^C
+```
+
+```python
+...
+async with server.connect():
+    # Creating some agents
+    async with server.register_modules():
         # Registration some agents
         server.serve()  # Agents will be active until ^C
 ```
@@ -391,6 +517,21 @@ assert numbered_set[2] == elements[2]
 numbered_set[5]  # raise KeyError
 ```
 
+#### Async AScSet, AScStructure, AScNumberedSet and AScOrientedSet
+
+Async versions of sc-set-classes are idential with some restrictions:
+
+- Constructor is the other method:
+
+```python
+from asc_kpm.asc_sets import AScSet
+
+asc_set = await AScSet.create(...)
+```
+
+- There are no `__len__`, `__bool__`, `__contains__` method, 
+  use async `len()`, `is_empty()` and `contains(...)` instead.
+
 ## Utils
 
 There are some functions for working with nodes, edges, links: create them, search, get content, delete, etc.
@@ -417,7 +558,7 @@ def create_nodes(*node_types: ScType) -> List[ScAddr]: ...
 
 ```python
 from sc_client.constants import sc_types
-from sc_kpm import ScKeynodes
+from sc_kpm import sc_keynodes
 from sc_kpm.utils.common_utils import create_node, create_nodes
 
 lang = create_node(sc_types.NODE_CONST_CLASS)  # ScAddr(...)
@@ -434,6 +575,7 @@ For creating edge between **src** and **trg** with setting its type use **create
 
 ```python
 def create_edge(edge_type: ScType, src: ScAddr, trg: ScAddr) -> ScAddr: ...
+
 
 def create_edges(edge_type: ScType, src: ScAddr, *targets: ScAddr) -> List[ScAddr]: ...
 ```
@@ -500,7 +642,7 @@ def create_norole_relation(src: ScAddr, trg: ScAddr, *nrel_nodes: ScAddr) -> ScA
 
 ```python
 from sc_client.constants import sc_types
-from sc_kpm import ScKeynodes
+from sc_kpm import sc_keynodes
 from sc_kpm.utils import create_node, create_nodes
 from sc_kpm.utils import create_binary_relation, create_role_relation, create_norole_relation
 
@@ -508,7 +650,7 @@ src, trg = create_nodes(*[sc_types.NODE_CONST] * 2)
 increase_relation = create_node(sc_types.NODE_CONST_CLASS)
 
 brel = create_binary_relation(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, trg, increase_relation)  # ScAddr(...)
-rrel = create_role_relation(src, trg, ScKeynodes.rrel_index(1))  # ScAddr(...)
+rrel = create_role_relation(src, trg, sc_keynodes.rrel_index(1))  # ScAddr(...)
 nrel = create_norole_relation(src, trg, create_node(sc_types.NODE_CONST_NOROLE))  # ScAddr(...)
 ```
 
@@ -573,18 +715,18 @@ def get_element_by_norole_relation(src: ScAddr, nrel_node: ScAddr) -> ScAddr: ..
 
 ```python
 from sc_client.constants import sc_types
-from sc_kpm import ScKeynodes
+from sc_kpm import sc_keynodes
 from sc_kpm.identifiers import CommonIdentifiers
 from sc_kpm.utils import create_nodes, create_role_relation, create_norole_relation
 from sc_kpm.utils import get_element_by_role_relation, get_element_by_norole_relation
 
 src, trg_rrel, trg_nrel = create_nodes(*[sc_types.NODE_CONST] * 3)
-rrel = create_role_relation(src, trg_rrel, ScKeynodes.rrel_index(1))  # ScAddr(...)
-nrel = create_norole_relation(src, trg_nrel, ScKeynodes[CommonIdentifiers.NREL_SYSTEM_IDENTIFIER])  # ScAddr(...)
+rrel = create_role_relation(src, trg_rrel, sc_keynodes.rrel_index(1))  # ScAddr(...)
+nrel = create_norole_relation(src, trg_nrel, sc_keynodes[CommonIdentifiers.NREL_SYSTEM_IDENTIFIER])  # ScAddr(...)
 
-result_rrel = get_element_by_role_relation(src, ScKeynodes.rrel_index(1))  # ScAddr(...)
+result_rrel = get_element_by_role_relation(src, sc_keynodes.rrel_index(1))  # ScAddr(...)
 assert result_rrel == trg_rrel
-result_nrel = get_element_by_norole_relation(src, ScKeynodes[CommonIdentifiers.NREL_SYSTEM_IDENTIFIER])  # ScAddr(...)
+result_nrel = get_element_by_norole_relation(src, sc_keynodes[CommonIdentifiers.NREL_SYSTEM_IDENTIFIER])  # ScAddr(...)
 assert result_nrel == trg_nrel
 ```
 
@@ -614,13 +756,13 @@ def get_system_idtf(addr: ScAddr) -> str: ...
 
 ```python
 from sc_client.constants import sc_types
-from sc_kpm import ScKeynodes
+from sc_kpm import sc_keynodes
 from sc_kpm.utils import create_node
 from sc_kpm.utils import get_system_idtf
 
 lang_en = create_node(sc_types.NODE_CONST_CLASS)  # ScAddr(...)
 idtf = get_system_idtf(lang_en)  # "lang_en"
-assert ScKeynodes[idtf] == lang_en
+assert sc_keynodes[idtf] == lang_en
 ```
 
 ## Action utils
@@ -643,13 +785,13 @@ This function should not be used in the ScAgentClassic.
 
 ```python
 from sc_client.constants import sc_types
-from sc_kpm import ScKeynodes
+from sc_kpm import sc_keynodes
 from sc_kpm.identifiers import CommonIdentifiers
 from sc_kpm.utils import create_node, create_edge
 from sc_kpm.utils.action_utils import check_action_class
 
 action_node = create_node(sc_types.NODE_CONST)
-create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, ScKeynodes[CommonIdentifiers.QUESTION], action_node)
+create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, sc_keynodes[CommonIdentifiers.QUESTION], action_node)
 action_class = create_node(sc_types.NODE_CONST_CLASS)
 create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, action_class, action_node)
 
@@ -670,7 +812,7 @@ def get_action_arguments(action_class: Union[ScAddr, Idtf], count: int) -> List[
 
 ```python
 from sc_client.constants import sc_types
-from sc_kpm import ScKeynodes
+from sc_kpm import sc_keynodes
 from sc_kpm.identifiers import CommonIdentifiers
 from sc_kpm.utils import create_node, create_edge, create_role_relation
 from sc_kpm.utils.action_utils import get_action_arguments
@@ -679,12 +821,12 @@ action_node = create_node(sc_types.NODE_CONST)
 
 # Static argument
 argument1 = create_node(sc_types.NODE_CONST)
-create_role_relation(action_node, argument1, ScKeynodes.rrel_index(1))
+create_role_relation(action_node, argument1, sc_keynodes.rrel_index(1))
 
 # Dynamic argument
 dynamic_node = create_node(sc_types.NODE_CONST)
-rrel_dynamic_arg = ScKeynodes[CommonIdentifiers.RREL_DYNAMIC_ARGUMENT]
-create_role_relation(action_node, dynamic_node, rrel_dynamic_arg, ScKeynodes.rrel_index(2))
+rrel_dynamic_arg = sc_keynodes[CommonIdentifiers.RREL_DYNAMIC_ARGUMENT]
+create_role_relation(action_node, dynamic_node, rrel_dynamic_arg, sc_keynodes.rrel_index(2))
 argument2 = create_node(sc_types.NODE_CONST)
 create_edge(sc_types.EDGE_ACCESS_CONST_POS_TEMP, dynamic_node, argument2)
 
@@ -721,7 +863,8 @@ assert result_elements == {answer_element}
 
 ### Call, execute and wait agent
 
-Agent call function: creates **action node** with some arguments, concepts and connects it to the node with initiation identifier.
+Agent call function: creates **action node** with some arguments, concepts and connects it to the node with initiation
+identifier.
 Returns **question node**
 
 ```python
@@ -739,7 +882,8 @@ Default reaction_node is `question_finished`.
 def wait_agent(seconds: float, question_node: ScAddr, reaction_node: ScAddr = None) -> None: ...
 ```
 
-Agent execute function: combines two previous functions -- calls, waits and returns question node and **True** if success
+Agent execute function: combines two previous functions -- calls, waits and returns question node and **True** if
+success
 
 ```python
 def execute_agent(
@@ -751,12 +895,11 @@ def execute_agent(
 ) -> Tuple[ScAddr, bool]: ...
 ```
 
-
 ![execute_agent](docs/schemes/png/execute_agent.png)
 
 ```python
 from sc_client.models import ScLinkContentType
-from sc_kpm import ScKeynodes
+from sc_kpm import sc_keynodes
 from sc_kpm.identifiers import CommonIdentifiers, QuestionStatus
 from sc_kpm.utils import create_link
 from sc_kpm.utils.action_utils import execute_agent, call_agent, wait_agent
@@ -770,7 +913,7 @@ kwargs = dict(
 )
 
 question = call_agent(**kwargs)  # ScAddr(...)
-wait_agent(3, question, ScKeynodes[QuestionStatus.QUESTION_FINISHED])
+wait_agent(3, question, sc_keynodes[QuestionStatus.QUESTION_FINISHED])
 # or
 question, is_successfully = execute_agent(**kwargs, wait_time=3)  # ScAddr(...), bool
 ```
@@ -813,7 +956,7 @@ Example:
 
 ```python
 from sc_client.models import ScLinkContentType
-from sc_kpm import ScKeynodes
+from sc_kpm import sc_keynodes
 from sc_kpm.identifiers import CommonIdentifiers, QuestionStatus
 from sc_kpm.utils import create_link
 from sc_kpm.utils.action_utils import add_action_arguments, call_action, create_action, execute_action, wait_agent
@@ -827,7 +970,7 @@ arguments = {arg1: False, arg2: False}
 
 add_action_arguments(action_node, arguments)
 call_action(action_node)
-wait_agent(3, action_node, ScKeynodes[QuestionStatus.QUESTION_FINISHED])
+wait_agent(3, action_node, sc_keynodes[QuestionStatus.QUESTION_FINISHED])
 # or
 is_successful = execute_action(action_node, wait_time=3)  # bool
 ```
@@ -840,7 +983,8 @@ Function `finish_action` connects status class to action node:
 def finish_action(action_node: ScAddr, status: Idtf = QuestionStatus.QUESTION_FINISHED) -> ScAddr: ...
 ```
 
-Function `finish_action_with_status` connects `question_finished` and `question_finished_(un)successfully` statuses to it:
+Function `finish_action_with_status` connects `question_finished` and `question_finished_(un)successfully` statuses to
+it:
 
 ```python
 def finish_action_with_status(action_node: ScAddr, is_success: bool = True) -> None: ...
@@ -850,7 +994,7 @@ def finish_action_with_status(action_node: ScAddr, is_success: bool = True) -> N
 
 ```python
 from sc_client.constants import sc_types
-from sc_kpm import ScKeynodes
+from sc_kpm import sc_keynodes
 from sc_kpm.identifiers import QuestionStatus
 from sc_kpm.utils import create_node, check_edge
 from sc_kpm.utils.action_utils import finish_action, finish_action_with_status
@@ -864,18 +1008,24 @@ finish_action_with_status(action_node, True)
 finish_action(action_node, QuestionStatus.QUESTION_FINISHED)
 finish_action(action_node, QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY)
 
-question_finished = ScKeynodes[QuestionStatus.QUESTION_FINISHED]
-question_finished_successfully = ScKeynodes[QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY]
+question_finished = sc_keynodes[QuestionStatus.QUESTION_FINISHED]
+question_finished_successfully = sc_keynodes[QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY]
 assert check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, question_finished, action_node)
 assert check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, question_finished_successfully, action_node)
 ```
+
+### Async utils
+
+Asyncronous function are the same parameters and return values.
 
 # Use-cases
 
 - Script for creating and registration agent until user press ^C:
     - [based on ScAgentClassic](docs/examples/register_and_wait_for_user.py)
+    - [based on AScAgentClassic](docs/examples/aio_register_and_wait_for_user.py)
 - Scripts for creating agent to calculate sum of two arguments and confirm result:
     - [based on ScAgent](docs/examples/sum_agent.py)
     - [based on ScAgentClassic](docs/examples/sum_agent_classic.py)
+    - [based on AScAgentClassic](docs/examples/aio_sum_agent_classic.py)
 - Logging examples:
     - [pretty project logging](docs/examples/pretty_logging.py)
