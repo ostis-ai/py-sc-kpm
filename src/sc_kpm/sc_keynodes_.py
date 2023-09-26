@@ -34,7 +34,7 @@ class ScKeynodes:
 
     def delete(self, identifier: Idtf) -> bool:
         """Delete keynode from the kb and memory and return boolean status"""
-        addr = self.__getitem__(identifier)
+        addr = self[identifier]
         del self._dict[identifier]
         return sc_client.delete_elements(addr)
 

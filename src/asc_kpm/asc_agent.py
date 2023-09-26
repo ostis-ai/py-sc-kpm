@@ -78,6 +78,7 @@ class AScAgentClassic(AScAgent, ABC):
 
     # pylint: disable=protected-access
     # pylint: disable=arguments-differ
+    # pylint: disable=arguments-renamed
     @classmethod
     async def ainit(
         cls,
