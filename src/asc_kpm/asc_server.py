@@ -12,6 +12,7 @@ from typing import Awaitable, Callable
 
 from sc_client.core.asc_client_instance import asc_client
 
+from asc_kpm.asc_keynodes_ import asc_keynodes
 from asc_kpm.asc_module import AScModule
 from sc_kpm.identifiers import _IdentifiersResolver
 
@@ -34,9 +35,18 @@ class AScServer:
         async def enter():
             await asc_client.connect(self._url)
             self.logger.info("Connected by url: %s", repr(self._url))
-            _IdentifiersResolver.resolve()
+            asc_client.set_on_reconnect_handler(self._register_after_reconnect)
+            await self.resolve_identifiers()
 
         return _AFinisher(enter, self.disconnect, self.logger)
+
+    @staticmethod
+    async def resolve_identifiers():
+        types_map = _IdentifiersResolver.get_types_map()
+        if types_map is None:
+            return
+        for idtf, sc_type in types_map:
+            await asc_keynodes.resolve(idtf, sc_type)
 
     async def disconnect(self) -> None:
         """Disconnect from the server"""
@@ -85,6 +95,13 @@ class AScServer:
         await self._unregister(*self._modules)
         self.is_registered = False
         self.logger.info("Unregistered modules successfully")
+
+    async def _register_after_reconnect(self):
+        if not self.is_registered:
+            return
+        await self._unregister(*self._modules)
+        await self._register(*self._modules)
+        self.logger.info("Re-registered modules successfully")
 
     def start(self) -> _AFinisher:
         """Connect and register modules"""

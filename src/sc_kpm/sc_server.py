@@ -14,6 +14,7 @@ from typing import Callable
 from sc_client.core.sc_client_instance import sc_client
 
 from sc_kpm.identifiers import _IdentifiersResolver
+from sc_kpm.sc_keynodes_ import sc_keynodes
 from sc_kpm.sc_module import ScModuleAbstract
 
 
@@ -66,8 +67,16 @@ class ScServer(ScServerAbstract):
     def connect(self) -> _Finisher:
         sc_client.connect(self._url)
         self.logger.info("Connected by url: %s", repr(self._url))
-        _IdentifiersResolver.resolve()
+        self.resolve_identifiers()
         return _Finisher(self.disconnect, self.logger)
+
+    @staticmethod
+    def resolve_identifiers():
+        types_map = _IdentifiersResolver.get_types_map()
+        if types_map is None:
+            return
+        for idtf, sc_type in types_map:
+            sc_keynodes.resolve(idtf, sc_type)
 
     def disconnect(self) -> None:
         sc_client.disconnect()

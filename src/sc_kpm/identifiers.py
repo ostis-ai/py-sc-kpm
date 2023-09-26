@@ -8,8 +8,7 @@ from typing import List, Optional, Tuple
 from sc_client import ScType
 from sc_client.constants import sc_types
 
-from asc_kpm.asc_keynodes_ import asc_keynodes
-from sc_kpm.sc_keynodes_ import Idtf, sc_keynodes
+from sc_kpm.sc_keynodes_ import Idtf
 
 
 class CommonIdentifiers:
@@ -52,51 +51,20 @@ class _IdentifiersResolver:
     def get_types_map(cls) -> Optional[List[Tuple[str, ScType]]]:
         if not cls.is_resolved:
             return None
+        cls.is_resolved = True
         return [
-            CommonIdentifiers.QUESTION,
-            sc_types.NODE_CONST_CLASS,
-            CommonIdentifiers.EXACT_VALUE,
-            sc_types.NODE_CONST_CLASS,
-            CommonIdentifiers.RREL_DYNAMIC_ARGUMENT,
-            sc_types.NODE_CONST_ROLE,
-            CommonIdentifiers.RREL_ONE,
-            sc_types.NODE_CONST_ROLE,
-            CommonIdentifiers.RREL_TWO,
-            sc_types.NODE_CONST_ROLE,
-            CommonIdentifiers.RREL_LAST,
-            sc_types.NODE_CONST_ROLE,
-            CommonIdentifiers.NREL_BASIC_SEQUENCE,
-            sc_types.NODE_CONST_NOROLE,
-            CommonIdentifiers.NREL_SYSTEM_IDENTIFIER,
-            sc_types.NODE_CONST_NOROLE,
-            CommonIdentifiers.NREL_ANSWER,
-            sc_types.NODE_CONST_NOROLE,
-            CommonIdentifiers.CONCEPT_FILENAME,
-            sc_types.NODE_CONST_CLASS,
-            QuestionStatus.QUESTION_INITIATED,
-            sc_types.NODE_CONST_CLASS,
-            QuestionStatus.QUESTION_FINISHED,
-            sc_types.NODE_CONST_CLASS,
-            QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY,
-            sc_types.NODE_CONST_CLASS,
-            QuestionStatus.QUESTION_FINISHED_UNSUCCESSFULLY,
-            sc_types.NODE_CONST_CLASS,
+            (CommonIdentifiers.QUESTION, sc_types.NODE_CONST_CLASS),
+            (CommonIdentifiers.EXACT_VALUE, sc_types.NODE_CONST_CLASS),
+            (CommonIdentifiers.RREL_DYNAMIC_ARGUMENT, sc_types.NODE_CONST_ROLE),
+            (CommonIdentifiers.RREL_ONE, sc_types.NODE_CONST_ROLE),
+            (CommonIdentifiers.RREL_TWO, sc_types.NODE_CONST_ROLE),
+            (CommonIdentifiers.RREL_LAST, sc_types.NODE_CONST_ROLE),
+            (CommonIdentifiers.NREL_BASIC_SEQUENCE, sc_types.NODE_CONST_NOROLE),
+            (CommonIdentifiers.NREL_SYSTEM_IDENTIFIER, sc_types.NODE_CONST_NOROLE),
+            (CommonIdentifiers.NREL_ANSWER, sc_types.NODE_CONST_NOROLE),
+            (CommonIdentifiers.CONCEPT_FILENAME, sc_types.NODE_CONST_CLASS),
+            (QuestionStatus.QUESTION_INITIATED, sc_types.NODE_CONST_CLASS),
+            (QuestionStatus.QUESTION_FINISHED, sc_types.NODE_CONST_CLASS),
+            (QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY, sc_types.NODE_CONST_CLASS),
+            (QuestionStatus.QUESTION_FINISHED_UNSUCCESSFULLY, sc_types.NODE_CONST_CLASS),
         ]
-
-    @classmethod
-    def resolve(cls) -> None:
-        types_map = cls.get_types_map()
-        if types_map is None:
-            return
-        for idtf, sc_type in types_map:
-            sc_keynodes.resolve(idtf, sc_type)
-        cls.is_resolved = True
-
-    @classmethod
-    async def aio_resolve(cls) -> None:
-        types_map = cls.get_types_map()
-        if types_map is None:
-            return
-        for idtf, sc_type in types_map:
-            await asc_keynodes.resolve(idtf, sc_type)
-        cls.is_resolved = True
