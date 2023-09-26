@@ -51,7 +51,7 @@ class ASumAgentClassic(AScAgentClassic):
 
 async def main():
     asc_server = AScServer("ws://localhost:8090/ws_json")
-    async with await asc_server.start():
+    async with asc_server.start():
         action_class_name = "sum"
         agent = await ASumAgentClassic.ainit(action_class_name)
         module = AScModule(agent)

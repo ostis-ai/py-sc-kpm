@@ -4,7 +4,6 @@ Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
 import asyncio
-from signal import signal
 
 from sc_client.constants.common import ScEventType
 from sc_client.models import ScAddr
@@ -58,7 +57,7 @@ class CommonTests(AsyncioScKpmTestCase):
         )
         self.assertFalse((await execute_agent(**arguments))[1])
         self.assertFalse((await execute_agent(**arguments_classic))[1])
-        async with await self.server.register_modules():
+        async with self.server.register_modules():
             self.assertTrue((await execute_agent(**arguments))[1])
             self.assertTrue((await execute_agent(**arguments_classic))[1])
         self.assertFalse((await execute_agent(**arguments))[1])
@@ -89,7 +88,7 @@ class CommonTests(AsyncioScKpmTestCase):
         module2 = await AScModule.ainit(agent2)
         await self.server.add_modules(module1)
         await module1.add_agent(agent3)
-        async with await self.server.register_modules():
+        async with self.server.register_modules():
             self.assertTrue(await is_executing_successful(1))
             self.assertFalse(await is_executing_successful(2))
             self.assertTrue(await is_executing_successful(3))
@@ -139,6 +138,6 @@ class CommonTests(AsyncioScKpmTestCase):
             await asyncio.sleep(0.01)
             asyncio.get_event_loop().stop()
 
-        async with await self.server.register_modules():
+        async with self.server.register_modules():
             asyncio.create_task(terminate())
             self.server.serve()

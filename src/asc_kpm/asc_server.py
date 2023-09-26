@@ -28,12 +28,15 @@ class AScServer:
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({', '.join(map(repr, self._modules))})"
 
-    async def connect(self) -> _AFinisher:
+    def connect(self) -> _AFinisher:
         """Connect to server"""
-        await asc_client.connect(self._url)
-        self.logger.info("Connected by url: %s", repr(self._url))
-        _IdentifiersResolver.resolve()
-        return _AFinisher(self.disconnect, self.logger)
+
+        async def enter():
+            await asc_client.connect(self._url)
+            self.logger.info("Connected by url: %s", repr(self._url))
+            _IdentifiersResolver.resolve()
+
+        return _AFinisher(enter, self.disconnect, self.logger)
 
     async def disconnect(self) -> None:
         """Disconnect from the server"""
@@ -61,15 +64,18 @@ class AScServer:
         self.logger.info("Removed all modules: %s", ", ".join(map(repr, self._modules)))
         self._modules.clear()
 
-    async def register_modules(self) -> _AFinisher:
+    def register_modules(self) -> _AFinisher:
         """Register all modules in the server"""
-        if self.is_registered:
-            self.logger.warning("Modules are already registered")
-        else:
-            await self._register(*self._modules)
-            self.is_registered = True
-            self.logger.info("Registered modules successfully")
-        return _AFinisher(self.unregister_modules, self.logger)
+
+        async def enter():
+            if self.is_registered:
+                self.logger.warning("Modules are already registered")
+            else:
+                await self._register(*self._modules)
+                self.is_registered = True
+                self.logger.info("Registered modules successfully")
+
+        return _AFinisher(enter, self.unregister_modules, self.logger)
 
     async def unregister_modules(self) -> None:
         """Unregister all modules from the server"""
@@ -80,11 +86,14 @@ class AScServer:
         self.is_registered = False
         self.logger.info("Unregistered modules successfully")
 
-    async def start(self) -> _AFinisher:
+    def start(self) -> _AFinisher:
         """Connect and register modules"""
-        await self.connect()
-        await self.register_modules()
-        return _AFinisher(self.stop, self.logger)
+
+        async def enter():
+            await self.connect()
+            await self.register_modules()
+
+        return _AFinisher(enter, self.stop, self.logger)
 
     async def stop(self) -> None:
         """Disconnect and unregister modules"""
@@ -120,14 +129,20 @@ class AScServer:
 class _AFinisher:
     """Class for calling finish method in with-statement"""
 
-    def __init__(self, finish_method: Callable[[], Awaitable], logger: Logger) -> None:
-        self._finish_method = finish_method
+    def __init__(
+        self, enter_method: Callable[[], Awaitable], exit_method: Callable[[], Awaitable], logger: Logger
+    ) -> None:
+        self._enter_method = enter_method
+        self._exit_method = exit_method
         self._logger = logger
 
+    def __await__(self):
+        return self._enter_method().__await__()
+
     async def __aenter__(self) -> None:
-        pass  # Interaction through the beginning method (with server.start_method(): ...)
+        await self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         if exc_val is not None:
             self._logger.error("Raised error %s, finishing", repr(exc_val))
-        await self._finish_method()
+        await self._exit_method()
