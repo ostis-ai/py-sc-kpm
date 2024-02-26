@@ -5,8 +5,8 @@ for [sc-machine](https://github.com/ostis-ai/sc-machine).
 Library provides tools for interacting with knowledge bases.
 Communication with server is implemented in separate library
 named [py-sc-client](https://github.com/ostis-ai/py-sc-client).
-This module is compatible with 0.7.0 version
-of [OSTIS Technology platform](https://github.com/ostis-ai/ostis-web-platform).
+This module is compatible with 0.9.0 version
+of [OSTIS Platform](https://github.com/ostis-ai/ostis-web-platform).
 
 # API Reference
 
