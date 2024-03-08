@@ -7,15 +7,13 @@ Distributed under the MIT License
 from threading import Event
 from typing import Dict, List, Tuple, Union
 
-from sc_client import client
-from sc_client.client import events_create, events_destroy
 from sc_client.constants import sc_types
 from sc_client.constants.common import ScEventType
+from sc_client.core.sc_client_instance import sc_client
 from sc_client.models import ScAddr, ScConstruction, ScEventParams, ScTemplate
 
 from sc_kpm.identifiers import CommonIdentifiers, QuestionStatus, ScAlias
-from sc_kpm.sc_keynodes import Idtf, ScKeynodes
-from sc_kpm.sc_result import ScResult
+from sc_kpm.sc_keynodes_ import Idtf, sc_keynodes
 from sc_kpm.sc_sets.sc_structure import ScStructure
 from sc_kpm.utils.common_utils import (
     check_edge,
@@ -30,25 +28,25 @@ COMMON_WAIT_TIME: float = 5
 
 
 def check_action_class(action_class: Union[ScAddr, Idtf], action_node: ScAddr) -> bool:
-    action_class = ScKeynodes[action_class] if isinstance(action_class, Idtf) else action_class
+    action_class = sc_keynodes[action_class] if isinstance(action_class, Idtf) else action_class
     templ = ScTemplate()
     templ.triple(action_class, sc_types.EDGE_ACCESS_VAR_POS_PERM, action_node)
-    templ.triple(ScKeynodes[CommonIdentifiers.QUESTION], sc_types.EDGE_ACCESS_VAR_POS_PERM, action_node)
-    search_results = client.template_search(templ)
+    templ.triple(sc_keynodes[CommonIdentifiers.QUESTION], sc_types.EDGE_ACCESS_VAR_POS_PERM, action_node)
+    search_results = sc_client.template_search(templ)
     return len(search_results) > 0
 
 
 def get_action_arguments(action_node: ScAddr, count: int) -> List[ScAddr]:
     arguments = []
     for index in range(1, count + 1):
-        argument = get_element_by_role_relation(action_node, ScKeynodes.rrel_index(index))
+        argument = get_element_by_role_relation(action_node, sc_keynodes.rrel_index(index))
         arguments.append(argument)
     return arguments
 
 
 def create_action_answer(action_node: ScAddr, *elements: ScAddr) -> None:
     answer_struct_node = ScStructure(*elements).set_node
-    create_norole_relation(action_node, answer_struct_node, ScKeynodes[CommonIdentifiers.NREL_ANSWER])
+    create_norole_relation(action_node, answer_struct_node, sc_keynodes[CommonIdentifiers.NREL_ANSWER])
 
 
 def get_action_answer(action_node: ScAddr) -> ScAddr:
@@ -58,9 +56,9 @@ def get_action_answer(action_node: ScAddr) -> ScAddr:
         sc_types.EDGE_D_COMMON_VAR >> ScAlias.RELATION_EDGE,
         sc_types.NODE_VAR_STRUCT >> ScAlias.ELEMENT,
         sc_types.EDGE_ACCESS_VAR_POS_PERM,
-        ScKeynodes[CommonIdentifiers.NREL_ANSWER],
+        sc_keynodes[CommonIdentifiers.NREL_ANSWER],
     )
-    if search_results := client.template_search(templ):
+    if search_results := sc_client.template_search(templ):
         return search_results[0].get(ScAlias.ELEMENT)
     return ScAddr(0)
 
@@ -77,7 +75,7 @@ def execute_agent(
 ) -> Tuple[ScAddr, bool]:
     question = call_agent(arguments, concepts, initiation)
     wait_agent(wait_time, question)
-    result = check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, ScKeynodes[reaction], question)
+    result = check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, sc_keynodes[reaction], question)
     return question, result
 
 
@@ -98,19 +96,20 @@ def create_action(*concepts: Idtf) -> ScAddr:
     for concept in concepts:
         construction.create_edge(
             sc_types.EDGE_ACCESS_CONST_POS_PERM,
-            ScKeynodes.resolve(concept, sc_types.NODE_CONST_CLASS),
+            sc_keynodes.resolve(concept, sc_types.NODE_CONST_CLASS),
             ScAlias.ACTION_NODE,
         )
-    action_node = client.create_elements(construction)[0]
+    action_node = sc_client.create_elements(construction)[0]
     return action_node
 
 
 def add_action_arguments(action_node: ScAddr, arguments: Dict[ScAddr, IsDynamic]) -> None:
-    rrel_dynamic_arg = ScKeynodes[CommonIdentifiers.RREL_DYNAMIC_ARGUMENT]
+    rrel_dynamic_arg = sc_keynodes[CommonIdentifiers.RREL_DYNAMIC_ARGUMENT]
+    index: int
     argument: ScAddr
     for index, (argument, is_dynamic) in enumerate(arguments.items(), 1):
         if argument.is_valid():
-            rrel_i = ScKeynodes.rrel_index(index)
+            rrel_i = sc_keynodes.rrel_index(index)
             if is_dynamic:
                 dynamic_node = create_node(sc_types.NODE_CONST)
                 create_role_relation(action_node, dynamic_node, rrel_dynamic_arg, rrel_i)
@@ -127,35 +126,34 @@ def execute_action(
 ) -> bool:
     call_action(action_node, initiation)
     wait_agent(wait_time, action_node)
-    result = check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, ScKeynodes[reaction], action_node)
+    result = check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, sc_keynodes[reaction], action_node)
     return result
 
 
 def call_action(action_node: ScAddr, initiation: Idtf = QuestionStatus.QUESTION_INITIATED) -> None:
-    initiation_node = ScKeynodes.resolve(initiation, sc_types.NODE_CONST_CLASS)
+    initiation_node = sc_keynodes.resolve(initiation, sc_types.NODE_CONST_CLASS)
     create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, initiation_node, action_node)
 
 
 def wait_agent(seconds: float, question_node: ScAddr, reaction_node: ScAddr = None) -> None:
-    reaction_node = reaction_node or ScKeynodes[QuestionStatus.QUESTION_FINISHED]
+    reaction_node = reaction_node or sc_keynodes[QuestionStatus.QUESTION_FINISHED]
     finish_event = Event()
 
-    def event_callback(_: ScAddr, __: ScAddr, trg: ScAddr) -> ScResult:
+    def event_callback(_: ScAddr, __: ScAddr, trg: ScAddr) -> None:
         if trg != reaction_node:
-            return ScResult.SKIP
+            return
         finish_event.set()
-        return ScResult.OK
 
     event_params = ScEventParams(question_node, ScEventType.ADD_INGOING_EDGE, event_callback)
-    sc_event = events_create(event_params)[0]
+    sc_event = sc_client.events_create(event_params)[0]
     if not check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, reaction_node, question_node):
         finish_event.wait(seconds)
-    events_destroy(sc_event)
+    sc_client.events_destroy(sc_event)
     # TODO: return status in 0.2.0
 
 
 def finish_action(action_node: ScAddr, status: Idtf = QuestionStatus.QUESTION_FINISHED) -> ScAddr:
-    return create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, ScKeynodes[status], action_node)
+    return create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, sc_keynodes[status], action_node)
 
 
 def finish_action_with_status(action_node: ScAddr, is_success: bool = True) -> None:

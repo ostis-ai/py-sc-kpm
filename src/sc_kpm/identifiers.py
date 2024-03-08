@@ -3,14 +3,14 @@ This source file is part of an OSTIS project. For the latest info, see https://g
 Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
-from dataclasses import dataclass
+from typing import List, Optional, Tuple
 
+from sc_client import ScType
 from sc_client.constants import sc_types
 
-from sc_kpm.sc_keynodes import Idtf, ScKeynodes
+from sc_kpm.sc_keynodes_ import Idtf
 
 
-@dataclass(frozen=True)
 class CommonIdentifiers:
     QUESTION: Idtf = "question"
     EXACT_VALUE: Idtf = "exact_value"
@@ -24,7 +24,6 @@ class CommonIdentifiers:
     CONCEPT_FILENAME: Idtf = "concept_filename"
 
 
-@dataclass(frozen=True)
 class QuestionStatus:
     QUESTION_INITIATED: Idtf = "question_initiated"
     QUESTION_FINISHED: Idtf = "question_finished"
@@ -32,7 +31,6 @@ class QuestionStatus:
     QUESTION_FINISHED_UNSUCCESSFULLY: Idtf = "question_finished_unsuccessfully"
 
 
-@dataclass(frozen=True)
 class ScAlias:
     ACTION_NODE: str = "_action_node"
     RELATION_EDGE: str = "_relation_edge"
@@ -50,27 +48,23 @@ class _IdentifiersResolver:
     is_resolved = False
 
     @classmethod
-    def resolve(cls) -> None:
-        if cls.is_resolved:
-            return
-        types_map = {
-            CommonIdentifiers.QUESTION: sc_types.NODE_CONST_CLASS,
-            CommonIdentifiers.EXACT_VALUE: sc_types.NODE_CONST_CLASS,
-            CommonIdentifiers.RREL_DYNAMIC_ARGUMENT: sc_types.NODE_CONST_ROLE,
-            CommonIdentifiers.RREL_ONE: sc_types.NODE_CONST_ROLE,
-            CommonIdentifiers.RREL_TWO: sc_types.NODE_CONST_ROLE,
-            CommonIdentifiers.RREL_LAST: sc_types.NODE_CONST_ROLE,
-            CommonIdentifiers.NREL_BASIC_SEQUENCE: sc_types.NODE_CONST_NOROLE,
-            CommonIdentifiers.NREL_SYSTEM_IDENTIFIER: sc_types.NODE_CONST_NOROLE,
-            CommonIdentifiers.NREL_ANSWER: sc_types.NODE_CONST_NOROLE,
-            CommonIdentifiers.CONCEPT_FILENAME: sc_types.NODE_CONST_CLASS,
-            QuestionStatus.QUESTION_INITIATED: sc_types.NODE_CONST_CLASS,
-            QuestionStatus.QUESTION_FINISHED: sc_types.NODE_CONST_CLASS,
-            QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY: sc_types.NODE_CONST_CLASS,
-            QuestionStatus.QUESTION_FINISHED_UNSUCCESSFULLY: sc_types.NODE_CONST_CLASS,
-        }
-
-        for idtf, sc_type in types_map.items():
-            ScKeynodes.resolve(idtf, sc_type)
-
+    def get_types_map(cls) -> Optional[List[Tuple[str, ScType]]]:
+        if not cls.is_resolved:
+            return None
         cls.is_resolved = True
+        return [
+            (CommonIdentifiers.QUESTION, sc_types.NODE_CONST_CLASS),
+            (CommonIdentifiers.EXACT_VALUE, sc_types.NODE_CONST_CLASS),
+            (CommonIdentifiers.RREL_DYNAMIC_ARGUMENT, sc_types.NODE_CONST_ROLE),
+            (CommonIdentifiers.RREL_ONE, sc_types.NODE_CONST_ROLE),
+            (CommonIdentifiers.RREL_TWO, sc_types.NODE_CONST_ROLE),
+            (CommonIdentifiers.RREL_LAST, sc_types.NODE_CONST_ROLE),
+            (CommonIdentifiers.NREL_BASIC_SEQUENCE, sc_types.NODE_CONST_NOROLE),
+            (CommonIdentifiers.NREL_SYSTEM_IDENTIFIER, sc_types.NODE_CONST_NOROLE),
+            (CommonIdentifiers.NREL_ANSWER, sc_types.NODE_CONST_NOROLE),
+            (CommonIdentifiers.CONCEPT_FILENAME, sc_types.NODE_CONST_CLASS),
+            (QuestionStatus.QUESTION_INITIATED, sc_types.NODE_CONST_CLASS),
+            (QuestionStatus.QUESTION_FINISHED, sc_types.NODE_CONST_CLASS),
+            (QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY, sc_types.NODE_CONST_CLASS),
+            (QuestionStatus.QUESTION_FINISHED_UNSUCCESSFULLY, sc_types.NODE_CONST_CLASS),
+        ]

@@ -4,8 +4,8 @@ Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
 
-from sc_kpm.utils import action_utils, iteration_utils
-from sc_kpm.utils.common_utils import (
+from asc_kpm.utils import aio_action_utils, aio_iteration_utils
+from asc_kpm.utils.aio_common_utils import (
     check_edge,
     create_binary_relation,
     create_edge,

@@ -4,13 +4,13 @@ Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
 
-from sc_client.client import check_elements
 from sc_client.constants import sc_types
-from sc_client.constants.exceptions import InvalidTypeError
+from sc_client.core.sc_client_instance import sc_client
+from sc_client.sc_exceptions import InvalidTypeError
+from test_sc_kpm.common_tests import BaseTestCase
 
 from sc_kpm.sc_sets import ScSet, ScStructure
 from sc_kpm.utils.common_utils import create_node
-from tests.common_tests import BaseTestCase
 
 
 class ScStructureTestCase(BaseTestCase):
@@ -20,7 +20,7 @@ class ScStructureTestCase(BaseTestCase):
 
     def test_create(self):
         struct = ScStructure()
-        self.assertTrue(check_elements(struct.set_node)[0] == sc_types.NODE_CONST_STRUCT)
+        self.assertTrue(sc_client.check_elements(struct.set_node)[0] == sc_types.NODE_CONST_STRUCT)
 
     def test_create_valid_type(self):
         node_var_struct = create_node(sc_types.NODE_VAR_STRUCT)

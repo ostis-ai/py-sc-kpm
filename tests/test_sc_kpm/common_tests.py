@@ -10,7 +10,7 @@ from sc_kpm import ScServer
 
 SC_SERVER_URL = "ws://localhost:8090/ws_json"
 
-logging.basicConfig(filename="testing.log", filemode="w", level=logging.INFO, force=True)
+logging.basicConfig(filename="../testing.log", filemode="w", level=logging.INFO, force=True)
 
 
 class BaseTestCase(TestCase):

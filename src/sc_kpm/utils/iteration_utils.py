@@ -1,8 +1,7 @@
 from typing import Iterable, Iterator
 
-from sc_client.client import get_link_content
-from sc_client.models import ScAddr
-from sc_client.models.sc_construction import ScLinkContent, ScLinkContentData
+from sc_client.core.sc_client_instance import sc_client
+from sc_client.models import ScAddr, ScLinkContent, ScLinkContentData
 
 
 def iter_link_contents_data(contents: Iterable[ScLinkContent]) -> Iterator[ScLinkContentData]:
@@ -13,5 +12,5 @@ def iter_link_contents_data(contents: Iterable[ScLinkContent]) -> Iterator[ScLin
 
 def iter_links_data(links: Iterable[ScAddr]) -> Iterator[ScLinkContentData]:
     """Iterate by contents data in links"""
-    contents = get_link_content(*links)
+    contents = sc_client.get_link_content(*links)
     return iter_link_contents_data(contents)
