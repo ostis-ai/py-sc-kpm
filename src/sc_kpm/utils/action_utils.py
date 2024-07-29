@@ -159,8 +159,6 @@ def finish_action(action_node: ScAddr, status: Idtf = ActionStatus.ACTION_FINISH
 
 
 def finish_action_with_status(action_node: ScAddr, is_success: bool = True) -> None:
-    status = (
-        ActionStatus.ACTION_FINISHED_SUCCESSFULLY if is_success else ActionStatus.ACTION_FINISHED_UNSUCCESSFULLY
-    )
+    status = ActionStatus.ACTION_FINISHED_SUCCESSFULLY if is_success else ActionStatus.ACTION_FINISHED_UNSUCCESSFULLY
     finish_action(action_node, status)
     finish_action(action_node, ActionStatus.ACTION_FINISHED)
