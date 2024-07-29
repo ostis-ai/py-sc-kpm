@@ -13,7 +13,7 @@ from sc_client.constants import sc_types
 from sc_client.constants.common import ScEventType
 from sc_client.models import ScAddr, ScConstruction, ScEventParams, ScTemplate
 
-from sc_kpm.identifiers import CommonIdentifiers, ActionStatus, ScAlias
+from sc_kpm.identifiers import ActionStatus, CommonIdentifiers, ScAlias
 from sc_kpm.sc_keynodes import Idtf, ScKeynodes
 from sc_kpm.sc_result import ScResult
 from sc_kpm.sc_sets.sc_structure import ScStructure
@@ -159,8 +159,6 @@ def finish_action(action_node: ScAddr, status: Idtf = ActionStatus.ACTION_FINISH
 
 
 def finish_action_with_status(action_node: ScAddr, is_success: bool = True) -> None:
-    status = (
-        ActionStatus.ACTION_FINISHED_SUCCESSFULLY if is_success else ActionStatus.ACTION_FINISHED_UNSUCCESSFULLY
-    )
+    status = ActionStatus.ACTION_FINISHED_SUCCESSFULLY if is_success else ActionStatus.ACTION_FINISHED_UNSUCCESSFULLY
     finish_action(action_node, status)
     finish_action(action_node, ActionStatus.ACTION_FINISHED)
