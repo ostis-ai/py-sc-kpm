@@ -13,7 +13,7 @@ from sc_client.constants import sc_types
 from sc_client.constants.common import ScEventType
 from sc_client.models import ScAddr, ScConstruction, ScEventParams, ScTemplate
 
-from sc_kpm.identifiers import CommonIdentifiers, ActionStatus, ScAlias
+from sc_kpm.identifiers import ActionStatus, CommonIdentifiers, ScAlias
 from sc_kpm.sc_keynodes import Idtf, ScKeynodes
 from sc_kpm.sc_result import ScResult
 from sc_kpm.sc_sets.sc_structure import ScStructure
