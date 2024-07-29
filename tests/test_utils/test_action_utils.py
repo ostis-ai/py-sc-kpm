@@ -10,7 +10,7 @@ from sc_client.constants import sc_types
 from sc_client.constants.common import ScEventType
 
 from sc_kpm import ScAgent, ScKeynodes, ScModule
-from sc_kpm.identifiers import CommonIdentifiers, QuestionStatus
+from sc_kpm.identifiers import CommonIdentifiers, ActionStatus
 from sc_kpm.sc_result import ScResult
 from sc_kpm.utils.action_utils import (
     add_action_arguments,
@@ -48,14 +48,14 @@ class TestActionUtils(BaseTestCase):
     def test_validate_action(self):
         action_class_idtf = "test_action_class"
         action_class_node = ScKeynodes.resolve(action_class_idtf, sc_types.NODE_CONST)
-        question = ScKeynodes[CommonIdentifiers.QUESTION]
+        action = ScKeynodes[CommonIdentifiers.ACTION]
         test_node = create_node(sc_types.NODE_CONST)
         self.assertFalse(check_action_class(action_class_node, test_node))
         self.assertFalse(check_action_class(action_class_idtf, test_node))
         class_edge = create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, action_class_node, test_node)
         self.assertFalse(check_action_class(action_class_node, test_node))
         self.assertFalse(check_action_class(action_class_idtf, test_node))
-        create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, question, test_node)
+        create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, action, test_node)
         self.assertTrue(check_action_class(action_class_node, test_node))
         self.assertTrue(check_action_class(action_class_idtf, test_node))
         delete_elements(class_edge)
@@ -73,10 +73,10 @@ class TestActionUtils(BaseTestCase):
         module = ScModuleTest()
         self.server.add_modules(module)
         with self.server.register_modules():
-            question = call_agent({}, [], test_node_idtf)
-            wait_agent(1, question, ScKeynodes[QuestionStatus.QUESTION_FINISHED])
+            action = call_agent({}, [], test_node_idtf)
+            wait_agent(1, action, ScKeynodes[ActionStatus.ACTION_FINISHED])
             result = check_edge(
-                sc_types.EDGE_ACCESS_VAR_POS_PERM, ScKeynodes[QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY], question
+                sc_types.EDGE_ACCESS_VAR_POS_PERM, ScKeynodes[ActionStatus.ACTION_FINISHED_SUCCESSFULLY], action
             )
             self.assertTrue(result)
         self.server.remove_modules(module)
@@ -104,10 +104,10 @@ class TestActionUtils(BaseTestCase):
             action_node = create_action()
             add_action_arguments(action_node, {})
             call_action(action_node, test_node_idtf)
-            wait_agent(1, action_node, ScKeynodes[QuestionStatus.QUESTION_FINISHED])
+            wait_agent(1, action_node, ScKeynodes[ActionStatus.ACTION_FINISHED])
             result = check_edge(
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
-                ScKeynodes[QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY],
+                ScKeynodes[ActionStatus.ACTION_FINISHED_SUCCESSFULLY],
                 action_node,
             )
             self.assertTrue(result)
@@ -130,20 +130,20 @@ class TestActionUtils(BaseTestCase):
             timeout = 0.5
             # Action is not finished while waiting
             start_time = time.time()
-            wait_agent(timeout, action_node, ScKeynodes[QuestionStatus.QUESTION_FINISHED])
+            wait_agent(timeout, action_node, ScKeynodes[ActionStatus.ACTION_FINISHED])
             timedelta = time.time() - start_time
             self.assertGreater(timedelta, timeout)
             # Action is finished while waiting
             call_action(action_node, test_node_idtf)
             start_time = time.time()
-            wait_agent(timeout, action_node, ScKeynodes[QuestionStatus.QUESTION_FINISHED])
+            wait_agent(timeout, action_node, ScKeynodes[ActionStatus.ACTION_FINISHED])
             timedelta = time.time() - start_time
             self.assertLess(timedelta, timeout)
             # Action finished before waiting
             call_action(action_node, test_node_idtf)
             time.sleep(0.1)
             start_time = time.time()
-            wait_agent(timeout, action_node, ScKeynodes[QuestionStatus.QUESTION_FINISHED])
+            wait_agent(timeout, action_node, ScKeynodes[ActionStatus.ACTION_FINISHED])
             timedelta = time.time() - start_time
             self.assertLess(timedelta, timeout)
         self.server.remove_modules(module)

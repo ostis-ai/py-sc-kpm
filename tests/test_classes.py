@@ -50,7 +50,7 @@ class CommonTests(BaseTestCase):
         )
         kwargs_classic = dict(
             arguments={},
-            concepts=[CommonIdentifiers.QUESTION, AgentClassic.ACTION_CLASS_NAME],
+            concepts=[CommonIdentifiers.ACTION, AgentClassic.ACTION_CLASS_NAME],
             wait_time=WAIT_TIME,
         )
         self.assertFalse(execute_agent(**kwargs)[1])
