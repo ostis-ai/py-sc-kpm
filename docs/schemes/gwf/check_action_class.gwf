@@ -4,7 +4,7 @@
         <node type="node/const/perm/general" idtf="py: action_node" shapeColor="0" id="32412208" parent="0" left="0" top="0" right="93.5313" bottom="23" textColor="164" text_angle="0" text_font="Times New Roman" font_size="10" x="270" y="330" haveBus="false" idtf_pos="3">
             <content type="0" mime_type="" content_visibility="false" file_name=""/>
         </node>
-        <node type="node/const/perm/group" idtf="question" shapeColor="0" id="27237632" parent="0" left="0" top="0" right="53.4688" bottom="23" textColor="164" text_angle="0" text_font="Times New Roman" font_size="10" x="150" y="330" haveBus="false" idtf_pos="2">
+        <node type="node/const/perm/group" idtf="action" shapeColor="0" id="27237632" parent="0" left="0" top="0" right="53.4688" bottom="23" textColor="164" text_angle="0" text_font="Times New Roman" font_size="10" x="150" y="330" haveBus="false" idtf_pos="2">
             <content type="0" mime_type="" content_visibility="false" file_name=""/>
         </node>
         <node type="node/const/perm/group" idtf="py: action_class" shapeColor="0" id="30415136" parent="0" left="0" top="0" right="93.5156" bottom="23" textColor="164" text_angle="0" text_font="Times New Roman" font_size="10" x="270" y="210" haveBus="false" idtf_pos="3">

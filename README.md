@@ -80,7 +80,7 @@ For the ScAgent initialization you should define the sc-element and the type of 
 
 For the ScAgentClassic initialization
 you should define the identifier of the action class node and arguments of the ScAgent.
-`event_class` is set to the `question_initiated` keynode by default.
+`event_class` is set to the `action_initiated` keynode by default.
 `event_type` is set to the `ScEventType.ADD_OUTGOING_EDGE` type by default.
 
 **ClassicScAgent checks its action element automatically and doesn't run `on_event` method if checking fails.**
@@ -651,7 +651,7 @@ from sc_kpm.utils import create_node, create_edge
 from sc_kpm.utils.action_utils import check_action_class
 
 action_node = create_node(sc_types.NODE_CONST)
-create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, ScKeynodes[CommonIdentifiers.QUESTION], action_node)
+create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, ScKeynodes[CommonIdentifiers.ACTION], action_node)
 action_class = create_node(sc_types.NODE_CONST_CLASS)
 create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, action_class, action_node)
 
@@ -724,31 +724,31 @@ assert result_elements == {answer_element}
 ### Call, execute and wait agent
 
 Agent call function: creates **action node** with some arguments, concepts and connects it to the node with initiation identifier.
-Returns **question node**
+Returns **action node**
 
 ```python
 def call_agent(
         arguments: Dict[ScAddr, IsDynamic],
         concepts: List[Idtf],
-        initiation: Idtf = QuestionStatus.QUESTION_INITIATED,
+        initiation: Idtf = ActionStatus.ACTION_INITIATED,
 ) -> ScAddr: ...
 ```
 
 Agent wait function: Waits for creation of edge to reaction node for some seconds.
-Default reaction_node is `question_finished`.
+Default reaction_node is `action_finished`.
 
 ```python
-def wait_agent(seconds: float, question_node: ScAddr, reaction_node: ScAddr = None) -> None: ...
+def wait_agent(seconds: float, action_node: ScAddr, reaction_node: ScAddr = None) -> None: ...
 ```
 
-Agent execute function: combines two previous functions -- calls, waits and returns question node and **True** if success
+Agent execute function: combines two previous functions -- calls, waits and returns action node and **True** if success
 
 ```python
 def execute_agent(
         arguments: Dict[ScAddr, IsDynamic],
         concepts: List[Idtf],
-        initiation: Idtf = QuestionStatus.QUESTION_INITIATED,
-        reaction: Idtf = QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY,
+        initiation: Idtf = ActionStatus.ACTION_INITIATED,
+        reaction: Idtf = ActionStatus.ACTION_FINISHED_SUCCESSFULLY,
         wait_time: int = COMMON_WAIT_TIME,  # 5
 ) -> Tuple[ScAddr, bool]: ...
 ```
@@ -759,7 +759,7 @@ def execute_agent(
 ```python
 from sc_client.models import ScLinkContentType
 from sc_kpm import ScKeynodes
-from sc_kpm.identifiers import CommonIdentifiers, QuestionStatus
+from sc_kpm.identifiers import CommonIdentifiers, ActionStatus
 from sc_kpm.utils import create_link
 from sc_kpm.utils.action_utils import execute_agent, call_agent, wait_agent
 
@@ -768,13 +768,13 @@ arg2 = create_link(3, ScLinkContentType.INT)
 
 kwargs = dict(
     arguments={arg1: False, arg2: False},
-    concepts=[CommonIdentifiers.QUESTION, "some_class_name"],
+    concepts=[CommonIdentifiers.ACTION, "some_class_name"],
 )
 
-question = call_agent(**kwargs)  # ScAddr(...)
-wait_agent(3, question, ScKeynodes[QuestionStatus.QUESTION_FINISHED])
+action = call_agent(**kwargs)  # ScAddr(...)
+wait_agent(3, action, ScKeynodes[ActionStatus.ACTION_FINISHED])
 # or
-question, is_successfully = execute_agent(**kwargs, wait_time=3)  # ScAddr(...), bool
+action, is_successfully = execute_agent(**kwargs, wait_time=3)  # ScAddr(...), bool
 ```
 
 ### Create, call and execute action
@@ -798,15 +798,15 @@ Action call functions don't return action_node because it's parameter to them.
 
 ```python
 def call_action(
-        action_node: ScAddr, initiation: Idtf = QuestionStatus.QUESTION_INITIATED
+        action_node: ScAddr, initiation: Idtf = ActionStatus.ACTION_INITIATED
 ) -> None: ...
 ```
 
 ```python
 def execute_action(
         action_node: ScAddr,
-        initiation: Idtf = QuestionStatus.QUESTION_INITIATED,
-        reaction: Idtf = QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY,
+        initiation: Idtf = ActionStatus.ACTION_INITIATED,
+        reaction: Idtf = ActionStatus.ACTION_FINISHED_SUCCESSFULLY,
         wait_time: float = COMMON_WAIT_TIME,
 ) -> bool: ...
 ```
@@ -816,20 +816,20 @@ Example:
 ```python
 from sc_client.models import ScLinkContentType
 from sc_kpm import ScKeynodes
-from sc_kpm.identifiers import CommonIdentifiers, QuestionStatus
+from sc_kpm.identifiers import CommonIdentifiers, ActionStatus
 from sc_kpm.utils import create_link
 from sc_kpm.utils.action_utils import add_action_arguments, call_action, create_action, execute_action, wait_agent
 
 arg1 = create_link(2, ScLinkContentType.INT)
 arg2 = create_link(3, ScLinkContentType.INT)
 
-action_node = create_action(CommonIdentifiers.QUESTION, "some_class_name")  # ScAddr(...)
+action_node = create_action(CommonIdentifiers.ACTION, "some_class_name")  # ScAddr(...)
 # Do something here
 arguments = {arg1: False, arg2: False}
 
 add_action_arguments(action_node, arguments)
 call_action(action_node)
-wait_agent(3, action_node, ScKeynodes[QuestionStatus.QUESTION_FINISHED])
+wait_agent(3, action_node, ScKeynodes[ActionStatus.ACTION_FINISHED])
 # or
 is_successful = execute_action(action_node, wait_time=3)  # bool
 ```
@@ -839,10 +839,10 @@ is_successful = execute_action(action_node, wait_time=3)  # bool
 Function `finish_action` connects status class to action node:
 
 ```python
-def finish_action(action_node: ScAddr, status: Idtf = QuestionStatus.QUESTION_FINISHED) -> ScAddr: ...
+def finish_action(action_node: ScAddr, status: Idtf = ActionStatus.ACTION_FINISHED) -> ScAddr: ...
 ```
 
-Function `finish_action_with_status` connects `question_finished` and `question_finished_(un)successfully` statuses to it:
+Function `finish_action_with_status` connects `action_finished` and `action_finished_(un)successfully` statuses to it:
 
 ```python
 def finish_action_with_status(action_node: ScAddr, is_success: bool = True) -> None: ...
@@ -853,7 +853,7 @@ def finish_action_with_status(action_node: ScAddr, is_success: bool = True) -> N
 ```python
 from sc_client.constants import sc_types
 from sc_kpm import ScKeynodes
-from sc_kpm.identifiers import QuestionStatus
+from sc_kpm.identifiers import ActionStatus
 from sc_kpm.utils import create_node, check_edge
 from sc_kpm.utils.action_utils import finish_action, finish_action_with_status
 
@@ -863,13 +863,13 @@ finish_action_with_status(action_node)
 # or
 finish_action_with_status(action_node, True)
 # or
-finish_action(action_node, QuestionStatus.QUESTION_FINISHED)
-finish_action(action_node, QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY)
+finish_action(action_node, ActionStatus.ACTION_FINISHED)
+finish_action(action_node, ActionStatus.ACTION_FINISHED_SUCCESSFULLY)
 
-question_finished = ScKeynodes[QuestionStatus.QUESTION_FINISHED]
-question_finished_successfully = ScKeynodes[QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY]
-assert check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, question_finished, action_node)
-assert check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, question_finished_successfully, action_node)
+action_finished = ScKeynodes[ActionStatus.ACTION_FINISHED]
+action_finished_successfully = ScKeynodes[ActionStatus.ACTION_FINISHED_SUCCESSFULLY]
+assert check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, action_finished, action_node)
+assert check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, action_finished_successfully, action_node)
 ```
 
 # Use-cases

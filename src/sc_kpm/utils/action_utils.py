@@ -13,7 +13,7 @@ from sc_client.constants import sc_types
 from sc_client.constants.common import ScEventType
 from sc_client.models import ScAddr, ScConstruction, ScEventParams, ScTemplate
 
-from sc_kpm.identifiers import CommonIdentifiers, QuestionStatus, ScAlias
+from sc_kpm.identifiers import CommonIdentifiers, ActionStatus, ScAlias
 from sc_kpm.sc_keynodes import Idtf, ScKeynodes
 from sc_kpm.sc_result import ScResult
 from sc_kpm.sc_sets.sc_structure import ScStructure
@@ -33,7 +33,7 @@ def check_action_class(action_class: Union[ScAddr, Idtf], action_node: ScAddr) -
     action_class = ScKeynodes[action_class] if isinstance(action_class, Idtf) else action_class
     templ = ScTemplate()
     templ.triple(action_class, sc_types.EDGE_ACCESS_VAR_POS_PERM, action_node)
-    templ.triple(ScKeynodes[CommonIdentifiers.QUESTION], sc_types.EDGE_ACCESS_VAR_POS_PERM, action_node)
+    templ.triple(ScKeynodes[CommonIdentifiers.ACTION], sc_types.EDGE_ACCESS_VAR_POS_PERM, action_node)
     search_results = client.template_search(templ)
     return len(search_results) > 0
 
@@ -71,25 +71,25 @@ IsDynamic = bool
 def execute_agent(
     arguments: Dict[ScAddr, IsDynamic],
     concepts: List[Idtf],
-    initiation: Idtf = QuestionStatus.QUESTION_INITIATED,
-    reaction: Idtf = QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY,
+    initiation: Idtf = ActionStatus.ACTION_INITIATED,
+    reaction: Idtf = ActionStatus.ACTION_FINISHED_SUCCESSFULLY,
     wait_time: float = COMMON_WAIT_TIME,
 ) -> Tuple[ScAddr, bool]:
-    question = call_agent(arguments, concepts, initiation)
-    wait_agent(wait_time, question)
-    result = check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, ScKeynodes[reaction], question)
-    return question, result
+    action = call_agent(arguments, concepts, initiation)
+    wait_agent(wait_time, action)
+    result = check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, ScKeynodes[reaction], action)
+    return action, result
 
 
 def call_agent(
     arguments: Dict[ScAddr, IsDynamic],
     concepts: List[Idtf],
-    initiation: Idtf = QuestionStatus.QUESTION_INITIATED,
+    initiation: Idtf = ActionStatus.ACTION_INITIATED,
 ) -> ScAddr:
-    question = create_action(*concepts)
-    add_action_arguments(question, arguments)
-    call_action(question, initiation)
-    return question
+    action = create_action(*concepts)
+    add_action_arguments(action, arguments)
+    call_action(action, initiation)
+    return action
 
 
 def create_action(*concepts: Idtf) -> ScAddr:
@@ -121,8 +121,8 @@ def add_action_arguments(action_node: ScAddr, arguments: Dict[ScAddr, IsDynamic]
 
 def execute_action(
     action_node: ScAddr,
-    initiation: Idtf = QuestionStatus.QUESTION_INITIATED,
-    reaction: Idtf = QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY,
+    initiation: Idtf = ActionStatus.ACTION_INITIATED,
+    reaction: Idtf = ActionStatus.ACTION_FINISHED_SUCCESSFULLY,
     wait_time: float = COMMON_WAIT_TIME,
 ) -> bool:
     call_action(action_node, initiation)
@@ -131,13 +131,13 @@ def execute_action(
     return result
 
 
-def call_action(action_node: ScAddr, initiation: Idtf = QuestionStatus.QUESTION_INITIATED) -> None:
+def call_action(action_node: ScAddr, initiation: Idtf = ActionStatus.ACTION_INITIATED) -> None:
     initiation_node = ScKeynodes.resolve(initiation, sc_types.NODE_CONST_CLASS)
     create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, initiation_node, action_node)
 
 
-def wait_agent(seconds: float, question_node: ScAddr, reaction_node: ScAddr = None) -> None:
-    reaction_node = reaction_node or ScKeynodes[QuestionStatus.QUESTION_FINISHED]
+def wait_agent(seconds: float, action_node: ScAddr, reaction_node: ScAddr = None) -> None:
+    reaction_node = reaction_node or ScKeynodes[ActionStatus.ACTION_FINISHED]
     finish_event = Event()
 
     def event_callback(_: ScAddr, __: ScAddr, trg: ScAddr) -> ScResult:
@@ -146,21 +146,21 @@ def wait_agent(seconds: float, question_node: ScAddr, reaction_node: ScAddr = No
         finish_event.set()
         return ScResult.OK
 
-    event_params = ScEventParams(question_node, ScEventType.ADD_INGOING_EDGE, event_callback)
+    event_params = ScEventParams(action_node, ScEventType.ADD_INGOING_EDGE, event_callback)
     sc_event = events_create(event_params)[0]
-    if not check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, reaction_node, question_node):
+    if not check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, reaction_node, action_node):
         finish_event.wait(seconds)
     events_destroy(sc_event)
     # TODO: return status in 0.2.0
 
 
-def finish_action(action_node: ScAddr, status: Idtf = QuestionStatus.QUESTION_FINISHED) -> ScAddr:
+def finish_action(action_node: ScAddr, status: Idtf = ActionStatus.ACTION_FINISHED) -> ScAddr:
     return create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, ScKeynodes[status], action_node)
 
 
 def finish_action_with_status(action_node: ScAddr, is_success: bool = True) -> None:
     status = (
-        QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY if is_success else QuestionStatus.QUESTION_FINISHED_UNSUCCESSFULLY
+        ActionStatus.ACTION_FINISHED_SUCCESSFULLY if is_success else ActionStatus.ACTION_FINISHED_UNSUCCESSFULLY
     )
     finish_action(action_node, status)
-    finish_action(action_node, QuestionStatus.QUESTION_FINISHED)
+    finish_action(action_node, ActionStatus.ACTION_FINISHED)

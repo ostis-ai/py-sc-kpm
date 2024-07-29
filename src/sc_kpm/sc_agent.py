@@ -14,7 +14,7 @@ from sc_client.constants.common import ScEventType
 from sc_client.constants.exceptions import InvalidValueError
 from sc_client.models import ScAddr, ScEvent, ScEventParams
 
-from sc_kpm.identifiers import QuestionStatus
+from sc_kpm.identifiers import ActionStatus
 from sc_kpm.sc_keynodes import Idtf, ScKeynodes
 from sc_kpm.sc_result import ScResult
 from sc_kpm.utils.action_utils import check_action_class
@@ -72,7 +72,7 @@ class ScAgentClassic(ScAgent, ABC):
     def __init__(
         self,
         action_class_name: Idtf,
-        event_element: Union[Idtf, ScAddr] = QuestionStatus.QUESTION_INITIATED,
+        event_element: Union[Idtf, ScAddr] = ActionStatus.ACTION_INITIATED,
         event_type: ScEventType = ScEventType.ADD_OUTGOING_EDGE,
     ) -> None:
         super().__init__(event_element, event_type)
@@ -81,7 +81,7 @@ class ScAgentClassic(ScAgent, ABC):
 
     def __repr__(self) -> str:
         description = f"ClassicScAgent(action_class_name={repr(self._action_class_name)}"
-        if self._event_element != ScKeynodes.get(QuestionStatus.QUESTION_INITIATED):
+        if self._event_element != ScKeynodes.get(ActionStatus.ACTION_INITIATED):
             description = f"{description}, event_class={repr(self._event_element)}"
         if self._event_type != ScEventType.ADD_OUTGOING_EDGE:
             description = f"{description}, event_type={repr(self._event_type)}"

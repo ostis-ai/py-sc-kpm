@@ -12,7 +12,7 @@ from sc_kpm.sc_keynodes import Idtf, ScKeynodes
 
 @dataclass(frozen=True)
 class CommonIdentifiers:
-    QUESTION: Idtf = "question"
+    ACTION: Idtf = "action"
     EXACT_VALUE: Idtf = "exact_value"
     RREL_DYNAMIC_ARGUMENT: Idtf = "rrel_dynamic_argument"
     RREL_ONE: Idtf = "rrel_1"
@@ -25,11 +25,11 @@ class CommonIdentifiers:
 
 
 @dataclass(frozen=True)
-class QuestionStatus:
-    QUESTION_INITIATED: Idtf = "question_initiated"
-    QUESTION_FINISHED: Idtf = "question_finished"
-    QUESTION_FINISHED_SUCCESSFULLY: Idtf = "question_finished_successfully"
-    QUESTION_FINISHED_UNSUCCESSFULLY: Idtf = "question_finished_unsuccessfully"
+class ActionStatus:
+    ACTION_INITIATED: Idtf = "action_initiated"
+    ACTION_FINISHED: Idtf = "action_finished"
+    ACTION_FINISHED_SUCCESSFULLY: Idtf = "action_finished_successfully"
+    ACTION_FINISHED_UNSUCCESSFULLY: Idtf = "action_finished_unsuccessfully"
 
 
 @dataclass(frozen=True)
@@ -43,7 +43,7 @@ class ScAlias:
 
 class _IdentifiersResolver:
     """
-    Class for resolving common identifiers and question status identifiers.
+    Class for resolving common identifiers and action status identifiers.
     It confirms the presence of all of them in the KB.
     """
 
@@ -54,7 +54,7 @@ class _IdentifiersResolver:
         if cls.is_resolved:
             return
         types_map = {
-            CommonIdentifiers.QUESTION: sc_types.NODE_CONST_CLASS,
+            CommonIdentifiers.ACTION: sc_types.NODE_CONST_CLASS,
             CommonIdentifiers.EXACT_VALUE: sc_types.NODE_CONST_CLASS,
             CommonIdentifiers.RREL_DYNAMIC_ARGUMENT: sc_types.NODE_CONST_ROLE,
             CommonIdentifiers.RREL_ONE: sc_types.NODE_CONST_ROLE,
@@ -64,10 +64,10 @@ class _IdentifiersResolver:
             CommonIdentifiers.NREL_SYSTEM_IDENTIFIER: sc_types.NODE_CONST_NOROLE,
             CommonIdentifiers.NREL_ANSWER: sc_types.NODE_CONST_NOROLE,
             CommonIdentifiers.CONCEPT_FILENAME: sc_types.NODE_CONST_CLASS,
-            QuestionStatus.QUESTION_INITIATED: sc_types.NODE_CONST_CLASS,
-            QuestionStatus.QUESTION_FINISHED: sc_types.NODE_CONST_CLASS,
-            QuestionStatus.QUESTION_FINISHED_SUCCESSFULLY: sc_types.NODE_CONST_CLASS,
-            QuestionStatus.QUESTION_FINISHED_UNSUCCESSFULLY: sc_types.NODE_CONST_CLASS,
+            ActionStatus.ACTION_INITIATED: sc_types.NODE_CONST_CLASS,
+            ActionStatus.ACTION_FINISHED: sc_types.NODE_CONST_CLASS,
+            ActionStatus.ACTION_FINISHED_SUCCESSFULLY: sc_types.NODE_CONST_CLASS,
+            ActionStatus.ACTION_FINISHED_UNSUCCESSFULLY: sc_types.NODE_CONST_CLASS,
         }
 
         for idtf, sc_type in types_map.items():

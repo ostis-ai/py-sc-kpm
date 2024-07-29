@@ -55,16 +55,16 @@ def main():
         agent = SumAgentClassic(action_class_name)
         module = ScModule(agent)
         server.add_modules(module)
-        question, is_successful = execute_agent(
+        action, is_successful = execute_agent(
             arguments={
                 create_link(2, ScLinkContentType.INT): False,
                 create_link(3, ScLinkContentType.INT): False,
             },
-            concepts=[CommonIdentifiers.QUESTION, action_class_name],
+            concepts=[CommonIdentifiers.ACTION, action_class_name],
             wait_time=1,
         )
         assert is_successful
-        answer_struct = get_action_answer(question)
+        answer_struct = get_action_answer(action)
         answer_link = ScStructure(set_node=answer_struct).elements_set.pop()
         answer_content = get_link_content_data(answer_link)
         logging.info("Answer received: %s", repr(answer_content))
