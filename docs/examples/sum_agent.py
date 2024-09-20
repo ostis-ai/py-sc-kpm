@@ -15,10 +15,10 @@ from sc_kpm import ScAgent, ScModule, ScResult, ScServer
 from sc_kpm.sc_sets import ScStructure
 from sc_kpm.utils import create_link, get_link_content_data
 from sc_kpm.utils.action_utils import (
-    create_action_answer,
+    create_action_result,
     execute_agent,
     finish_action_with_status,
-    get_action_answer,
+    get_action_result,
     get_action_arguments,
 )
 
@@ -45,7 +45,7 @@ class SumAgent(ScAgent):
         arg2_content = get_link_content_data(arg2_link)
         if not isinstance(arg1_content, int) or not isinstance(arg2_content, int):
             return ScResult.ERROR_INVALID_TYPE
-        create_action_answer(action_node, create_link(arg1_content + arg2_content, ScLinkContentType.INT))
+        create_action_result(action_node, create_link(arg1_content + arg2_content, ScLinkContentType.INT))
         return ScResult.OK
 
 
@@ -67,10 +67,10 @@ def main():
                 wait_time=1,
             )
             assert is_successful
-            answer_struct = get_action_answer(action)
-            answer_link = (ScStructure(set_node=answer_struct)).elements_set.pop()  # get one element
-            answer_content = get_link_content_data(answer_link)
-            logging.info("Answer received: %s", repr(answer_content))
+            result_struct = get_action_result(action)
+            result_link = (ScStructure(set_node=result_struct)).elements_set.pop()  # get one element
+            result_content = get_link_content_data(result_link)
+            logging.info("Result received: %s", repr(result_content))
 
 
 if __name__ == "__main__":
