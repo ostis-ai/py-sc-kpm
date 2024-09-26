@@ -46,19 +46,19 @@ def get_action_arguments(action_node: ScAddr, count: int) -> List[ScAddr]:
     return arguments
 
 
-def create_action_answer(action_node: ScAddr, *elements: ScAddr) -> None:
-    answer_struct_node = ScStructure(*elements).set_node
-    create_norole_relation(action_node, answer_struct_node, ScKeynodes[CommonIdentifiers.NREL_ANSWER])
+def create_action_result(action_node: ScAddr, *elements: ScAddr) -> None:
+    result_struct_node = ScStructure(*elements).set_node
+    create_norole_relation(action_node, result_struct_node, ScKeynodes[CommonIdentifiers.NREL_RESULT])
 
 
-def get_action_answer(action_node: ScAddr) -> ScAddr:
+def get_action_result(action_node: ScAddr) -> ScAddr:
     templ = ScTemplate()
     templ.triple_with_relation(
         action_node,
         sc_types.EDGE_D_COMMON_VAR >> ScAlias.RELATION_EDGE,
         sc_types.NODE_VAR_STRUCT >> ScAlias.ELEMENT,
         sc_types.EDGE_ACCESS_VAR_POS_PERM,
-        ScKeynodes[CommonIdentifiers.NREL_ANSWER],
+        ScKeynodes[CommonIdentifiers.NREL_RESULT],
     )
     if search_results := client.template_search(templ):
         return search_results[0].get(ScAlias.ELEMENT)

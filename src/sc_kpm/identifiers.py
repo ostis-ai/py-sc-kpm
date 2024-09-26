@@ -20,7 +20,7 @@ class CommonIdentifiers:
     RREL_LAST: Idtf = "rrel_last"
     NREL_BASIC_SEQUENCE: Idtf = "nrel_basic_sequence"
     NREL_SYSTEM_IDENTIFIER: Idtf = "nrel_system_identifier"
-    NREL_ANSWER: Idtf = "nrel_answer"
+    NREL_RESULT: Idtf = "nrel_result"
     CONCEPT_FILENAME: Idtf = "concept_filename"
 
 
@@ -62,7 +62,7 @@ class _IdentifiersResolver:
             CommonIdentifiers.RREL_LAST: sc_types.NODE_CONST_ROLE,
             CommonIdentifiers.NREL_BASIC_SEQUENCE: sc_types.NODE_CONST_NOROLE,
             CommonIdentifiers.NREL_SYSTEM_IDENTIFIER: sc_types.NODE_CONST_NOROLE,
-            CommonIdentifiers.NREL_ANSWER: sc_types.NODE_CONST_NOROLE,
+            CommonIdentifiers.NREL_RESULT: sc_types.NODE_CONST_NOROLE,
             CommonIdentifiers.CONCEPT_FILENAME: sc_types.NODE_CONST_CLASS,
             ActionStatus.ACTION_INITIATED: sc_types.NODE_CONST_CLASS,
             ActionStatus.ACTION_FINISHED: sc_types.NODE_CONST_CLASS,

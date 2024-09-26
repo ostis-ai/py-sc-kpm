@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GWF version="2.0">
     <staticSector>
-        <contour type="contour/const/perm" idtf="py: answer_struct" shapeColor="0" id="22085440" parent="0" left="0" top="0" right="102.875" bottom="23" textColor="164" text_angle="0" text_font="Times New Roman" font_size="10" idtf_pos_x="-52" idtf_pos_y="62">
+        <contour type="contour/const/perm" idtf="py: result_struct" shapeColor="0" id="22085440" parent="0" left="0" top="0" right="102.875" bottom="23" textColor="164" text_angle="0" text_font="Times New Roman" font_size="10" idtf_pos_x="-52" idtf_pos_y="62">
             <points>
                 <point x="210" y="435"/>
                 <point x="210" y="555"/>
@@ -30,7 +30,7 @@
         <node type="node/const/perm/general" idtf="py: arguments[...]" shapeColor="0" id="15676064" parent="0" left="0" top="0" right="103.266" bottom="23" textColor="164" text_angle="0" text_font="Times New Roman" font_size="10" x="555" y="360" haveBus="false" idtf_pos="0">
             <content type="0" mime_type="" content_visibility="false" file_name=""/>
         </node>
-        <node type="node/const/perm/relation" idtf="nrel_answer" shapeColor="0" id="15659472" parent="0" left="0" top="0" right="75.375" bottom="23" textColor="164" text_angle="0" text_font="Times New Roman" font_size="10" x="180" y="375" haveBus="false" idtf_pos="0">
+        <node type="node/const/perm/relation" idtf="nrel_result" shapeColor="0" id="15659472" parent="0" left="0" top="0" right="75.375" bottom="23" textColor="164" text_angle="0" text_font="Times New Roman" font_size="10" x="180" y="375" haveBus="false" idtf_pos="0">
             <content type="0" mime_type="" content_visibility="false" file_name=""/>
         </node>
         <node type="node/const/perm/general" idtf="py: action_node" shapeColor="0" id="15601856" parent="0" left="0" top="0" right="93.5313" bottom="23" textColor="164" text_angle="0" text_font="Times New Roman" font_size="10" x="270" y="330" haveBus="false" idtf_pos="1">

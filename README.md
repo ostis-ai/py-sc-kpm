@@ -694,31 +694,31 @@ arguments = get_action_arguments(action_node, 2)
 assert arguments == [argument1, dynamic_node]
 ```
 
-### Create and get action answer
+### Create and get action result
 
 ```python
-def create_action_answer(action_node: ScAddr, *elements: ScAddr) -> None: ...
+def create_action_result(action_node: ScAddr, *elements: ScAddr) -> None: ...
 
 
-def get_action_answer(action_node: ScAddr) -> ScAddr: ...
+def get_action_result(action_node: ScAddr) -> ScAddr: ...
 ```
 
 Create and get structure with output of action
 
-![agent answer](docs/schemes/png/agent_answer.png)
+![agent result](docs/schemes/png/agent_result.png)
 
 ```python
 from sc_client.constants import sc_types
 from sc_kpm.utils import create_node
-from sc_kpm.utils.action_utils import create_action_answer, get_action_answer
+from sc_kpm.utils.action_utils import create_action_result, get_action_result
 from sc_kpm.sc_sets import ScStructure
 
 action_node = create_node(sc_types.NODE_CONST_STRUCT)
-answer_element = create_node(sc_types.NODE_CONST_STRUCT)
-create_action_answer(action_node, answer_element)
-result = get_action_answer(action_node)
+result_element = create_node(sc_types.NODE_CONST_STRUCT)
+create_action_result(action_node, result_element)
+result = get_action_result(action_node)
 result_elements = ScStructure(result).elements_set
-assert result_elements == {answer_element}
+assert result_elements == {result_element}
 ```
 
 ### Call, execute and wait agent
