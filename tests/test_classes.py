@@ -24,9 +24,9 @@ class CommonTests(BaseTestCase):
             ACTION_CLASS_NAME = "test_agent"
 
             def __init__(self):
-                super().__init__(self.ACTION_CLASS_NAME, ScEventType.ADD_OUTGOING_EDGE)
+                super().__init__(self.ACTION_CLASS_NAME, ScEventType.AFTER_GENERATE_OUTGOING_ARC)
 
-            def on_event(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
+            def on_event(self, event_element: ScAddr, event_connector: ScAddr, action_element: ScAddr) -> ScResult:
                 finish_action_with_status(action_element, True)
                 return ScResult.OK
 
@@ -36,7 +36,7 @@ class CommonTests(BaseTestCase):
             def __init__(self):
                 super().__init__(self.ACTION_CLASS_NAME)
 
-            def on_event(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
+            def on_event(self, event_element: ScAddr, event_connector: ScAddr, action_element: ScAddr) -> ScResult:
                 finish_action_with_status(action_element, True)
                 return ScResult.OK
 
@@ -64,7 +64,7 @@ class CommonTests(BaseTestCase):
 
     def test_sc_module(self):
         class TestAgent(ScAgent):
-            def on_event(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
+            def on_event(self, event_element: ScAddr, event_connector: ScAddr, action_element: ScAddr) -> ScResult:
                 finish_action_with_status(action_element, True)
                 return ScResult.OK
 
@@ -76,9 +76,9 @@ class CommonTests(BaseTestCase):
                 wait_time=WAIT_TIME,
             )[1]
 
-        agent1 = TestAgent("agent1", ScEventType.ADD_OUTGOING_EDGE)
-        agent2 = TestAgent("agent2", ScEventType.ADD_OUTGOING_EDGE)
-        agent3 = TestAgent("agent3", ScEventType.ADD_OUTGOING_EDGE)
+        agent1 = TestAgent("agent1", ScEventType.AFTER_GENERATE_OUTGOING_ARC)
+        agent2 = TestAgent("agent2", ScEventType.AFTER_GENERATE_OUTGOING_ARC)
+        agent3 = TestAgent("agent3", ScEventType.AFTER_GENERATE_OUTGOING_ARC)
 
         module1 = ScModule(agent1)
         module2 = ScModule(agent2)
@@ -102,9 +102,9 @@ class CommonTests(BaseTestCase):
             ACTION_CLASS_NAME = "some_agent"
 
             def __init__(self):
-                super().__init__(self.ACTION_CLASS_NAME, ScEventType.ADD_OUTGOING_EDGE)
+                super().__init__(self.ACTION_CLASS_NAME, ScEventType.AFTER_GENERATE_OUTGOING_ARC)
 
-            def on_event(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
+            def on_event(self, event_element: ScAddr, event_connector: ScAddr, action_element: ScAddr) -> ScResult:
                 finish_action_with_status(action_element, True)
                 return ScResult.OK
 

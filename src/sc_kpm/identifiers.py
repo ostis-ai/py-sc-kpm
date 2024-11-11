@@ -5,7 +5,7 @@ Distributed under the MIT License
 """
 from dataclasses import dataclass
 
-from sc_client.constants import sc_types
+from sc_client.constants import sc_type
 
 from sc_kpm.sc_keynodes import Idtf, ScKeynodes
 
@@ -35,8 +35,8 @@ class ActionStatus:
 @dataclass(frozen=True)
 class ScAlias:
     ACTION_NODE: str = "_action_node"
-    RELATION_EDGE: str = "_relation_edge"
-    ACCESS_EDGE: str = "_access_edge"
+    RELATION_ARC: str = "_relation_arc"
+    MEMBERSHIP_ARC: str = "_membership_arc"
     ELEMENT: str = "_element"
     LINK: str = "_link"
 
@@ -54,20 +54,20 @@ class _IdentifiersResolver:
         if cls.is_resolved:
             return
         types_map = {
-            CommonIdentifiers.ACTION: sc_types.NODE_CONST_CLASS,
-            CommonIdentifiers.EXACT_VALUE: sc_types.NODE_CONST_CLASS,
-            CommonIdentifiers.RREL_DYNAMIC_ARGUMENT: sc_types.NODE_CONST_ROLE,
-            CommonIdentifiers.RREL_ONE: sc_types.NODE_CONST_ROLE,
-            CommonIdentifiers.RREL_TWO: sc_types.NODE_CONST_ROLE,
-            CommonIdentifiers.RREL_LAST: sc_types.NODE_CONST_ROLE,
-            CommonIdentifiers.NREL_BASIC_SEQUENCE: sc_types.NODE_CONST_NOROLE,
-            CommonIdentifiers.NREL_SYSTEM_IDENTIFIER: sc_types.NODE_CONST_NOROLE,
-            CommonIdentifiers.NREL_RESULT: sc_types.NODE_CONST_NOROLE,
-            CommonIdentifiers.CONCEPT_FILENAME: sc_types.NODE_CONST_CLASS,
-            ActionStatus.ACTION_INITIATED: sc_types.NODE_CONST_CLASS,
-            ActionStatus.ACTION_FINISHED: sc_types.NODE_CONST_CLASS,
-            ActionStatus.ACTION_FINISHED_SUCCESSFULLY: sc_types.NODE_CONST_CLASS,
-            ActionStatus.ACTION_FINISHED_UNSUCCESSFULLY: sc_types.NODE_CONST_CLASS,
+            CommonIdentifiers.ACTION: sc_type.CONST_NODE_CLASS,
+            CommonIdentifiers.EXACT_VALUE: sc_type.CONST_NODE_CLASS,
+            CommonIdentifiers.RREL_DYNAMIC_ARGUMENT: sc_type.CONST_NODE_ROLE,
+            CommonIdentifiers.RREL_ONE: sc_type.CONST_NODE_ROLE,
+            CommonIdentifiers.RREL_TWO: sc_type.CONST_NODE_ROLE,
+            CommonIdentifiers.RREL_LAST: sc_type.CONST_NODE_ROLE,
+            CommonIdentifiers.NREL_BASIC_SEQUENCE: sc_type.CONST_NODE_NON_ROLE,
+            CommonIdentifiers.NREL_SYSTEM_IDENTIFIER: sc_type.CONST_NODE_NON_ROLE,
+            CommonIdentifiers.NREL_RESULT: sc_type.CONST_NODE_NON_ROLE,
+            CommonIdentifiers.CONCEPT_FILENAME: sc_type.CONST_NODE_CLASS,
+            ActionStatus.ACTION_INITIATED: sc_type.CONST_NODE_CLASS,
+            ActionStatus.ACTION_FINISHED: sc_type.CONST_NODE_CLASS,
+            ActionStatus.ACTION_FINISHED_SUCCESSFULLY: sc_type.CONST_NODE_CLASS,
+            ActionStatus.ACTION_FINISHED_UNSUCCESSFULLY: sc_type.CONST_NODE_CLASS,
         }
 
         for idtf, sc_type in types_map.items():

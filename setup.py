@@ -7,7 +7,7 @@ DIRECTORY_PATH = Path(__file__).parent
 README = (DIRECTORY_PATH / "README.md").read_text()
 
 VERSION = "0.3.0"
-INSTALL_REQUIRES = ["py-sc-client>=0.3.0"]
+INSTALL_REQUIRES = ["py-sc-client>=0.4.0"]
 CURRENT_PYTHON = sys.version_info[:2]
 REQUIRED_PYTHON = (3, 8)
 
@@ -46,6 +46,8 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
     ],
     keywords="sc-kpm, kpm, knowledge processing",
     packages=find_packages(where="src", exclude=("tests",)),

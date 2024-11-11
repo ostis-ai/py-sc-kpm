@@ -9,10 +9,10 @@ from logging import getLogger
 from typing import Optional, Union
 
 from sc_client import client
-from sc_client.constants import sc_types
+from sc_client.constants import sc_type
 from sc_client.constants.common import ScEventType
 from sc_client.constants.exceptions import InvalidValueError
-from sc_client.models import ScAddr, ScEvent, ScEventParams
+from sc_client.models import ScAddr, ScEvent, ScEventSubscriptionParams
 
 from sc_kpm.identifiers import ActionStatus
 from sc_kpm.sc_keynodes import Idtf, ScKeynodes
@@ -35,30 +35,30 @@ class ScAgentAbstract(ABC):
         if self._event is not None:
             self.logger.warning("Almost registered")
             return
-        event_params = ScEventParams(self._event_element, self._event_type, self._callback)
-        self._event = client.events_create(event_params)[0]
+        event_params = ScEventSubscriptionParams(self._event_element, self._event_type, self._callback)
+        self._event = client.create_elementary_event_subscriptions(event_params)[0]
         self.logger.info("Registered with ScEvent: %s - %s", repr(self._event_element), repr(self._event_type))
 
     def _unregister(self) -> None:
         if self._event is None:
             self.logger.warning("ScEvent was already destroyed or not registered")
             return
-        client.events_destroy(self._event)
+        client.destroy_elementary_event_subscriptions(self._event)
         self._event = None
         self.logger.info("Unregistered ScEvent: %s - %s", repr(self._event_element), repr(self._event_type))
 
-    def _callback(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
-        return self.on_event(event_element, event_edge, action_element)
+    def _callback(self, event_element: ScAddr, event_connector: ScAddr, action_element: ScAddr) -> ScResult:
+        return self.on_event(event_element, event_connector, action_element)
 
     @abstractmethod
-    def on_event(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
+    def on_event(self, event_element: ScAddr, event_connector: ScAddr, action_element: ScAddr) -> ScResult:
         pass
 
 
 class ScAgent(ScAgentAbstract, ABC):
     def __init__(self, event_element: Union[Idtf, ScAddr], event_type: ScEventType) -> None:
         if isinstance(event_element, Idtf):
-            event_element = ScKeynodes.resolve(event_element, sc_types.NODE_CONST_CLASS)
+            event_element = ScKeynodes.resolve(event_element, sc_type.CONST_NODE_CLASS)
         if not event_element.is_valid():
             self.logger.error("Failed to initialize ScAgent: event_class is invalid")
             raise InvalidValueError(f"event_class of {self.__class__.__name__} is invalid")
@@ -73,22 +73,22 @@ class ScAgentClassic(ScAgent, ABC):
         self,
         action_class_name: Idtf,
         event_element: Union[Idtf, ScAddr] = ActionStatus.ACTION_INITIATED,
-        event_type: ScEventType = ScEventType.ADD_OUTGOING_EDGE,
+        event_type: ScEventType = ScEventType.AFTER_GENERATE_OUTGOING_ARC,
     ) -> None:
         super().__init__(event_element, event_type)
         self._action_class_name = action_class_name
-        self._action_class = ScKeynodes.resolve(action_class_name, sc_types.NODE_CONST_CLASS)
+        self._action_class = ScKeynodes.resolve(action_class_name, sc_type.CONST_NODE_CLASS)
 
     def __repr__(self) -> str:
         description = f"ClassicScAgent(action_class_name={repr(self._action_class_name)}"
         if self._event_element != ScKeynodes.get(ActionStatus.ACTION_INITIATED):
             description = f"{description}, event_class={repr(self._event_element)}"
-        if self._event_type != ScEventType.ADD_OUTGOING_EDGE:
+        if self._event_type != ScEventType.AFTER_GENERATE_OUTGOING_ARC:
             description = f"{description}, event_type={repr(self._event_type)}"
         return description + ")"
 
-    def _callback(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
+    def _callback(self, event_element: ScAddr, event_connector: ScAddr, action_element: ScAddr) -> ScResult:
         if not check_action_class(self._action_class, action_element):
             return ScResult.SKIP
         self.logger.info("Confirmed action class")
-        return self.on_event(event_element, event_edge, action_element)
+        return self.on_event(event_element, event_connector, action_element)

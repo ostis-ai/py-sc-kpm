@@ -15,7 +15,7 @@ class ScResult(IntEnum):
     ERROR_IO = auto()  # input/output error
     ERROR_INVALID_STATE = auto()  # invalid state of processed object
     ERROR_NOT_FOUND = auto()  # item not found
-    ERROR_NO_WRITE_RIGHTS = auto()  # no rights to change or delete object
+    ERROR_NO_WRITE_RIGHTS = auto()  # no rights to change or erase object
     ERROR_NO_READ_RIGHTS = auto()  # no rights to read object
     NO = auto()  # no result
     UNKNOWN = auto()  # result unknown

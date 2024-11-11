@@ -5,8 +5,8 @@ Distributed under the MIT License
 """
 import time
 
-from sc_client.client import delete_elements
-from sc_client.constants import sc_types
+from sc_client.client import erase_elements
+from sc_client.constants import sc_type
 from sc_client.constants.common import ScEventType
 
 from sc_kpm import ScAgent, ScKeynodes, ScModule
@@ -17,20 +17,20 @@ from sc_kpm.utils.action_utils import (
     call_action,
     call_agent,
     check_action_class,
-    create_action,
+    generate_action,
     execute_action,
     execute_agent,
     finish_action_with_status,
     wait_agent,
 )
-from sc_kpm.utils.common_utils import check_edge, create_edge, create_node
+from sc_kpm.utils.common_utils import check_connector, generate_connector, generate_node
 from tests.common_tests import BaseTestCase
 
 test_node_idtf = "test_node"
 
 
 class ScAgentTest(ScAgent):
-    def on_event(self, _src, _edge, target_node) -> ScResult:
+    def on_event(self, _src, _connector, target_node) -> ScResult:
         self.logger.info(f"Agent's started")
         finish_action_with_status(target_node)
         return ScResult.OK
@@ -39,7 +39,7 @@ class ScAgentTest(ScAgent):
 class ScModuleTest(ScModule):
     def __init__(self):
         super().__init__(
-            ScAgentTest(test_node_idtf, ScEventType.ADD_OUTGOING_EDGE),
+            ScAgentTest(test_node_idtf, ScEventType.AFTER_GENERATE_OUTGOING_ARC),
             ScAgentTest(test_node_idtf, ScEventType.ADD_INGOING_EDGE),
         )
 
@@ -47,18 +47,18 @@ class ScModuleTest(ScModule):
 class TestActionUtils(BaseTestCase):
     def test_validate_action(self):
         action_class_idtf = "test_action_class"
-        action_class_node = ScKeynodes.resolve(action_class_idtf, sc_types.NODE_CONST)
+        action_class_node = ScKeynodes.resolve(action_class_idtf, sc_type.CONST_NODE)
         action = ScKeynodes[CommonIdentifiers.ACTION]
-        test_node = create_node(sc_types.NODE_CONST)
+        test_node = generate_node(sc_type.CONST_NODE)
         self.assertFalse(check_action_class(action_class_node, test_node))
         self.assertFalse(check_action_class(action_class_idtf, test_node))
-        class_edge = create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, action_class_node, test_node)
+        class_connector = generate_connector(sc_type.CONST_PERM_POS_ARC, action_class_node, test_node)
         self.assertFalse(check_action_class(action_class_node, test_node))
         self.assertFalse(check_action_class(action_class_idtf, test_node))
-        create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, action, test_node)
+        generate_connector(sc_type.CONST_PERM_POS_ARC, action, test_node)
         self.assertTrue(check_action_class(action_class_node, test_node))
         self.assertTrue(check_action_class(action_class_idtf, test_node))
-        delete_elements(class_edge)
+        erase_elements(class_connector)
         self.assertFalse(check_action_class(action_class_node, test_node))
         self.assertFalse(check_action_class(action_class_idtf, test_node))
 
@@ -75,8 +75,8 @@ class TestActionUtils(BaseTestCase):
         with self.server.register_modules():
             action = call_agent({}, [], test_node_idtf)
             wait_agent(1, action, ScKeynodes[ActionStatus.ACTION_FINISHED])
-            result = check_edge(
-                sc_types.EDGE_ACCESS_VAR_POS_PERM, ScKeynodes[ActionStatus.ACTION_FINISHED_SUCCESSFULLY], action
+            result = check_connector(
+                sc_type.VAR_PERM_POS_ARC, ScKeynodes[ActionStatus.ACTION_FINISHED_SUCCESSFULLY], action
             )
             self.assertTrue(result)
         self.server.remove_modules(module)
@@ -92,7 +92,7 @@ class TestActionUtils(BaseTestCase):
         module = ScModuleTest()
         self.server.add_modules(module)
         with self.server.register_modules():
-            action_node = create_action()
+            action_node = generate_action()
             add_action_arguments(action_node, {})
             assert execute_action(action_node, test_node_idtf)
         self.server.remove_modules(module)
@@ -101,12 +101,12 @@ class TestActionUtils(BaseTestCase):
         module = ScModuleTest()
         self.server.add_modules(module)
         with self.server.register_modules():
-            action_node = create_action()
+            action_node = generate_action()
             add_action_arguments(action_node, {})
             call_action(action_node, test_node_idtf)
             wait_agent(1, action_node, ScKeynodes[ActionStatus.ACTION_FINISHED])
-            result = check_edge(
-                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+            result = check_connector(
+                sc_type.VAR_PERM_POS_ARC,
                 ScKeynodes[ActionStatus.ACTION_FINISHED_SUCCESSFULLY],
                 action_node,
             )
@@ -117,7 +117,7 @@ class TestActionUtils(BaseTestCase):
         module = ScModuleTest()
         self.server.add_modules(module)
         with self.server.register_modules():
-            action_node = create_action()
+            action_node = generate_action()
             add_action_arguments(action_node, {})
             self.assertFalse(execute_action(action_node, "wrong_agent", wait_time=1))
         self.server.remove_modules(module)
@@ -126,7 +126,7 @@ class TestActionUtils(BaseTestCase):
         module = ScModuleTest()
         self.server.add_modules(module)
         with self.server.register_modules():
-            action_node = create_action()
+            action_node = generate_action()
             timeout = 0.5
             # Action is not finished while waiting
             start_time = time.time()

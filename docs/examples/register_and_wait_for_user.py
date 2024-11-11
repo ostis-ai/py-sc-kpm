@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 class TestScAgent(ScAgentClassic):
-    def on_event(self, event_element: ScAddr, event_edge: ScAddr, action_element: ScAddr) -> ScResult:
+    def on_event(self, event_element: ScAddr, event_connector: ScAddr, action_element: ScAddr) -> ScResult:
         return ScResult.OK
 
 
