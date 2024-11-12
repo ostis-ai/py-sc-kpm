@@ -5,7 +5,9 @@ from sc_client.models import ScAddr
 from sc_client.models.sc_construction import ScLinkContent, ScLinkContentData
 
 
-def iter_link_contents_data(contents: Iterable[ScLinkContent]) -> Iterator[ScLinkContentData]:
+def iter_link_contents_data(
+    contents: Iterable[ScLinkContent],
+) -> Iterator[ScLinkContentData]:
     """Iterate by data in link contents"""
     for content in contents:
         yield content.data

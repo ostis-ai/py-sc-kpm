@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Iterator
 
-from sc_client.client import generate_elements, erase_elements, search_by_template
+from sc_client.client import erase_elements, generate_elements, search_by_template
 from sc_client.constants import ScType, sc_type
 from sc_client.models import ScAddr, ScConstruction, ScTemplate, ScTemplateResult
 
@@ -13,7 +13,7 @@ class ScSet:
     """
     ScSet is a class for handling set construction in kb.
 
-    It has main set_node and connector elements.
+    It has main set_node and arc elements.
     """
 
     def __init__(self, *elements: ScAddr, set_node: ScAddr = None, set_node_type: ScType = None) -> None:

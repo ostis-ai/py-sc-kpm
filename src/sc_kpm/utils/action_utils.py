@@ -4,12 +4,13 @@ Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
 
+import warnings
 from threading import Event
 from typing import Dict, List, Tuple, Union
 
 from sc_client import client
 from sc_client.client import create_elementary_event_subscriptions, destroy_elementary_event_subscriptions
-from sc_client.constants import sc_type
+from sc_client.constants import sc_types
 from sc_client.constants.common import ScEventType
 from sc_client.models import ScAddr, ScConstruction, ScEventSubscriptionParams, ScTemplate
 
@@ -49,6 +50,14 @@ def get_action_arguments(action_node: ScAddr, count: int) -> List[ScAddr]:
 def generate_action_result(action_node: ScAddr, *elements: ScAddr) -> None:
     result_struct_node = ScStructure(*elements).set_node
     generate_non_role_relation(action_node, result_struct_node, ScKeynodes[CommonIdentifiers.NREL_RESULT])
+
+
+def create_action_result(action_node: ScAddr, *elements: ScAddr) -> None:
+    warnings.warn(
+        "Action utils 'create_action_result' method is deprecated. Use `generate_action_result` method instead.",
+        DeprecationWarning,
+    )
+    generate_action_result(action_node, *elements)
 
 
 def get_action_result(action_node: ScAddr) -> ScAddr:
@@ -103,6 +112,14 @@ def generate_action(*concepts: Idtf) -> ScAddr:
         )
     action_node = client.generate_elements(construction)[0]
     return action_node
+
+
+def create_action(*concepts: Idtf) -> ScAddr:
+    warnings.warn(
+        "Action utils 'create_action' method is deprecated. Use `generate_action` method instead.",
+        DeprecationWarning,
+    )
+    return generate_action(*concepts)
 
 
 def add_action_arguments(action_node: ScAddr, arguments: Dict[ScAddr, IsDynamic]) -> None:

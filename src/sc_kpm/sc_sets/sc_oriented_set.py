@@ -14,9 +14,9 @@ class ScOrientedSet(ScSet):
     """
     ScOrientedSet is a class for handling oriented set structure in kb.
 
-    It has main set_node and connector elements:
+    It has main set_node and arc elements:
     Edge to the first element marked with 'rrel_1' node.
-    The other have connectors between connectors from set_node marked with 'nrel_basic_sequence'.
+    The other have arcs between arcs from set_node marked with 'nrel_basic_sequence'.
     """
 
     def add(self, *elements: ScAddr) -> None:
@@ -106,7 +106,11 @@ class ScOrientedSet(ScSet):
 
     @staticmethod
     def _mark_connector_with_rrel_last(last_connector: ScAddr) -> None:
-        generate_connector(sc_type.CONST_PERM_POS_ARC, ScKeynodes[CommonIdentifiers.RREL_LAST], last_connector)
+        generate_connector(
+            sc_type.CONST_PERM_POS_ARC,
+            ScKeynodes[CommonIdentifiers.RREL_LAST],
+            last_connector,
+        )
 
     def _search_next_element_template(self, cur_element_connector: ScAddr) -> Optional[ScTemplateResult]:
         templ = ScTemplate()

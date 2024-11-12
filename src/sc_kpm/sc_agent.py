@@ -37,7 +37,11 @@ class ScAgentAbstract(ABC):
             return
         event_params = ScEventSubscriptionParams(self._event_element, self._event_type, self._callback)
         self._event = client.create_elementary_event_subscriptions(event_params)[0]
-        self.logger.info("Registered with ScEvent: %s - %s", repr(self._event_element), repr(self._event_type))
+        self.logger.info(
+            "Registered with ScEvent: %s - %s",
+            repr(self._event_element),
+            repr(self._event_type),
+        )
 
     def _unregister(self) -> None:
         if self._event is None:
@@ -45,7 +49,11 @@ class ScAgentAbstract(ABC):
             return
         client.destroy_elementary_event_subscriptions(self._event)
         self._event = None
-        self.logger.info("Unregistered ScEvent: %s - %s", repr(self._event_element), repr(self._event_type))
+        self.logger.info(
+            "Unregistered ScEvent: %s - %s",
+            repr(self._event_element),
+            repr(self._event_type),
+        )
 
     def _callback(self, event_element: ScAddr, event_connector: ScAddr, action_element: ScAddr) -> ScResult:
         return self.on_event(event_element, event_connector, action_element)

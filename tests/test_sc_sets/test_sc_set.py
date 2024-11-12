@@ -14,28 +14,28 @@ from tests.common_tests import BaseTestCase
 
 
 class ScSetTestCase(BaseTestCase):
-    def test_create_with_set_node(self):
+    def test_generate_with_set_node(self):
         set_node = generate_node(sc_type.CONST_NODE)
         element1 = generate_node(sc_type.CONST_NODE)
         element2 = generate_node(sc_type.CONST_NODE)
         ScSet(element1, element2, set_node=set_node)
         self._assert_two_elements_set_template(set_node, element1, element2)
 
-    def test_create_without_set_node(self):
+    def test_generate_without_set_node(self):
         element1 = generate_node(sc_type.CONST_NODE)
         element2 = generate_node(sc_type.CONST_NODE)
         sc_set = ScSet(element1, element2)
         self.assertEqual(check_elements(sc_set.set_node)[0], sc_type.CONST_NODE)
         self._assert_two_elements_set_template(sc_set.set_node, element1, element2)
 
-    def test_create_with_set_type(self):
+    def test_generate_with_set_type(self):
         element1 = generate_node(sc_type.CONST_NODE)
         element2 = generate_node(sc_type.CONST_NODE)
         sc_set = ScSet(element1, element2, set_node_type=sc_type.CONST_NODE_STRUCTURE)
         self.assertEqual(check_elements(sc_set.set_node)[0], sc_type.CONST_NODE_STRUCTURE)
         self._assert_two_elements_set_template(sc_set.set_node, element1, element2)
 
-    def test_create_copy_set_node(self):
+    def test_generate_copy_set_node(self):
         element1 = generate_node(sc_type.CONST_NODE)
         element2 = generate_node(sc_type.CONST_NODE)
         sc_set = ScSet(element1, element2)

@@ -7,6 +7,7 @@ Distributed under the MIT License
 from sc_kpm.utils import action_utils
 from sc_kpm.utils.common_utils import (
     check_connector,
+    erase_connectors,
     generate_binary_relation,
     generate_connector,
     generate_connectors,
@@ -16,12 +17,11 @@ from sc_kpm.utils.common_utils import (
     generate_nodes,
     generate_non_role_relation,
     generate_role_relation,
-    erase_connectors,
     get_connector,
     get_connectors,
     get_element_by_non_role_relation,
     get_element_by_role_relation,
-    get_link_content_data,
     get_element_system_identifier,
+    get_link_content_data,
     search_role_relation_template,
 )

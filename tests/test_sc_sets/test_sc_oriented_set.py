@@ -16,14 +16,14 @@ from tests.common_tests import BaseTestCase
 
 
 class ScOrientedSetTestCase(BaseTestCase):
-    def test_create_with_set_node(self):
+    def test_generate_with_set_node(self):
         set_node = generate_node(sc_type.CONST_NODE)
         start_element = generate_node(sc_type.CONST_NODE)
         other_element = generate_node(sc_type.CONST_NODE)
         ScOrientedSet(start_element, other_element, set_node=set_node)
         self._assert_two_elements_oriented_set_template(set_node, start_element, other_element)
 
-    def test_create_without_set_node(self):
+    def test_generate_without_set_node(self):
         start_element = generate_node(sc_type.CONST_NODE)
         other_element = generate_node(sc_type.CONST_NODE)
         oriented_set = ScOrientedSet(start_element, other_element)

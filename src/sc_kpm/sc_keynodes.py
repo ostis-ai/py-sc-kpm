@@ -4,6 +4,7 @@ Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
 
+import warnings
 from logging import Logger, getLogger
 from typing import Dict, Optional
 
@@ -37,10 +38,17 @@ class ScKeynodesMeta(type):
         return addr
 
     def erase(cls, identifier: Idtf) -> bool:
-        """Delete keynode from the kb and memory and return boolean status"""
+        """Erase keynode from the kb and memory and return boolean status"""
         addr = cls.__getitem__(identifier)  # pylint: disable=no-value-for-parameter
         del cls._dict[identifier]
         return erase_elements(addr)
+
+    def delete(cls, identifier: Idtf) -> bool:
+        warnings.warn(
+            "ScKeynodesMeta 'delete' method is deprecated. Use `erase` method instead.",
+            DeprecationWarning,
+        )
+        return cls.erase(identifier)
 
     def get(cls, identifier: Idtf) -> ScAddr:
         """Get keynode, can be ScAddr(0)"""
@@ -54,7 +62,12 @@ class ScKeynodesMeta(type):
             addr = client.resolve_keynodes(params)[0]
             if addr.is_valid():
                 cls._dict[identifier] = addr
-            cls._logger.debug("Resolved %s identifier with type %s: %s", repr(identifier), repr(sc_type), repr(addr))
+            cls._logger.debug(
+                "Resolved %s identifier with type %s: %s",
+                repr(identifier),
+                repr(sc_type),
+                repr(addr),
+            )
         return addr
 
     def rrel_index(cls, index: int) -> ScAddr:

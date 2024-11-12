@@ -10,7 +10,7 @@ class ScStructure(ScSet):
     """
     ScStructure is a class for handling structure construction in kb.
 
-    It has main set_node with type CONST_NODE_STRUCTURE and connector elements.
+    It has main set_node with type CONST_NODE_STRUCTURE and arc elements.
     """
 
     def __init__(self, *elements: ScAddr, set_node: ScAddr = None, set_node_type: ScType = None) -> None:
