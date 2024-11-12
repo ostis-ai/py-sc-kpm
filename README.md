@@ -78,12 +78,9 @@ class ScAgentClassicTest(ScAgentClassic):
 
 For the ScAgent initialization you should define the sc-element and the type of the ScEvent.
 
-For the ScAgentClassic initialization
-you should define the identifier of the action class node and arguments of the ScAgent.
-`event_class` is set to the `action_initiated` keynode by default.
-`event_type` is set to the `ScEventType.AFTER_GENERATE_OUTGOING_ARC` type by default.
+For the ScAgentClassic initialization you should define the identifier of the action class node and arguments of the ScAgent. `subscription_element` is set to the `action_initiated` keynode by default. `event_class` is set to the `ScEventType.AFTER_GENERATE_OUTGOING_ARC` type by default.
 
-**ClassicScAgent checks its action element automatically and doesn't run `on_event` method if checking fails.**
+**ScAgentClassic checks its action element automatically and doesn't run `on_event` method if checking fails.**
 
 ```python
 from sc_client.constants import sc_type
@@ -94,7 +91,7 @@ action_class = ScKeynodes.resolve("test_class", sc_type.CONST_NODE_CLASS)
 agent = ScAgentTest(action_class, ScEventType.AFTER_GENERATE_OUTGOING_ARC)
 
 classic_agent = ScAgentClassicTest("classic_test_class")
-classic_agent_ingoing = ScAgentClassicTest("classic_test_class", ScEventType.AFTER_GENERATE_INCOMING_ARC)
+classic_agent_incoming = ScAgentClassicTest("classic_test_class", ScEventType.AFTER_GENERATE_INCOMING_ARC)
 ```
 
 ### ScModule
@@ -376,7 +373,7 @@ assert numbered_set.elements_list == elements
 ![numbered_set_example](docs/schemes/png/numbered_set.png)
 
 Class for handling sc-numbered-set construction.
-Set-node is connectord with numerating each element with rrel node.
+Set-node is set with numerating each element with rrel node.
 Easy access to elements by index (index i is marked with rrel(i + 1))
 
 ```python
@@ -462,14 +459,14 @@ For generating links with string type content (by default) use these functions:
 def generate_link(
         content: Union[str, int],
         content_type: ScLinkContentType = ScLinkContentType.STRING,
-        link_type: ScType = sc_type.LINK_CONST
+        link_type: ScType = sc_type.CONST_NODE_LINK
 ) -> ScAddr: ...
 
 
 def generate_links(
         *contents: Union[str, int],
         content_type: ScLinkContentType = ScLinkContentType.STRING,
-        link_type: ScType = sc_type.LINK_CONST,
+        link_type: ScType = sc_type.CONST_NODE_LINK,
 ) -> List[ScAddr]: ...
 ```
 
@@ -482,7 +479,7 @@ from sc_kpm.utils import generate_link, generate_links
 
 msg = generate_link("hello")  # ScAddr(...)
 four = generate_link(4, ScLinkContentType.INT)  # ScAddr(...)
-water = generate_link("water", link_type=sc_type.LINK_VAR)  # ScAddr(...)
+water = generate_link("water", link_type=sc_type.VAR_NODE_LINK)  # ScAddr(...)
 names = generate_links("Sam", "Pit")  # [ScAddr(...), ScAddr(...)]
 ```
 
@@ -500,6 +497,8 @@ def generate_role_relation(src: ScAddr, trg: ScAddr, *rrel_nodes: ScAddr) -> ScA
 def generate_non_role_relation(src: ScAddr, trg: ScAddr, *nrel_nodes: ScAddr) -> ScAddr: ...
 ```
 
+These methods return ScAddr of sc-arc generated between `src` and `trg` sc-elements. 
+
 ```python
 from sc_client.constants import sc_type
 from sc_kpm import ScKeynodes
@@ -514,9 +513,9 @@ rrel = generate_role_relation(src, trg, ScKeynodes.rrel_index(1))  # ScAddr(...)
 nrel = generate_non_role_relation(src, trg, generate_node(sc_type.CONST_NODE_NON_ROLE))  # ScAddr(...)
 ```
 
-### Deleting utils
+### Erasing utils
 
-If you want to remove all connectors between two nodes, which define by their type use
+If you want to erase all connectors between two elements, which define by their type use
 
 ```python
 def erase_connectors(source: ScAddr, target: ScAddr, *connector_types: ScType) -> bool: ...
@@ -536,7 +535,7 @@ erase_connectors(src, trg, sc_type.CONST_PERM_POS_ARC)  # True
 
 ### Getting connectors
 
-For getting connector or connectors between two nodes use:
+For getting connector or connectors between two elements use:
 
 ```python
 def get_connector(source: ScAddr, target: ScAddr, connector_type: ScType) -> ScAddr: ...
@@ -570,7 +569,7 @@ Get target element by source element and relation:
 def get_element_by_role_relation(src: ScAddr, rrel_node: ScAddr) -> ScAddr: ...
 
 
-def get_element_by_non_role_relation(src: ScAddr, nrel_node: ScAddr) -> ScAddr: ...
+def search_element_by_non_role_relation(src: ScAddr, nrel_node: ScAddr) -> ScAddr: ...
 ```
 
 ```python
@@ -578,7 +577,7 @@ from sc_client.constants import sc_type
 from sc_kpm import ScKeynodes
 from sc_kpm.identifiers import CommonIdentifiers
 from sc_kpm.utils import generate_nodes, generate_role_relation, generate_non_role_relation
-from sc_kpm.utils import get_element_by_role_relation, get_element_by_non_role_relation
+from sc_kpm.utils import get_element_by_role_relation, search_element_by_non_role_relation
 
 src, trg_rrel, trg_nrel = generate_nodes(*[sc_type.CONST_NODE] * 3)
 rrel = generate_role_relation(src, trg_rrel, ScKeynodes.rrel_index(1))  # ScAddr(...)
@@ -586,7 +585,7 @@ nrel = generate_non_role_relation(src, trg_nrel, ScKeynodes[CommonIdentifiers.NR
 
 result_rrel = get_element_by_role_relation(src, ScKeynodes.rrel_index(1))  # ScAddr(...)
 assert result_rrel == trg_rrel
-result_nrel = get_element_by_non_role_relation(src, ScKeynodes[CommonIdentifiers.NREL_SYSTEM_IDENTIFIER])  # ScAddr(...)
+result_nrel = search_element_by_non_role_relation(src, ScKeynodes[CommonIdentifiers.NREL_SYSTEM_IDENTIFIER])  # ScAddr(...)
 assert result_nrel == trg_nrel
 ```
 
@@ -608,7 +607,7 @@ content = get_link_content_data(water)  # "water"
 
 ### Getting element system identifier
 
-For getting element system identifier of keynode use:
+For getting system identifier of keynode use:
 
 ```python
 def get_element_system_identifier(addr: ScAddr) -> str: ...
@@ -617,12 +616,9 @@ def get_element_system_identifier(addr: ScAddr) -> str: ...
 ```python
 from sc_client.constants import sc_type
 from sc_kpm import ScKeynodes
-from sc_kpm.utils import generate_node
 from sc_kpm.utils import get_element_system_identifier
 
-lang_en = generate_node(sc_type.CONST_NODE_CLASS)  # ScAddr(...)
 idtf = get_element_system_identifier(lang_en)  # "lang_en"
-assert ScKeynodes[idtf] == lang_en
 ```
 
 ## Action utils
@@ -713,8 +709,8 @@ from sc_kpm.utils import generate_node
 from sc_kpm.utils.action_utils import generate_action_result, get_action_result
 from sc_kpm.sc_sets import ScStructure
 
-action_node = generate_node(sc_type.CONST_NODE_STRUCTURE)
-result_element = generate_node(sc_type.CONST_NODE_STRUCTURE)
+action_node = generate_node(sc_type.CONST_NODE)
+result_element = generate_node(sc_type.CONST_NODE)
 generate_action_result(action_node, result_element)
 result = get_action_result(action_node)
 result_elements = ScStructure(result).elements_set
@@ -734,7 +730,7 @@ def call_agent(
 ) -> ScAddr: ...
 ```
 
-Agent wait function: Waits for generation of arc to reaction node for some seconds.
+Agent wait function: Waits for generation of arc from reaction node for some seconds.
 Default reaction_node is `action_finished`.
 
 ```python

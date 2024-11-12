@@ -13,18 +13,18 @@ class ScSet:
     """
     ScSet is a class for handling set construction in kb.
 
-    It has main set_node and arc elements.
+    It has main set_node and elements.
     """
 
     def __init__(self, *elements: ScAddr, set_node: ScAddr = None, set_node_type: ScType = None) -> None:
         """
         Initialize ScSet.
 
-        Receive or create set_node and add elements.
+        Receive or generate set_node and add elements.
 
         :param elements: Elements of a set to initialize it.
-        :param set_node: Set node has connectors to each element.
-        Optional parameter: it will be created if it doesn't exist.
+        :param set_node: Set node has arcs to each element.
+        Optional parameter: it will be generated if it doesn't exist.
         :param set_node_type: ScType for creating set node.
         """
 
@@ -79,7 +79,7 @@ class ScSet:
         return element in self.elements_set
 
     def remove(self, *elements: ScAddr) -> None:
-        """Remove the connections between set_node and elements"""
+        """Erase the connections between set_node and elements"""
         templ = ScTemplate()
         for element in elements:
             templ.triple(self._set_node, sc_type.VAR_PERM_POS_ARC, element)

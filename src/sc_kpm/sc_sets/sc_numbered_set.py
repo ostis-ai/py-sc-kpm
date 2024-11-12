@@ -13,7 +13,7 @@ class ScNumberedSet(ScSet):
     ScNumberedSet is a class for handling numbered set structure in kb.
 
     It has main set_node and arc elements:
-    Edge to each element marked with 'rrel_1', 'rrel_2', and so on nodes.
+    Arcs to each element marked with 'rrel_1', 'rrel_2', and so on nodes.
     """
 
     def add(self, *elements: ScAddr) -> None:

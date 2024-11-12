@@ -14,8 +14,8 @@ class TestActionUtils(BaseTestCase):
         contents = [content1, content2]
         data = [content1_data, content2_data]
         construction = ScConstruction()
-        construction.generate_link(sc_type.LINK_CONST, content1)
-        construction.generate_link(sc_type.LINK_CONST, content2)
+        construction.generate_link(sc_type.CONST_NODE_LINK, content1)
+        construction.generate_link(sc_type.CONST_NODE_LINK, content2)
         links = generate_elements(construction)
         links_data_from_iterator = list(iter_link_contents_data(contents))
         self.assertEqual(links_data_from_iterator, data)

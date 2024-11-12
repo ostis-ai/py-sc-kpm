@@ -10,7 +10,7 @@ from typing import Dict, List, Tuple, Union
 
 from sc_client import client
 from sc_client.client import create_elementary_event_subscriptions, destroy_elementary_event_subscriptions
-from sc_client.constants import sc_types
+from sc_client.constants import sc_type
 from sc_client.constants.common import ScEventType
 from sc_client.models import ScAddr, ScConstruction, ScEventSubscriptionParams, ScTemplate
 
@@ -163,7 +163,7 @@ def wait_agent(seconds: float, action_node: ScAddr, reaction_node: ScAddr = None
         finish_event.set()
         return ScResult.OK
 
-    event_params = ScEventSubscriptionParams(action_node, ScEventType.ADD_INGOING_EDGE, event_callback)
+    event_params = ScEventSubscriptionParams(action_node, ScEventType.AFTER_GENERATE_INCOMING_ARC, event_callback)
     sc_event = create_elementary_event_subscriptions(event_params)[0]
     if not check_connector(sc_type.VAR_PERM_POS_ARC, reaction_node, action_node):
         finish_event.wait(seconds)

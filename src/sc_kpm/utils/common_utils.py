@@ -205,7 +205,7 @@ def get_element_system_identifier(addr: ScAddr) -> Idtf:
     templ.quintuple(
         addr,
         sc_type.VAR_COMMON_ARC,
-        sc_type.LINK_VAR >> ScAlias.LINK,
+        sc_type.VAR_NODE_LINK >> ScAlias.LINK,
         sc_type.VAR_PERM_POS_ARC,
         nrel_system_idtf,
     )
@@ -257,17 +257,17 @@ def get_element_by_role_relation(src: ScAddr, rrel_node: ScAddr) -> ScAddr:
     return search_result.get(ScAlias.ELEMENT) if search_result else ScAddr(0)
 
 
-def get_element_by_non_role_relation(src: ScAddr, nrel_node: ScAddr) -> ScAddr:
+def search_element_by_non_role_relation(src: ScAddr, nrel_node: ScAddr) -> ScAddr:
     search_result = search_non_role_relation_template(src, nrel_node)
     return search_result.get(ScAlias.ELEMENT) if search_result else ScAddr(0)
 
 
 def get_element_by_norole_relation(src: ScAddr, nrel_node: ScAddr) -> ScAddr:
     warnings.warn(
-        "Common utils 'get_element_by_norole_relation' method is deprecated. Use `get_element_by_non_role_relation` method instead.",
+        "Common utils 'get_element_by_norole_relation' method is deprecated. Use `search_element_by_non_role_relation` method instead.",
         DeprecationWarning,
     )
-    return get_element_by_non_role_relation(src, nrel_node)
+    return search_element_by_non_role_relation(src, nrel_node)
 
 
 def get_link_content_data(link: ScAddr) -> ScLinkContentData:

@@ -40,7 +40,7 @@ class ScModuleTest(ScModule):
     def __init__(self):
         super().__init__(
             ScAgentTest(test_node_idtf, ScEventType.AFTER_GENERATE_OUTGOING_ARC),
-            ScAgentTest(test_node_idtf, ScEventType.ADD_INGOING_EDGE),
+            ScAgentTest(test_node_idtf, ScEventType.AFTER_GENERATE_INCOMING_ARC),
         )
 
 

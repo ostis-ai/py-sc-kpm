@@ -12,7 +12,7 @@ from sc_client import client
 from sc_client.constants import sc_type
 from sc_client.constants.common import ScEventType
 from sc_client.constants.exceptions import InvalidValueError
-from sc_client.models import ScAddr, ScEvent, ScEventSubscriptionParams
+from sc_client.models import ScAddr, ScEventSubscription, ScEventSubscriptionParams
 
 from sc_kpm.identifiers import ActionStatus
 from sc_kpm.sc_keynodes import Idtf, ScKeynodes
@@ -24,7 +24,7 @@ class ScAgentAbstract(ABC):
     def __init__(self, event_element: ScAddr, event_type: ScEventType) -> None:
         self._event_element = event_element
         self._event_type = event_type
-        self._event: Optional[ScEvent] = None
+        self._event: Optional[ScEventSubscription] = None
         self.logger = getLogger(f"{self.__module__}.{self.__class__.__name__}")
 
     @abstractmethod

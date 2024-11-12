@@ -23,7 +23,7 @@ from sc_kpm.utils.common_utils import (
     erase_connectors,
     get_connector,
     get_connectors,
-    get_element_by_non_role_relation,
+    search_element_by_non_role_relation,
     get_element_by_role_relation,
     get_link_content_data,
     get_element_system_identifier,
@@ -119,8 +119,8 @@ class TestActionUtils(BaseTestCase):
         assert expected_rrel_target.value == rrel_trg.value
         assert expected_empty.is_valid() is False
 
-        expected_nrel_target = get_element_by_non_role_relation(src, nrel_node)
-        expected_empty = get_element_by_non_role_relation(src, rrel_node)
+        expected_nrel_target = search_element_by_non_role_relation(src, nrel_node)
+        expected_empty = search_element_by_non_role_relation(src, rrel_node)
         assert expected_nrel_target.is_valid()
         assert expected_nrel_target.value == nrel_trg.value
         assert expected_empty.is_valid() is False
