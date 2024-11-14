@@ -276,7 +276,7 @@ def get_link_content_data(link: ScAddr) -> ScLinkContentData:
 
 
 def erase_connectors(source: ScAddr, target: ScAddr, *connector_types: ScType) -> bool:
-    return client.erase(*get_connectors(source, target, *connector_types))
+    return client.erase_elements(*get_connectors(source, target, *connector_types))
 
 
 def delete_edges(source: ScAddr, target: ScAddr, *connector_types: ScType) -> bool:

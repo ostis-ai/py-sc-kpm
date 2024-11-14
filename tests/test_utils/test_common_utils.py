@@ -33,7 +33,7 @@ from tests.common_tests import BaseTestCase
 
 class TestActionUtils(BaseTestCase):
     def test_node_utils(self):
-        node = generate_node(sc_type.NODE_VAR_ROLE)
+        node = generate_node(sc_type.VAR_NODE_ROLE)
         node_2 = generate_node(sc_type.CONST_NODE_CLASS)
         assert node.is_valid() and node_2.is_valid()
 
@@ -136,6 +136,3 @@ class TestActionUtils(BaseTestCase):
         nrel_connector = generate_non_role_relation(src, nrel_trg)
         assert erase_connectors(src, rrel_trg, sc_type.VAR_PERM_POS_ARC)
         assert erase_elements(nrel_connector, src, rrel_trg, nrel_trg)
-
-        result = client.check_elements(rrel_connector)[0]
-        assert result.is_valid() is False

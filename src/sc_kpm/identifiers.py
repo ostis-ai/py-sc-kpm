@@ -70,7 +70,7 @@ class _IdentifiersResolver:
             ActionStatus.ACTION_FINISHED_UNSUCCESSFULLY: sc_type.CONST_NODE_CLASS,
         }
 
-        for idtf, sc_type in types_map.items():
-            ScKeynodes.resolve(idtf, sc_type)
+        for idtf, type_value in types_map.items():
+            ScKeynodes.resolve(idtf, type_value)
 
         cls.is_resolved = True

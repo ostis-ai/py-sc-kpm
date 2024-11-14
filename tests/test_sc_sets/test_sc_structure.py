@@ -23,8 +23,8 @@ class ScStructureTestCase(BaseTestCase):
         self.assertTrue(check_elements(struct.set_node)[0] == sc_type.CONST_NODE_STRUCTURE)
 
     def test_generate_valid_type(self):
-        node_var_struct = generate_node(sc_type.NODE_VAR_STRUCT)
-        self.assertIsNotNone(ScStructure(set_node_type=sc_type.NODE_VAR_STRUCT))
+        node_var_struct = generate_node(sc_type.VAR_NODE_STRUCTURE)
+        self.assertIsNotNone(ScStructure(set_node_type=sc_type.VAR_NODE_STRUCTURE))
         self.assertIsNotNone(ScStructure(set_node=node_var_struct))
 
     def test_generate_wrong_type(self):
