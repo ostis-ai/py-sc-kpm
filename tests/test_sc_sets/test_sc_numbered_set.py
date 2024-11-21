@@ -4,7 +4,7 @@ Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
 
-from sc_client.client import check_elements, search_by_template
+from sc_client.client import get_elements_types, search_by_template
 from sc_client.constants import sc_type
 from sc_client.models import ScAddr, ScTemplate
 
@@ -32,7 +32,7 @@ class ScNumberedSetTestCase(BaseTestCase):
         element1 = generate_node(sc_type.CONST_NODE)
         element2 = generate_node(sc_type.CONST_NODE)
         sc_set = ScNumberedSet(element1, element2, set_node_type=sc_type.CONST_NODE_STRUCTURE)
-        self.assertEqual(check_elements(sc_set.set_node)[0], sc_type.CONST_NODE_STRUCTURE)
+        self.assertEqual(get_elements_types(sc_set.set_node)[0], sc_type.CONST_NODE_STRUCTURE)
         self._assert_two_elements_num_set_template(sc_set.set_node, element1, element2)
 
     def test_generate_large(self):

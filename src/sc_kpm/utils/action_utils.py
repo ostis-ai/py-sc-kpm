@@ -24,7 +24,7 @@ from sc_kpm.utils.common_utils import (
     generate_node,
     generate_non_role_relation,
     generate_role_relation,
-    get_element_by_role_relation,
+    search_element_by_role_relation,
 )
 
 COMMON_WAIT_TIME: float = 5
@@ -42,7 +42,7 @@ def check_action_class(action_class: Union[ScAddr, Idtf], action_node: ScAddr) -
 def get_action_arguments(action_node: ScAddr, count: int) -> List[ScAddr]:
     arguments = []
     for index in range(1, count + 1):
-        argument = get_element_by_role_relation(action_node, ScKeynodes.rrel_index(index))
+        argument = search_element_by_role_relation(action_node, ScKeynodes.rrel_index(index))
         arguments.append(argument)
     return arguments
 

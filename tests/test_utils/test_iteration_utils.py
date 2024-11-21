@@ -1,5 +1,5 @@
 from common_tests import BaseTestCase
-from sc_client.client import generate_elements, erase_elements
+from sc_client.client import erase_elements, generate_elements
 from sc_client.constants import sc_type
 from sc_client.models import ScConstruction, ScLinkContent, ScLinkContentType
 
@@ -7,7 +7,7 @@ from sc_kpm.utils import generate_links
 from sc_kpm.utils.iteration_utils import iter_link_contents_data, iter_links_data
 
 
-class TestActionUtils(BaseTestCase):
+class TestIterationUtils(BaseTestCase):
     def test_iter_link_contents_data(self):
         content1 = ScLinkContent(content1_data := "content1", ScLinkContentType.STRING)
         content2 = ScLinkContent(content2_data := "content2", ScLinkContentType.STRING)

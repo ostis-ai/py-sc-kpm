@@ -1,6 +1,6 @@
 from common_tests import BaseTestCase
 from sc_client import client
-from sc_client.client import check_elements, erase_elements
+from sc_client.client import erase_elements, get_elements_types
 from sc_client.constants import sc_type
 from sc_client.constants.exceptions import InvalidValueError
 from sc_client.models import ScAddr, ScIdtfResolveParams
@@ -40,10 +40,13 @@ class KeynodesTests(BaseTestCase):
     def test_rrel(self):
         rrel_1 = ScKeynodes.rrel_index(1)
         self.assertTrue(rrel_1.is_valid())
-        self.assertTrue(check_elements(rrel_1)[0].is_role())
+        self.assertTrue(get_elements_types(rrel_1)[0].is_role())
 
-    def test_large_rrel(self):
+    def test_max_rrel(self):
         self.assertRaises(KeyError, ScKeynodes.rrel_index, ScKeynodes._max_rrel_index + 1)
+
+    def test_min_rrel(self):
+        self.assertRaises(KeyError, ScKeynodes.rrel_index, ScKeynodes._min_rrel_index - 1)
 
     def test_wrong_rrel(self):
         self.assertRaises(TypeError, ScKeynodes.rrel_index, "str")

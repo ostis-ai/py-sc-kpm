@@ -10,17 +10,17 @@ from sc_client.constants import sc_type
 from sc_client.constants.common import ScEventType
 
 from sc_kpm import ScAgent, ScKeynodes, ScModule
-from sc_kpm.identifiers import CommonIdentifiers, ActionStatus
+from sc_kpm.identifiers import ActionStatus, CommonIdentifiers
 from sc_kpm.sc_result import ScResult
 from sc_kpm.utils.action_utils import (
     add_action_arguments,
     call_action,
     call_agent,
     check_action_class,
-    generate_action,
     execute_action,
     execute_agent,
     finish_action_with_status,
+    generate_action,
     wait_agent,
 )
 from sc_kpm.utils.common_utils import check_connector, generate_connector, generate_node

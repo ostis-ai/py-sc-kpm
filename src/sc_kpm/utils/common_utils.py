@@ -65,7 +65,7 @@ def create_links(
         "Common utils 'create_links' method is deprecated. Use `generate_links` method instead.",
         DeprecationWarning,
     )
-    return generate_links(*contents, content_type, link_type)
+    return generate_links(*contents, content_type=content_type, link_type=link_type)
 
 
 def generate_link(
@@ -85,7 +85,7 @@ def create_link(
         "Common utils 'create_link' method is deprecated. Use `generate_link` method instead.",
         DeprecationWarning,
     )
-    return generate_link(content, content_type=content_type, link_type=link_type)[0]
+    return generate_link(content, content_type=content_type, link_type=link_type)
 
 
 def generate_connector(connector_type: ScType, src: ScAddr, trg: ScAddr) -> ScAddr:
@@ -156,7 +156,7 @@ def create_norole_relation(src: ScAddr, trg: ScAddr, *nrel_nodes: ScAddr) -> ScA
 
 
 def check_connector(connector_type: ScType, source: ScAddr, target: ScAddr) -> bool:
-    return bool(get_connectors(source, target, connector_type))
+    return bool(search_connectors(source, target, connector_type))
 
 
 def check_edge(connector_type: ScType, source: ScAddr, target: ScAddr) -> bool:
@@ -167,20 +167,20 @@ def check_edge(connector_type: ScType, source: ScAddr, target: ScAddr) -> bool:
     return check_connector(connector_type, source, target)
 
 
-def get_connector(source: ScAddr, target: ScAddr, connector_type: ScType) -> ScAddr:
-    connectors = get_connectors(source, target, connector_type)
+def search_connector(source: ScAddr, target: ScAddr, connector_type: ScType) -> ScAddr:
+    connectors = search_connectors(source, target, connector_type)
     return connectors[0] if connectors else ScAddr(0)
 
 
 def get_edge(source: ScAddr, target: ScAddr, connector_type: ScType) -> ScAddr:
     warnings.warn(
-        "Common utils 'get_edge' method is deprecated. Use `get_connector` method instead.",
+        "Common utils 'get_edge' method is deprecated. Use `search_connector` method instead.",
         DeprecationWarning,
     )
-    return get_connector(source, target, connector_type)
+    return search_connector(source, target, connector_type)
 
 
-def get_connectors(source: ScAddr, target: ScAddr, *connector_types: ScType) -> List[ScAddr]:
+def search_connectors(source: ScAddr, target: ScAddr, *connector_types: ScType) -> List[ScAddr]:
     result_connectors = []
     for connector_type in connector_types:
         templ = ScTemplate()
@@ -192,10 +192,10 @@ def get_connectors(source: ScAddr, target: ScAddr, *connector_types: ScType) -> 
 
 def get_edges(source: ScAddr, target: ScAddr, *connector_types: ScType) -> List[ScAddr]:
     warnings.warn(
-        "Common utils 'get_edges' method is deprecated. Use `get_connectors` method instead.",
+        "Common utils 'get_edges' method is deprecated. Use `search_connectors` method instead.",
         DeprecationWarning,
     )
-    return get_connectors(source, target, *connector_types)
+    return search_connectors(source, target, *connector_types)
 
 
 def get_element_system_identifier(addr: ScAddr) -> Idtf:
@@ -227,7 +227,7 @@ def _search_relation_template(src: ScAddr, rel_node: ScAddr, rel_type: ScType) -
     template = ScTemplate()
     template.quintuple(
         src,
-        rel_type >> ScAlias.MEMBERSHIP_ARC,
+        rel_type >> ScAlias.RELATION_ARC,
         sc_type.UNKNOWN >> ScAlias.ELEMENT,
         sc_type.VAR_PERM_POS_ARC,
         rel_node,
@@ -252,9 +252,17 @@ def search_norole_relation_template(src: ScAddr, nrel_node: ScAddr) -> Optional[
     return search_non_role_relation_template(src, nrel_node)
 
 
-def get_element_by_role_relation(src: ScAddr, rrel_node: ScAddr) -> ScAddr:
+def search_element_by_role_relation(src: ScAddr, rrel_node: ScAddr) -> ScAddr:
     search_result = search_role_relation_template(src, rrel_node)
     return search_result.get(ScAlias.ELEMENT) if search_result else ScAddr(0)
+
+
+def get_element_by_role_relation(src: ScAddr, rrel_node: ScAddr) -> ScAddr:
+    warnings.warn(
+        "Common utils 'get_element_by_role_relation' method is deprecated. Use `search_element_by_role_relation` method instead.",
+        DeprecationWarning,
+    )
+    return search_element_by_role_relation(src, rrel_node)
 
 
 def search_element_by_non_role_relation(src: ScAddr, nrel_node: ScAddr) -> ScAddr:
@@ -276,7 +284,7 @@ def get_link_content_data(link: ScAddr) -> ScLinkContentData:
 
 
 def erase_connectors(source: ScAddr, target: ScAddr, *connector_types: ScType) -> bool:
-    return client.erase_elements(*get_connectors(source, target, *connector_types))
+    return client.erase_elements(*search_connectors(source, target, *connector_types))
 
 
 def delete_edges(source: ScAddr, target: ScAddr, *connector_types: ScType) -> bool:

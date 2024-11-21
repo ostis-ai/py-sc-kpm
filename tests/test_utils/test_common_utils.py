@@ -4,13 +4,15 @@ Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
 
+import pytest
 from sc_client import client
 from sc_client.client import erase_elements
-from sc_client.constants import sc_type
+from sc_client.constants import exceptions, sc_type
 
 from sc_kpm import ScKeynodes
 from sc_kpm.utils.common_utils import (
     check_connector,
+    erase_connectors,
     generate_binary_relation,
     generate_connector,
     generate_connectors,
@@ -20,24 +22,23 @@ from sc_kpm.utils.common_utils import (
     generate_nodes,
     generate_non_role_relation,
     generate_role_relation,
-    erase_connectors,
-    get_connector,
-    get_connectors,
-    search_element_by_non_role_relation,
-    get_element_by_role_relation,
-    get_link_content_data,
     get_element_system_identifier,
+    get_link_content_data,
+    search_connector,
+    search_connectors,
+    search_element_by_non_role_relation,
+    search_element_by_role_relation,
 )
 from tests.common_tests import BaseTestCase
 
 
-class TestActionUtils(BaseTestCase):
+class TestCommonUtils(BaseTestCase):
     def test_node_utils(self):
         node = generate_node(sc_type.VAR_NODE_ROLE)
         node_2 = generate_node(sc_type.CONST_NODE_CLASS)
         assert node.is_valid() and node_2.is_valid()
 
-        result = client.check_elements(node, node_2)
+        result = client.get_elements_types(node, node_2)
         assert len(result) == 2
         assert result[0].is_node() and result[0].is_var() and result[0].is_role()
         assert result[1].is_node() and result[1].is_const() and result[1].is_class()
@@ -47,7 +48,7 @@ class TestActionUtils(BaseTestCase):
         for node in node_list:
             assert node.is_valid()
 
-        result = client.check_elements(*node_list)
+        result = client.get_elements_types(*node_list)
         assert len(result) == nodes_counter
         for result_item in result:
             assert result_item.is_node() and result_item.is_const()
@@ -64,32 +65,32 @@ class TestActionUtils(BaseTestCase):
         for link in link_list:
             assert link.is_valid()
 
-        result = client.check_elements(*link_list)
+        result = client.get_elements_types(*link_list)
         for result_item in result:
             assert result_item.is_valid() and result_item.is_link()
 
     def test_connector_utils(self):
         source, target = generate_nodes(sc_type.CONST_NODE_CLASS, sc_type.CONST_NODE)
-        empty = get_connector(source, target, sc_type.VAR_PERM_POS_ARC)
+        empty = search_connector(source, target, sc_type.VAR_PERM_POS_ARC)
         assert empty.is_valid() is False
 
         connector = generate_connector(sc_type.CONST_PERM_POS_ARC, source, target)
         assert connector.is_valid()
-        same_connector = get_connector(source, target, sc_type.VAR_PERM_POS_ARC)
+        same_connector = search_connector(source, target, sc_type.VAR_PERM_POS_ARC)
         assert same_connector.is_valid() and same_connector.value == connector.value
         assert check_connector(sc_type.VAR_PERM_POS_ARC, source, target)
 
         source, target, target2 = generate_nodes(sc_type.CONST_NODE_CLASS, sc_type.CONST_NODE, sc_type.CONST_NODE)
         connectors = generate_connectors(sc_type.CONST_PERM_POS_ARC, source, target, target2)
         assert all(connector_.is_valid() for connector_ in connectors)
-        same_target1 = get_connector(source, target, sc_type.VAR_PERM_POS_ARC)
-        same_target2 = get_connector(source, target2, sc_type.VAR_PERM_POS_ARC)
+        same_target1 = search_connector(source, target, sc_type.VAR_PERM_POS_ARC)
+        same_target2 = search_connector(source, target2, sc_type.VAR_PERM_POS_ARC)
         assert connectors == [same_target1, same_target2]
 
         connector_counter = 10
         for _ in range(connector_counter):
             generate_connector(sc_type.CONST_PERM_POS_ARC, source, target)
-        result = get_connectors(source, target, sc_type.VAR_PERM_POS_ARC)
+        result = search_connectors(source, target, sc_type.VAR_PERM_POS_ARC)
         assert len(result) == connector_counter + 1
         for connector in result:
             assert connector.is_valid()
@@ -107,14 +108,14 @@ class TestActionUtils(BaseTestCase):
         for connector in connectors:
             assert connector.is_valid()
 
-        result = client.check_elements(*connectors)
+        result = client.get_elements_types(*connectors)
         for result_item in result:
             assert result_item.is_valid() and result_item.is_connector() and result_item.is_const()
         assert result[0].is_pos() and result[1].is_pos()
         assert result[2].is_pos() is False and result[3].is_pos() is False
 
-        expected_rrel_target = get_element_by_role_relation(src, rrel_node)
-        expected_empty = get_element_by_role_relation(src, nrel_node)
+        expected_rrel_target = search_element_by_role_relation(src, rrel_node)
+        expected_empty = search_element_by_role_relation(src, nrel_node)
         assert expected_rrel_target.is_valid()
         assert expected_rrel_target.value == rrel_trg.value
         assert expected_empty.is_valid() is False
@@ -136,3 +137,5 @@ class TestActionUtils(BaseTestCase):
         nrel_connector = generate_non_role_relation(src, nrel_trg)
         assert erase_connectors(src, rrel_trg, sc_type.VAR_PERM_POS_ARC)
         assert erase_elements(nrel_connector, src, rrel_trg, nrel_trg)
+        with pytest.raises(exceptions.ServerError):
+            client.check_elements(rrel_connector)[0]

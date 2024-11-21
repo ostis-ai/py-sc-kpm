@@ -28,8 +28,6 @@ from sc_kpm.utils.common_utils import (
     generate_nodes,
     generate_non_role_relation,
     generate_role_relation,
-    get_connector,
-    get_connectors,
     get_edge,
     get_edges,
     get_element_by_norole_relation,
@@ -37,6 +35,9 @@ from sc_kpm.utils.common_utils import (
     get_element_system_identifier,
     get_link_content_data,
     get_system_idtf,
+    search_connector,
+    search_connectors,
     search_element_by_non_role_relation,
+    search_element_by_role_relation,
     search_role_relation_template,
 )

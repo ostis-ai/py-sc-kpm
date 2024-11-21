@@ -77,7 +77,7 @@ class ScKeynodesMeta(type):
             raise TypeError("Index of rrel node must be int")
         if index > cls._max_rrel_index:
             raise KeyError(f"You cannot use rrel more than {cls._max_rrel_index}")
-        if index < 1:
+        if index < cls._min_rrel_index:
             raise KeyError(f"You cannot use rrel less than {cls._min_rrel_index}")
         return cls.resolve(f"rrel_{index}", CONST_NODE_ROLE)  # pylint: disable=no-value-for-parameter
 

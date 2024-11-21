@@ -25,7 +25,7 @@ class ScSet:
         :param elements: Elements of a set to initialize it.
         :param set_node: Set node has arcs to each element.
         Optional parameter: it will be generated if it doesn't exist.
-        :param set_node_type: ScType for creating set node.
+        :param set_node_type: ScType for generated set node.
         """
 
         if set_node is None:

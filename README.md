@@ -533,15 +533,15 @@ connector = generate_connector(sc_type.CONST_PERM_POS_ARC, src, trg)
 erase_connectors(src, trg, sc_type.CONST_PERM_POS_ARC)  # True
 ```
 
-### Getting connectors
+### Searching connectors
 
 For getting connector or connectors between two elements use:
 
 ```python
-def get_connector(source: ScAddr, target: ScAddr, connector_type: ScType) -> ScAddr: ...
+def search_connector(source: ScAddr, target: ScAddr, connector_type: ScType) -> ScAddr: ...
 
 
-def get_connectors(source: ScAddr, target: ScAddr, *connector_types: ScType) -> List[ScAddr]: ...
+def search_connectors(source: ScAddr, target: ScAddr, *connector_types: ScType) -> List[ScAddr]: ...
 ```
 
 _**NOTE: Use VAR type instead of CONST in getting utils**_
@@ -549,24 +549,24 @@ _**NOTE: Use VAR type instead of CONST in getting utils**_
 ```python
 from sc_client.constants import sc_type
 from sc_kpm.utils import generate_nodes, generate_connector
-from sc_kpm.utils import get_connector, get_connectors
+from sc_kpm.utils import search_connector, search_connectors
 
 src, trg = generate_nodes(*[sc_type.CONST_NODE] * 2)
 connector1 = generate_connector(sc_type.CONST_PERM_POS_ARC, src, trg)
 connector2 = generate_connector(sc_type.CONST_COMMON_ARC, src, trg)
 
-class_connector = get_connector(src, trg, sc_type.VAR_PERM_POS_ARC)  # ScAddr(...)
+class_connector = search_connector(src, trg, sc_type.VAR_PERM_POS_ARC)  # ScAddr(...)
 assert class_connector == connector1
-connectors = get_connectors(src, trg, sc_type.VAR_PERM_POS_ARC, sc_type.VAR_COMMON_ARC)  # [ScAddr(...), ScAddr(...)]
+connectors = search_connectors(src, trg, sc_type.VAR_PERM_POS_ARC, sc_type.VAR_COMMON_ARC)  # [ScAddr(...), ScAddr(...)]
 assert connectors == [connector1, connector2]
 ```
 
-### Getting elements by relation
+### Searching elements by relation
 
-Get target element by source element and relation:
+Search target element by source element and relation:
 
 ```python
-def get_element_by_role_relation(src: ScAddr, rrel_node: ScAddr) -> ScAddr: ...
+def search_element_by_role_relation(src: ScAddr, rrel_node: ScAddr) -> ScAddr: ...
 
 
 def search_element_by_non_role_relation(src: ScAddr, nrel_node: ScAddr) -> ScAddr: ...
@@ -577,13 +577,13 @@ from sc_client.constants import sc_type
 from sc_kpm import ScKeynodes
 from sc_kpm.identifiers import CommonIdentifiers
 from sc_kpm.utils import generate_nodes, generate_role_relation, generate_non_role_relation
-from sc_kpm.utils import get_element_by_role_relation, search_element_by_non_role_relation
+from sc_kpm.utils import search_element_by_role_relation, search_element_by_non_role_relation
 
 src, trg_rrel, trg_nrel = generate_nodes(*[sc_type.CONST_NODE] * 3)
 rrel = generate_role_relation(src, trg_rrel, ScKeynodes.rrel_index(1))  # ScAddr(...)
 nrel = generate_non_role_relation(src, trg_nrel, ScKeynodes[CommonIdentifiers.NREL_SYSTEM_IDENTIFIER])  # ScAddr(...)
 
-result_rrel = get_element_by_role_relation(src, ScKeynodes.rrel_index(1))  # ScAddr(...)
+result_rrel = search_element_by_role_relation(src, ScKeynodes.rrel_index(1))  # ScAddr(...)
 assert result_rrel == trg_rrel
 result_nrel = search_element_by_non_role_relation(src, ScKeynodes[CommonIdentifiers.NREL_SYSTEM_IDENTIFIER])  # ScAddr(...)
 assert result_nrel == trg_nrel
@@ -618,7 +618,7 @@ from sc_client.constants import sc_type
 from sc_kpm import ScKeynodes
 from sc_kpm.utils import get_element_system_identifier
 
-idtf = get_element_system_identifier(lang_en)  # "lang_en"
+idtf = get_element_system_identifier(some_addr)  # "lang_en"
 ```
 
 ## Action utils

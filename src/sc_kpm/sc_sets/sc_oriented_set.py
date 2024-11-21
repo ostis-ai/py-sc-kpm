@@ -38,13 +38,13 @@ class ScOrientedSet(ScSet):
         if not start_template:
             return
         yield start_template.get(ScAlias.ELEMENT)
-        next_arc = start_template.get(ScAlias.MEMBERSHIP_ARC)
+        next_arc = start_template.get(ScAlias.RELATION_ARC)
         while True:
             elem_search_result = self._search_next_element_template(next_arc)
             if elem_search_result is None:
                 return
             yield elem_search_result.get(ScAlias.ELEMENT)
-            next_arc = elem_search_result.get(ScAlias.MEMBERSHIP_ARC)
+            next_arc = elem_search_result.get(ScAlias.RELATION_ARC)
 
     @property
     def elements_list(self) -> List[ScAddr]:
@@ -82,7 +82,7 @@ class ScOrientedSet(ScSet):
         # Search unmarked last arc
         next_elem_result = search_role_relation_template(self._set_node, ScKeynodes[CommonIdentifiers.RREL_ONE])
         while True:
-            next_arc = next_elem_result.get(ScAlias.MEMBERSHIP_ARC)
+            next_arc = next_elem_result.get(ScAlias.RELATION_ARC)
             next_elem_result = self._search_next_element_template(next_arc)
             if next_elem_result is None:
                 return next_arc
@@ -117,10 +117,10 @@ class ScOrientedSet(ScSet):
         templ.quintuple(
             cur_element_arc,
             sc_type.VAR_COMMON_ARC,
-            sc_type.VAR_PERM_POS_ARC >> ScAlias.MEMBERSHIP_ARC,
+            sc_type.VAR_PERM_POS_ARC >> ScAlias.RELATION_ARC,
             sc_type.VAR_PERM_POS_ARC,
             ScKeynodes[CommonIdentifiers.NREL_BASIC_SEQUENCE],
         )
-        templ.triple(self._set_node, ScAlias.MEMBERSHIP_ARC, sc_type.UNKNOWN >> ScAlias.ELEMENT)
+        templ.triple(self._set_node, ScAlias.RELATION_ARC, sc_type.UNKNOWN >> ScAlias.ELEMENT)
         search_results = search_by_template(templ)
         return search_results[0] if search_results else None

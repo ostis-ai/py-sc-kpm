@@ -129,7 +129,7 @@ class CommonTests(BaseTestCase):
         def execute_and_send_sigint():
             self.assertTrue(is_executing_successful())
             os.kill(main_pid, signal.SIGINT)
-            self.assertFalse(is_executing_successful())
+            self.assertRaises(ConnectionAbortedError, is_executing_successful())
 
         with self.server.register_modules():
             thread = threading.Thread(target=execute_and_send_sigint, daemon=True)
