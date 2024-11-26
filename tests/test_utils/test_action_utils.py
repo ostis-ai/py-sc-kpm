@@ -23,7 +23,12 @@ from sc_kpm.utils.action_utils import (
     generate_action,
     wait_agent,
 )
-from sc_kpm.utils.common_utils import check_connector, generate_connector, generate_node
+from sc_kpm.utils.common_utils import (
+    check_connector,
+    generate_connector,
+    generate_node,
+    search_element_by_role_relation,
+)
 from tests.common_tests import BaseTestCase
 
 test_node_idtf = "test_node"
@@ -105,6 +110,46 @@ class TestActionUtils(BaseTestCase):
             add_action_arguments(action_node, {})
             call_action(action_node, test_node_idtf)
             wait_agent(1, action_node, ScKeynodes[ActionStatus.ACTION_FINISHED])
+            result = check_connector(
+                sc_type.VAR_PERM_POS_ARC,
+                ScKeynodes[ActionStatus.ACTION_FINISHED_SUCCESSFULLY],
+                action_node,
+            )
+            self.assertTrue(result)
+        self.server.remove_modules(module)
+
+    def test_call_action_with_arguments(self):
+        module = ScModuleTest()
+        self.server.add_modules(module)
+        with self.server.register_modules():
+            action_node = generate_action()
+            node1 = generate_node(sc_type.CONST_NODE)
+            node2 = generate_node(sc_type.CONST_NODE)
+            add_action_arguments(action_node, {node1: False, node2: False})
+            call_action(action_node, test_node_idtf)
+            wait_agent(1, action_node, ScKeynodes[ActionStatus.ACTION_FINISHED])
+            self.assertEqual(search_element_by_role_relation(action_node, ScKeynodes.rrel_index(1)), node1)
+            self.assertEqual(search_element_by_role_relation(action_node, ScKeynodes.rrel_index(2)), node2)
+            result = check_connector(
+                sc_type.VAR_PERM_POS_ARC,
+                ScKeynodes[ActionStatus.ACTION_FINISHED_SUCCESSFULLY],
+                action_node,
+            )
+            self.assertTrue(result)
+        self.server.remove_modules(module)
+
+    def test_call_action_with_arguments_in_wrong_order(self):
+        module = ScModuleTest()
+        self.server.add_modules(module)
+        with self.server.register_modules():
+            action_node = generate_action()
+            node1 = generate_node(sc_type.CONST_NODE)
+            node2 = generate_node(sc_type.CONST_NODE)
+            add_action_arguments(action_node, {node2: False, node1: False})
+            call_action(action_node, test_node_idtf)
+            wait_agent(1, action_node, ScKeynodes[ActionStatus.ACTION_FINISHED])
+            self.assertEqual(search_element_by_role_relation(action_node, ScKeynodes.rrel_index(1)), node2)
+            self.assertEqual(search_element_by_role_relation(action_node, ScKeynodes.rrel_index(2)), node1)
             result = check_connector(
                 sc_type.VAR_PERM_POS_ARC,
                 ScKeynodes[ActionStatus.ACTION_FINISHED_SUCCESSFULLY],
