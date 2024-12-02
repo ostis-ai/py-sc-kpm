@@ -4,47 +4,47 @@ Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
 
-from sc_client.client import check_elements, template_search
-from sc_client.constants import sc_types
+from sc_client.client import get_elements_types, search_by_template
+from sc_client.constants import sc_type
 from sc_client.models import ScAddr, ScTemplate
 
 from sc_kpm.sc_sets.sc_set import ScSet
-from sc_kpm.utils.common_utils import create_node
+from sc_kpm.utils.common_utils import generate_node
 from tests.common_tests import BaseTestCase
 
 
 class ScSetTestCase(BaseTestCase):
-    def test_create_with_set_node(self):
-        set_node = create_node(sc_types.NODE_CONST)
-        element1 = create_node(sc_types.NODE_CONST)
-        element2 = create_node(sc_types.NODE_CONST)
+    def test_generate_with_set_node(self):
+        set_node = generate_node(sc_type.CONST_NODE)
+        element1 = generate_node(sc_type.CONST_NODE)
+        element2 = generate_node(sc_type.CONST_NODE)
         ScSet(element1, element2, set_node=set_node)
         self._assert_two_elements_set_template(set_node, element1, element2)
 
-    def test_create_without_set_node(self):
-        element1 = create_node(sc_types.NODE_CONST)
-        element2 = create_node(sc_types.NODE_CONST)
+    def test_generate_without_set_node(self):
+        element1 = generate_node(sc_type.CONST_NODE)
+        element2 = generate_node(sc_type.CONST_NODE)
         sc_set = ScSet(element1, element2)
-        self.assertEqual(check_elements(sc_set.set_node)[0], sc_types.NODE_CONST)
+        self.assertEqual(get_elements_types(sc_set.set_node)[0], sc_type.CONST_NODE)
         self._assert_two_elements_set_template(sc_set.set_node, element1, element2)
 
-    def test_create_with_set_type(self):
-        element1 = create_node(sc_types.NODE_CONST)
-        element2 = create_node(sc_types.NODE_CONST)
-        sc_set = ScSet(element1, element2, set_node_type=sc_types.NODE_CONST_STRUCT)
-        self.assertEqual(check_elements(sc_set.set_node)[0], sc_types.NODE_CONST_STRUCT)
+    def test_generate_with_set_type(self):
+        element1 = generate_node(sc_type.CONST_NODE)
+        element2 = generate_node(sc_type.CONST_NODE)
+        sc_set = ScSet(element1, element2, set_node_type=sc_type.CONST_NODE_STRUCTURE)
+        self.assertEqual(get_elements_types(sc_set.set_node)[0], sc_type.CONST_NODE_STRUCTURE)
         self._assert_two_elements_set_template(sc_set.set_node, element1, element2)
 
-    def test_create_copy_set_node(self):
-        element1 = create_node(sc_types.NODE_CONST)
-        element2 = create_node(sc_types.NODE_CONST)
+    def test_generate_copy_set_node(self):
+        element1 = generate_node(sc_type.CONST_NODE)
+        element2 = generate_node(sc_type.CONST_NODE)
         sc_set = ScSet(element1, element2)
         sc_set_copy = ScSet(set_node=sc_set.set_node)
         self.assertEqual(sc_set, sc_set_copy)
         self._assert_two_elements_set_template(sc_set_copy.set_node, element1, element2)
 
     def test_get_elements_set(self):
-        elements = {create_node(sc_types.NODE_CONST), create_node(sc_types.NODE_CONST)}
+        elements = {generate_node(sc_type.CONST_NODE), generate_node(sc_type.CONST_NODE)}
         sc_set = ScSet(*elements)
         self.assertEqual(sc_set.elements_set, elements)
 
@@ -53,29 +53,29 @@ class ScSetTestCase(BaseTestCase):
         self.assertEqual(sc_set.elements_set, set())
 
     def test_iterate(self):
-        elements = {create_node(sc_types.NODE_CONST), create_node(sc_types.NODE_CONST)}
+        elements = {generate_node(sc_type.CONST_NODE), generate_node(sc_type.CONST_NODE)}
         sc_set = ScSet(*elements)
         for set_element in sc_set:
             self.assertIn(set_element, elements)
 
     def test_add(self):
-        element1 = create_node(sc_types.NODE_CONST)
-        element2 = create_node(sc_types.NODE_CONST)
+        element1 = generate_node(sc_type.CONST_NODE)
+        element2 = generate_node(sc_type.CONST_NODE)
         sc_set = ScSet(element1)
         sc_set.add(element2)
-        self.assertEqual(check_elements(sc_set.set_node)[0], sc_types.NODE_CONST)
+        self.assertEqual(get_elements_types(sc_set.set_node)[0], sc_type.CONST_NODE)
         self._assert_two_elements_set_template(sc_set.set_node, element1, element2)
 
     def test_add_element_twice(self):
-        element1 = create_node(sc_types.NODE_CONST)
-        element2 = create_node(sc_types.NODE_CONST)
+        element1 = generate_node(sc_type.CONST_NODE)
+        element2 = generate_node(sc_type.CONST_NODE)
         elements = {element1, element2}
         sc_set = ScSet(*elements)
         sc_set.add(element2)  # element is added second time
         self.assertEqual(sc_set.elements_set, elements)  # element1 will not duplicate
 
     def test_get_power(self):
-        element = create_node(sc_types.NODE_CONST)
+        element = generate_node(sc_type.CONST_NODE)
         sc_set = ScSet()
         self.assertEqual(len(sc_set), 0)
         sc_set.add(element)
@@ -87,7 +87,7 @@ class ScSetTestCase(BaseTestCase):
         self.assertFalse(bool(sc_set))
         self.assertTrue(sc_set.is_empty())
 
-        element = create_node(sc_types.NODE_CONST)
+        element = generate_node(sc_type.CONST_NODE)
         sc_set.add(element)
         self.assertTrue(bool(sc_set))
         self.assertFalse(sc_set.is_empty())
@@ -96,8 +96,8 @@ class ScSetTestCase(BaseTestCase):
         self.assertNotIn(ScAddr(0), sc_set)
 
     def test_remove(self):
-        element = create_node(sc_types.NODE_CONST)
-        element_to_remove = create_node(sc_types.NODE_CONST)
+        element = generate_node(sc_type.CONST_NODE)
+        element_to_remove = generate_node(sc_type.CONST_NODE)
         sc_set = ScSet(element, element_to_remove)
         self.assertEqual(len(sc_set), 2)
         sc_set.remove(element_to_remove)
@@ -105,8 +105,8 @@ class ScSetTestCase(BaseTestCase):
         self.assertEqual(sc_set.elements_set, {element})
 
     def test_clear(self):
-        element1 = create_node(sc_types.NODE_CONST)
-        element2 = create_node(sc_types.NODE_CONST)
+        element1 = generate_node(sc_type.CONST_NODE)
+        element2 = generate_node(sc_type.CONST_NODE)
         sc_set = ScSet(element1, element2)
         self.assertFalse(sc_set.is_empty())
         sc_set.clear()
@@ -116,13 +116,13 @@ class ScSetTestCase(BaseTestCase):
         template = ScTemplate()
         template.triple(
             set_node,
-            sc_types.EDGE_ACCESS_VAR_POS_PERM,
+            sc_type.VAR_PERM_POS_ARC,
             element1,
         )
         template.triple(
             set_node,
-            sc_types.EDGE_ACCESS_VAR_POS_PERM,
+            sc_type.VAR_PERM_POS_ARC,
             element2,
         )
-        results = template_search(template)
+        results = search_by_template(template)
         self.assertEqual(len(results), 1)

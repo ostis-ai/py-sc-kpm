@@ -5,7 +5,7 @@ for [sc-machine](https://github.com/ostis-ai/sc-machine).
 Library provides tools for interacting with knowledge bases.
 Communication with server is implemented in separate library
 named [py-sc-client](https://github.com/ostis-ai/py-sc-client).
-This module is compatible with 0.9.0 version
+This module is compatible with 0.10.0 version
 of [OSTIS Platform](https://github.com/ostis-ai/ostis-web-platform).
 
 # API Reference
@@ -17,7 +17,7 @@ of [OSTIS Platform](https://github.com/ostis-ai/ostis-web-platform).
    + [ScServer](#scserver)
 2. [Utils](#utils)
    + [Common utils](#common-utils)
-   + [Creating utils](#creating-utils)
+   + [Generating utils](#generating-utils)
    + [Retrieve utils](#retrieve-utils)
    + [Action utils](#action-utils)
 3. [Use-cases](#use-cases)
@@ -31,7 +31,7 @@ The library contains the python implementation of useful classes and functions t
 Class which provides the ability to cache the identifier and ScAddr of keynodes stored in the KB.
 
 ```python
-from sc_client.constants import sc_types
+from sc_client.constants import sc_type
 from sc_kpm import ScKeynodes
 
 # Get the provided identifier
@@ -42,11 +42,11 @@ ScKeynodes["not_stored_in_kb"]  # Raises InvalidValueError if an identifier does
 ScKeynodes.get("not_stored_in_kb")  # Returns an invalid ScAddr(0) in the same situation
 
 # Resolve identifier
-ScKeynodes.resolve("my_class_node", sc_types.NODE_CONST_CLASS)  # Returns the element if it exists, otherwise creates
+ScKeynodes.resolve("my_class_node", sc_type.CONST_NODE_CLASS)  # Returns the element if it exists, otherwise generates
 ScKeynodes.resolve("some_node", None)  # Returns the element if it exists, otherwise returns an invalid ScAddr(0)
 
-# Delete identifier
-ScKeynodes.delete("identifier_to_delete")  # Delete keynode from kb and ScKeynodes cache
+# Erase identifier
+ScKeynodes.erase("identifier_to_erase")  # Erase keynode from kb and ScKeynodes cache
 
 # Get rrel node
 ScKeynodes.rrel_index(1)  # Returns valid ScAddr of 'rrel_1'
@@ -64,13 +64,13 @@ from sc_kpm import ScAgent, ScAgentClassic, ScResult
 
 
 class ScAgentTest(ScAgent):
-    def on_event(self, class_node: ScAddr, edge: ScAddr, action_node: ScAddr) -> ScResult:
+    def on_event(self, class_node: ScAddr, connector: ScAddr, action_node: ScAddr) -> ScResult:
         ...
         return ScResult.OK
 
 
 class ScAgentClassicTest(ScAgentClassic):
-    def on_event(self, class_node: ScAddr, edge: ScAddr, action_node: ScAddr) -> ScResult:
+    def on_event(self, class_node: ScAddr, connector: ScAddr, action_node: ScAddr) -> ScResult:
         # ScAgentClassic automatically checks its action
         ...
         return ScResult.OK
@@ -78,23 +78,20 @@ class ScAgentClassicTest(ScAgentClassic):
 
 For the ScAgent initialization you should define the sc-element and the type of the ScEvent.
 
-For the ScAgentClassic initialization
-you should define the identifier of the action class node and arguments of the ScAgent.
-`event_class` is set to the `action_initiated` keynode by default.
-`event_type` is set to the `ScEventType.ADD_OUTGOING_EDGE` type by default.
+For the ScAgentClassic initialization you should define the identifier of the action class node and arguments of the ScAgent. `subscription_element` is set to the `action_initiated` keynode by default. `event_class` is set to the `ScEventType.AFTER_GENERATE_OUTGOING_ARC` type by default.
 
-**ClassicScAgent checks its action element automatically and doesn't run `on_event` method if checking fails.**
+**ScAgentClassic checks its action element automatically and doesn't run `on_event` method if checking fails.**
 
 ```python
-from sc_client.constants import sc_types
+from sc_client.constants import sc_type
 from sc_client.constants.common import ScEventType
 from sc_kpm import ScKeynodes
 
-action_class = ScKeynodes.resolve("test_class", sc_types.NODE_CONST_CLASS)
-agent = ScAgentTest(action_class, ScEventType.ADD_OUTGOING_EDGE)
+action_class = ScKeynodes.resolve("test_class", sc_type.CONST_NODE_CLASS)
+agent = ScAgentTest(action_class, ScEventType.AFTER_GENERATE_OUTGOING_ARC)
 
 classic_agent = ScAgentClassicTest("classic_test_class")
-classic_agent_ingoing = ScAgentClassicTest("classic_test_class", ScEventType.ADD_INGOING_EDGE)
+classic_agent_incoming = ScAgentClassicTest("classic_test_class", ScEventType.AFTER_GENERATE_INCOMING_ARC)
 ```
 
 ### ScModule
@@ -219,7 +216,7 @@ Methods and properties:
 1. *ScSet*(*elements: ScAddr, set_node: ScAddr = None, set_node_type: ScType = None) -> None
 
    Constructor of sc-set receives all elements to add, optional `set_node` and optional `set_node_type`.
-   If you don't specify `set_node`, it will be created with `set_node_type` (default NODE_CONST).
+   If you don't specify `set_node`, it will be generated with `set_node_type` (default CONST_NODE).
 
 2. *ScSet*.**add**(*elements: ScAddr) -> None
 
@@ -269,15 +266,15 @@ Methods and properties:
     *WARNING*: method isn't optimized in ScOrientedSet and ScNumberedSet
 
 ```python
-from sc_client.constants import sc_types
+from sc_client.constants import sc_type
 from sc_client.models import ScAddr
 
 from sc_kpm.sc_sets import ScSet
-from sc_kpm.utils import create_node, create_nodes
+from sc_kpm.utils import generate_node, generate_nodes
 
 # Example elements to add
-example_set_node: ScAddr = create_node(sc_types.NODE_CONST)
-elements: list[ScAddr] = create_nodes(*[sc_types.NODE_CONST] * 5)
+example_set_node: ScAddr = generate_node(sc_type.CONST_NODE)
+elements: list[ScAddr] = generate_nodes(*[sc_type.CONST_NODE] * 5)
 
 # Init sc-set and add elements
 empty_set = ScSet()
@@ -287,7 +284,7 @@ set_with_elements.add(elements[2], elements[3])
 set_with_elements.add(elements[4])
 
 set_with_elements_and_set_node = ScSet(elements[2], set_node=example_set_node)
-empty_set_with_specific_set_node_type = ScSet(set_node_type=sc_types.NODE_VAR)
+empty_set_with_specific_set_node_type = ScSet(set_node_type=sc_type.NODE_VAR)
 
 # Get set node
 set_node = empty_set.set_node
@@ -316,7 +313,7 @@ assert set_with_elements.is_empty()
 
 ##### ScStructure
 
-If `set_node` has type `sc_types.NODE_CONST_STRUCT` construction is called sc-structure
+If `set_node` has type `sc_type.CONST_NODE_STRUCTURE` construction is called sc-structure
 and looks like a loop in SCg:
 
 ![structure](docs/schemes/png/structure.png)
@@ -325,7 +322,7 @@ and looks like a loop in SCg:
 - *sc_kpm*.**ScStructure**
 
 Class for handling structure construction in the kb.
-The same logic as in `ScSet`, but *set_node_type* if set NODE_CONST_STRUCT.
+The same logic as in `ScSet`, but *set_node_type* if set CONST_NODE_STRUCTURE.
 There are checks that set node has struct sc-type:
 
 ```python
@@ -333,8 +330,8 @@ from sc_kpm.sc_sets import ScStructure
 
 sc_struct = ScStructure(..., set_node=..., set_node_type=...)
 
-sc_struct = ScStructure(..., set_node=create_node(sc_types.NODE_CONST))  # InvalidTypeError - not struct type
-sc_struct = ScStructure(..., set_node_type=sc_types.NODE_CONST)  # InvalidTypeError - not struct type
+sc_struct = ScStructure(..., set_node=generate_node(sc_type.CONST_NODE))  # InvalidTypeError - not struct type
+sc_struct = ScStructure(..., set_node_type=sc_type.CONST_NODE)  # InvalidTypeError - not struct type
 ```
 
 #### Ordered sc-sets
@@ -353,18 +350,18 @@ Child classes of ScSet, have the order in iteration and get list elements:
 ![oriented_set_example](docs/schemes/png/oriented_set.png)
 
 Class for handling sc-oriented-set construction.
-Has marked edges between edges from set_node to elements.
+Has marked arcs between arcs from set_node to elements.
 Easy lazy iterating.
 No access by index.
 
 ```python
-from sc_client.constants import sc_types
+from sc_client.constants import sc_type
 
 from sc_kpm.sc_sets import ScOrientedSet
-from sc_kpm.utils import create_nodes
+from sc_kpm.utils import generate_nodes
 
 
-elements = create_nodes(*[sc_types.NODE_CONST] * 5)
+elements = generate_nodes(*[sc_type.CONST_NODE] * 5)
 numbered_set = ScOrientedSet(*elements)
 assert numbered_set.elements_list == elements
 ```
@@ -376,17 +373,17 @@ assert numbered_set.elements_list == elements
 ![numbered_set_example](docs/schemes/png/numbered_set.png)
 
 Class for handling sc-numbered-set construction.
-Set-node is edged with numerating each element with rrel node.
+Set-node is set with numerating each element with rrel node.
 Easy access to elements by index (index i is marked with rrel(i + 1))
 
 ```python
-from sc_client.constants import sc_types
+from sc_client.constants import sc_type
 
 from sc_kpm.sc_sets import ScNumberedSet
-from sc_kpm.utils import create_nodes
+from sc_kpm.utils import generate_nodes
 
 
-elements = create_nodes(*[sc_types.NODE_CONST] * 5)
+elements = generate_nodes(*[sc_type.CONST_NODE] * 5)
 numbered_set = ScNumberedSet(*elements)
 assert numbered_set.elements_list == elements
 assert numbered_set[2] == elements[2]
@@ -395,7 +392,7 @@ numbered_set[5]  # raise KeyError
 
 ## Utils
 
-There are some functions for working with nodes, edges, links: create them, search, get content, delete, etc.
+There are some functions for working with nodes, connectors, links: generate them, search, get content, erase, etc.
 There is also possibility to wrap in set or oriented set.
 
 ## Common utils
@@ -404,189 +401,191 @@ There are utils to work with basic elements
 
 _You can import these utils from `sc_kpm.utils`_
 
-### Nodes creating
+### Nodes generating
 
-If you want to create one or more nodes use these functions with type setting argument:
+If you want to generate one or more nodes use these functions with type setting argument:
 
 ```python
-def create_node(node_type: ScType, sys_idtf: str = None) -> ScAddr: ...
+def generate_node(node_type: ScType, sys_idtf: str = None) -> ScAddr: ...
 
 
-def create_nodes(*node_types: ScType) -> List[ScAddr]: ...
+def generate_nodes(*node_types: ScType) -> List[ScAddr]: ...
 ```
 
 `sys_idtf` is optional name of keynode if you want to add it there.
 
 ```python
-from sc_client.constants import sc_types
+from sc_client.constants import sc_type
 from sc_kpm import ScKeynodes
-from sc_kpm.utils.common_utils import create_node, create_nodes
+from sc_kpm.utils.common_utils import generate_node, generate_nodes
 
-lang = create_node(sc_types.NODE_CONST_CLASS)  # ScAddr(...)
-lang_en = create_node(sc_types.NODE_CONST_CLASS)  # ScAddr(...)
+lang = generate_node(sc_type.CONST_NODE_CLASS)  # ScAddr(...)
+lang_en = generate_node(sc_type.CONST_NODE_CLASS)  # ScAddr(...)
 assert lang.is_valid() and lang_en.is_valid()
-elements = create_nodes(sc_types.NODE_CONST, sc_types.NODE_VAR)  # [ScAddr(...), ScAddr(...)]
+elements = generate_nodes(sc_type.CONST_NODE, sc_type.NODE_VAR)  # [ScAddr(...), ScAddr(...)]
 assert len(elements) == 2
 assert all(element.is_valid() for element in elements)
 ```
 
-### Edges creating
+### Connectors generating
 
-For creating edge between **src** and **trg** with setting its type use **create_edge** function:
+For generating connector between **src** and **trg** with setting its type use **generate_connector** function:
 
 ```python
-def create_edge(edge_type: ScType, src: ScAddr, trg: ScAddr) -> ScAddr: ...
+def generate_connector(connector_type: ScType, src: ScAddr, trg: ScAddr) -> ScAddr: ...
 
-def create_edges(edge_type: ScType, src: ScAddr, *targets: ScAddr) -> List[ScAddr]: ...
+def generate_connectors(connector_type: ScType, src: ScAddr, *targets: ScAddr) -> List[ScAddr]: ...
 ```
 
 ```python
-from sc_client.constants import sc_types
-from sc_kpm.utils import create_nodes
-from sc_kpm.utils import create_edge, create_edges
+from sc_client.constants import sc_type
+from sc_kpm.utils import generate_nodes
+from sc_kpm.utils import generate_connector, generate_connectors
 
-src, trg, trg2, trg3 = create_nodes(*[sc_types.NODE_CONST] * 4)
-edge = create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, trg)  # ScAddr(...)
-edges = create_edges(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, trg2, trg3)  # [ScAddr(...), ScAddr(...)]
-assert edge.is_valid()
-assert all(edges)
+src, trg, trg2, trg3 = generate_nodes(*[sc_type.CONST_NODE] * 4)
+connector = generate_connector(sc_type.CONST_PERM_POS_ARC, src, trg)  # ScAddr(...)
+connectors = generate_connectors(sc_type.CONST_PERM_POS_ARC, src, trg2, trg3)  # [ScAddr(...), ScAddr(...)]
+assert connector.is_valid()
+assert all(connectors)
 ```
 
-Function **is_valid()** is used for validation addresses of nodes or edges.
+Function **is_valid()** is used for validation addresses of nodes or connectors.
 
-### Links creating
+### Links generating
 
-For creating links with string type content (by default) use these functions:
+For generating links with string type content (by default) use these functions:
 
 ```python
-def create_link(
+def generate_link(
         content: Union[str, int],
         content_type: ScLinkContentType = ScLinkContentType.STRING,
-        link_type: ScType = sc_types.LINK_CONST
+        link_type: ScType = sc_type.CONST_NODE_LINK
 ) -> ScAddr: ...
 
 
-def create_links(
+def generate_links(
         *contents: Union[str, int],
         content_type: ScLinkContentType = ScLinkContentType.STRING,
-        link_type: ScType = sc_types.LINK_CONST,
+        link_type: ScType = sc_type.CONST_NODE_LINK,
 ) -> List[ScAddr]: ...
 ```
 
-You may use **ScLinkContentType.STRING** and **ScLinkContentType.INT** types for content of created links.
+You may use **ScLinkContentType.STRING** and **ScLinkContentType.INT** types for content of generated links.
 
 ```python
-from sc_client.constants import sc_types
+from sc_client.constants import sc_type
 from sc_client.models import ScLinkContentType
-from sc_kpm.utils import create_link, create_links
+from sc_kpm.utils import generate_link, generate_links
 
-msg = create_link("hello")  # ScAddr(...)
-four = create_link(4, ScLinkContentType.INT)  # ScAddr(...)
-water = create_link("water", link_type=sc_types.LINK_VAR)  # ScAddr(...)
-names = create_links("Sam", "Pit")  # [ScAddr(...), ScAddr(...)]
+msg = generate_link("hello")  # ScAddr(...)
+four = generate_link(4, ScLinkContentType.INT)  # ScAddr(...)
+water = generate_link("water", link_type=sc_type.VAR_NODE_LINK)  # ScAddr(...)
+names = generate_links("Sam", "Pit")  # [ScAddr(...), ScAddr(...)]
 ```
 
-### Relations creating
+### Relations generating
 
-Create different binary relations with these functions:
+Generate different binary relations with these functions:
 
 ```python
-def create_binary_relation(edge_type: ScType, src: ScAddr, trg: ScAddr, *relations: ScAddr) -> ScAddr: ...
+def generate_binary_relation(connector_type: ScType, src: ScAddr, trg: ScAddr, *relations: ScAddr) -> ScAddr: ...
 
 
-def create_role_relation(src: ScAddr, trg: ScAddr, *rrel_nodes: ScAddr) -> ScAddr: ...
+def generate_role_relation(src: ScAddr, trg: ScAddr, *rrel_nodes: ScAddr) -> ScAddr: ...
 
 
-def create_norole_relation(src: ScAddr, trg: ScAddr, *nrel_nodes: ScAddr) -> ScAddr: ...
+def generate_non_role_relation(src: ScAddr, trg: ScAddr, *nrel_nodes: ScAddr) -> ScAddr: ...
 ```
 
+These methods return ScAddr of sc-arc generated between `src` and `trg` sc-elements. 
+
 ```python
-from sc_client.constants import sc_types
+from sc_client.constants import sc_type
 from sc_kpm import ScKeynodes
-from sc_kpm.utils import create_node, create_nodes
-from sc_kpm.utils import create_binary_relation, create_role_relation, create_norole_relation
+from sc_kpm.utils import generate_node, generate_nodes
+from sc_kpm.utils import generate_binary_relation, generate_role_relation, generate_non_role_relation
 
-src, trg = create_nodes(*[sc_types.NODE_CONST] * 2)
-increase_relation = create_node(sc_types.NODE_CONST_CLASS)
+src, trg = generate_nodes(*[sc_type.CONST_NODE] * 2)
+increase_relation = generate_node(sc_type.CONST_NODE_CLASS)
 
-brel = create_binary_relation(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, trg, increase_relation)  # ScAddr(...)
-rrel = create_role_relation(src, trg, ScKeynodes.rrel_index(1))  # ScAddr(...)
-nrel = create_norole_relation(src, trg, create_node(sc_types.NODE_CONST_NOROLE))  # ScAddr(...)
+brel = generate_binary_relation(sc_type.CONST_PERM_POS_ARC, src, trg, increase_relation)  # ScAddr(...)
+rrel = generate_role_relation(src, trg, ScKeynodes.rrel_index(1))  # ScAddr(...)
+nrel = generate_non_role_relation(src, trg, generate_node(sc_type.CONST_NODE_NON_ROLE))  # ScAddr(...)
 ```
 
-### Deleting utils
+### Erasing utils
 
-If you want to remove all edges between two nodes, which define by their type use
+If you want to erase all connectors between two elements, which define by their type use
 
 ```python
-def delete_edges(source: ScAddr, target: ScAddr, *edge_types: ScType) -> bool: ...
+def erase_connectors(source: ScAddr, target: ScAddr, *connector_types: ScType) -> bool: ...
 ```
 
 It return **True** if operations was successful and **False** otherwise.
 
 ```python
-from sc_client.constants import sc_types
-from sc_kpm.utils import create_nodes, create_edge
-from sc_kpm.utils import delete_edges
+from sc_client.constants import sc_type
+from sc_kpm.utils import generate_nodes, generate_connector
+from sc_kpm.utils import erase_connectors
 
-src, trg = create_nodes(*[sc_types.NODE_CONST] * 2)
-edge = create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, trg)
-delete_edges(src, trg, sc_types.EDGE_ACCESS_CONST_POS_PERM)  # True
+src, trg = generate_nodes(*[sc_type.CONST_NODE] * 2)
+connector = generate_connector(sc_type.CONST_PERM_POS_ARC, src, trg)
+erase_connectors(src, trg, sc_type.CONST_PERM_POS_ARC)  # True
 ```
 
-### Getting edges
+### Searching connectors
 
-For getting edge or edges between two nodes use:
+For getting connector or connectors between two elements use:
 
 ```python
-def get_edge(source: ScAddr, target: ScAddr, edge_type: ScType) -> ScAddr: ...
+def search_connector(source: ScAddr, target: ScAddr, connector_type: ScType) -> ScAddr: ...
 
 
-def get_edges(source: ScAddr, target: ScAddr, *edge_types: ScType) -> List[ScAddr]: ...
+def search_connectors(source: ScAddr, target: ScAddr, *connector_types: ScType) -> List[ScAddr]: ...
 ```
 
 _**NOTE: Use VAR type instead of CONST in getting utils**_
 
 ```python
-from sc_client.constants import sc_types
-from sc_kpm.utils import create_nodes, create_edge
-from sc_kpm.utils import get_edge, get_edges
+from sc_client.constants import sc_type
+from sc_kpm.utils import generate_nodes, generate_connector
+from sc_kpm.utils import search_connector, search_connectors
 
-src, trg = create_nodes(*[sc_types.NODE_CONST] * 2)
-edge1 = create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, src, trg)
-edge2 = create_edge(sc_types.EDGE_D_COMMON_CONST, src, trg)
+src, trg = generate_nodes(*[sc_type.CONST_NODE] * 2)
+connector1 = generate_connector(sc_type.CONST_PERM_POS_ARC, src, trg)
+connector2 = generate_connector(sc_type.CONST_COMMON_ARC, src, trg)
 
-class_edge = get_edge(src, trg, sc_types.EDGE_ACCESS_VAR_POS_PERM)  # ScAddr(...)
-assert class_edge == edge1
-edges = get_edges(src, trg, sc_types.EDGE_ACCESS_VAR_POS_PERM, sc_types.EDGE_D_COMMON_VAR)  # [ScAddr(...), ScAddr(...)]
-assert edges == [edge1, edge2]
+class_connector = search_connector(src, trg, sc_type.VAR_PERM_POS_ARC)  # ScAddr(...)
+assert class_connector == connector1
+connectors = search_connectors(src, trg, sc_type.VAR_PERM_POS_ARC, sc_type.VAR_COMMON_ARC)  # [ScAddr(...), ScAddr(...)]
+assert connectors == [connector1, connector2]
 ```
 
-### Getting elements by relation
+### Searching elements by relation
 
-Get target element by source element and relation:
+Search target element by source element and relation:
 
 ```python
-def get_element_by_role_relation(src: ScAddr, rrel_node: ScAddr) -> ScAddr: ...
+def search_element_by_role_relation(src: ScAddr, rrel_node: ScAddr) -> ScAddr: ...
 
 
-def get_element_by_norole_relation(src: ScAddr, nrel_node: ScAddr) -> ScAddr: ...
+def search_element_by_non_role_relation(src: ScAddr, nrel_node: ScAddr) -> ScAddr: ...
 ```
 
 ```python
-from sc_client.constants import sc_types
+from sc_client.constants import sc_type
 from sc_kpm import ScKeynodes
 from sc_kpm.identifiers import CommonIdentifiers
-from sc_kpm.utils import create_nodes, create_role_relation, create_norole_relation
-from sc_kpm.utils import get_element_by_role_relation, get_element_by_norole_relation
+from sc_kpm.utils import generate_nodes, generate_role_relation, generate_non_role_relation
+from sc_kpm.utils import search_element_by_role_relation, search_element_by_non_role_relation
 
-src, trg_rrel, trg_nrel = create_nodes(*[sc_types.NODE_CONST] * 3)
-rrel = create_role_relation(src, trg_rrel, ScKeynodes.rrel_index(1))  # ScAddr(...)
-nrel = create_norole_relation(src, trg_nrel, ScKeynodes[CommonIdentifiers.NREL_SYSTEM_IDENTIFIER])  # ScAddr(...)
+src, trg_rrel, trg_nrel = generate_nodes(*[sc_type.CONST_NODE] * 3)
+rrel = generate_role_relation(src, trg_rrel, ScKeynodes.rrel_index(1))  # ScAddr(...)
+nrel = generate_non_role_relation(src, trg_nrel, ScKeynodes[CommonIdentifiers.NREL_SYSTEM_IDENTIFIER])  # ScAddr(...)
 
-result_rrel = get_element_by_role_relation(src, ScKeynodes.rrel_index(1))  # ScAddr(...)
+result_rrel = search_element_by_role_relation(src, ScKeynodes.rrel_index(1))  # ScAddr(...)
 assert result_rrel == trg_rrel
-result_nrel = get_element_by_norole_relation(src, ScKeynodes[CommonIdentifiers.NREL_SYSTEM_IDENTIFIER])  # ScAddr(...)
+result_nrel = search_element_by_non_role_relation(src, ScKeynodes[CommonIdentifiers.NREL_SYSTEM_IDENTIFIER])  # ScAddr(...)
 assert result_nrel == trg_nrel
 ```
 
@@ -599,30 +598,27 @@ def get_link_content(link: ScAddr) -> Union[str, int]: ...
 ```
 
 ```python
-from sc_kpm.utils import create_link
+from sc_kpm.utils import generate_link
 from sc_kpm.utils import get_link_content_data
 
-water = create_link("water")
+water = generate_link("water")
 content = get_link_content_data(water)  # "water"
 ```
 
-### Getting system identifier
+### Getting element system identifier
 
 For getting system identifier of keynode use:
 
 ```python
-def get_system_idtf(addr: ScAddr) -> str: ...
+def get_element_system_identifier(addr: ScAddr) -> str: ...
 ```
 
 ```python
-from sc_client.constants import sc_types
+from sc_client.constants import sc_type
 from sc_kpm import ScKeynodes
-from sc_kpm.utils import create_node
-from sc_kpm.utils import get_system_idtf
+from sc_kpm.utils import get_element_system_identifier
 
-lang_en = create_node(sc_types.NODE_CONST_CLASS)  # ScAddr(...)
-idtf = get_system_idtf(lang_en)  # "lang_en"
-assert ScKeynodes[idtf] == lang_en
+idtf = get_element_system_identifier(some_addr)  # "lang_en"
 ```
 
 ## Action utils
@@ -644,16 +640,16 @@ This function should not be used in the ScAgentClassic.
 ![check action class](docs/schemes/png/check_action_class.png)
 
 ```python
-from sc_client.constants import sc_types
+from sc_client.constants import sc_type
 from sc_kpm import ScKeynodes
 from sc_kpm.identifiers import CommonIdentifiers
-from sc_kpm.utils import create_node, create_edge
+from sc_kpm.utils import generate_node, generate_connector
 from sc_kpm.utils.action_utils import check_action_class
 
-action_node = create_node(sc_types.NODE_CONST)
-create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, ScKeynodes[CommonIdentifiers.ACTION], action_node)
-action_class = create_node(sc_types.NODE_CONST_CLASS)
-create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, action_class, action_node)
+action_node = generate_node(sc_type.CONST_NODE)
+generate_connector(sc_type.CONST_PERM_POS_ARC, ScKeynodes[CommonIdentifiers.ACTION], action_node)
+action_class = generate_node(sc_type.CONST_NODE_CLASS)
+generate_connector(sc_type.CONST_PERM_POS_ARC, action_class, action_node)
 
 assert check_action_class(action_class, action_node)
 # or
@@ -671,51 +667,51 @@ def get_action_arguments(action_class: Union[ScAddr, Idtf], count: int) -> List[
 ![check action class](docs/schemes/png/get_arguments.png)
 
 ```python
-from sc_client.constants import sc_types
+from sc_client.constants import sc_type
 from sc_kpm import ScKeynodes
 from sc_kpm.identifiers import CommonIdentifiers
-from sc_kpm.utils import create_node, create_edge, create_role_relation
+from sc_kpm.utils import generate_node, generate_connector, generate_role_relation
 from sc_kpm.utils.action_utils import get_action_arguments
 
-action_node = create_node(sc_types.NODE_CONST)
+action_node = generate_node(sc_type.CONST_NODE)
 
 # Static argument
-argument1 = create_node(sc_types.NODE_CONST)
-create_role_relation(action_node, argument1, ScKeynodes.rrel_index(1))
+argument1 = generate_node(sc_type.CONST_NODE)
+generate_role_relation(action_node, argument1, ScKeynodes.rrel_index(1))
 
 # Dynamic argument
-dynamic_node = create_node(sc_types.NODE_CONST)
+dynamic_node = generate_node(sc_type.CONST_NODE)
 rrel_dynamic_arg = ScKeynodes[CommonIdentifiers.RREL_DYNAMIC_ARGUMENT]
-create_role_relation(action_node, dynamic_node, rrel_dynamic_arg, ScKeynodes.rrel_index(2))
-argument2 = create_node(sc_types.NODE_CONST)
-create_edge(sc_types.EDGE_ACCESS_CONST_POS_TEMP, dynamic_node, argument2)
+generate_role_relation(action_node, dynamic_node, rrel_dynamic_arg, ScKeynodes.rrel_index(2))
+argument2 = generate_node(sc_type.CONST_NODE)
+generate_connector(sc_type.CONST_TEMP_POS_ARC, dynamic_node, argument2)
 
 arguments = get_action_arguments(action_node, 2)
 assert arguments == [argument1, dynamic_node]
 ```
 
-### Create and get action result
+### Generate and get action result
 
 ```python
-def create_action_result(action_node: ScAddr, *elements: ScAddr) -> None: ...
+def generate_action_result(action_node: ScAddr, *elements: ScAddr) -> None: ...
 
 
 def get_action_result(action_node: ScAddr) -> ScAddr: ...
 ```
 
-Create and get structure with output of action
+Generate and get structure with output of action
 
 ![agent result](docs/schemes/png/agent_result.png)
 
 ```python
-from sc_client.constants import sc_types
-from sc_kpm.utils import create_node
-from sc_kpm.utils.action_utils import create_action_result, get_action_result
+from sc_client.constants import sc_type
+from sc_kpm.utils import generate_node
+from sc_kpm.utils.action_utils import generate_action_result, get_action_result
 from sc_kpm.sc_sets import ScStructure
 
-action_node = create_node(sc_types.NODE_CONST_STRUCT)
-result_element = create_node(sc_types.NODE_CONST_STRUCT)
-create_action_result(action_node, result_element)
+action_node = generate_node(sc_type.CONST_NODE)
+result_element = generate_node(sc_type.CONST_NODE)
+generate_action_result(action_node, result_element)
 result = get_action_result(action_node)
 result_elements = ScStructure(result).elements_set
 assert result_elements == {result_element}
@@ -723,7 +719,7 @@ assert result_elements == {result_element}
 
 ### Call, execute and wait agent
 
-Agent call function: creates **action node** with some arguments, concepts and connects it to the node with initiation identifier.
+Agent call function: generates **action node** with some arguments, concepts and connects it to the node with initiation identifier.
 Returns **action node**
 
 ```python
@@ -734,7 +730,7 @@ def call_agent(
 ) -> ScAddr: ...
 ```
 
-Agent wait function: Waits for creation of edge to reaction node for some seconds.
+Agent wait function: Waits for generation of arc from reaction node for some seconds.
 Default reaction_node is `action_finished`.
 
 ```python
@@ -760,11 +756,11 @@ def execute_agent(
 from sc_client.models import ScLinkContentType
 from sc_kpm import ScKeynodes
 from sc_kpm.identifiers import CommonIdentifiers, ActionStatus
-from sc_kpm.utils import create_link
+from sc_kpm.utils import generate_link
 from sc_kpm.utils.action_utils import execute_agent, call_agent, wait_agent
 
-arg1 = create_link(2, ScLinkContentType.INT)
-arg2 = create_link(3, ScLinkContentType.INT)
+arg1 = generate_link(2, ScLinkContentType.INT)
+arg2 = generate_link(3, ScLinkContentType.INT)
 
 kwargs = dict(
     arguments={arg1: False, arg2: False},
@@ -777,17 +773,17 @@ wait_agent(3, action, ScKeynodes[ActionStatus.ACTION_FINISHED])
 action, is_successfully = execute_agent(**kwargs, wait_time=3)  # ScAddr(...), bool
 ```
 
-### Create, call and execute action
+### Generate, call and execute action
 
-Functions that allow to create action and add arguments and call later.
+Functions that allow to generate action and add arguments and call later.
 
-Function that creates action with concepts and return its ScAddr.
+Function that generates action with concepts and return its ScAddr.
 
 ```python
-def create_action(*concepts: Idtf) -> ScAddr: ...
+def generate_action(*concepts: Idtf) -> ScAddr: ...
 ```
 
-Function that creates arguments of action
+Function that generates arguments of action
 
 ```python
 def add_action_arguments(action_node: ScAddr, arguments: Dict[ScAddr, IsDynamic]) -> None: ...
@@ -817,13 +813,13 @@ Example:
 from sc_client.models import ScLinkContentType
 from sc_kpm import ScKeynodes
 from sc_kpm.identifiers import CommonIdentifiers, ActionStatus
-from sc_kpm.utils import create_link
-from sc_kpm.utils.action_utils import add_action_arguments, call_action, create_action, execute_action, wait_agent
+from sc_kpm.utils import generate_link
+from sc_kpm.utils.action_utils import add_action_arguments, call_action, generate_action, execute_action, wait_agent
 
-arg1 = create_link(2, ScLinkContentType.INT)
-arg2 = create_link(3, ScLinkContentType.INT)
+arg1 = generate_link(2, ScLinkContentType.INT)
+arg2 = generate_link(3, ScLinkContentType.INT)
 
-action_node = create_action(CommonIdentifiers.ACTION, "some_class_name")  # ScAddr(...)
+action_node = generate_action(CommonIdentifiers.ACTION, "some_class_name")  # ScAddr(...)
 # Do something here
 arguments = {arg1: False, arg2: False}
 
@@ -851,13 +847,13 @@ def finish_action_with_status(action_node: ScAddr, is_success: bool = True) -> N
 ![finish_action](docs/schemes/png/finish_action.png)
 
 ```python
-from sc_client.constants import sc_types
+from sc_client.constants import sc_type
 from sc_kpm import ScKeynodes
 from sc_kpm.identifiers import ActionStatus
-from sc_kpm.utils import create_node, check_edge
+from sc_kpm.utils import generate_node, check_connector
 from sc_kpm.utils.action_utils import finish_action, finish_action_with_status
 
-action_node = create_node(sc_types.NODE_CONST)
+action_node = generate_node(sc_type.CONST_NODE)
 
 finish_action_with_status(action_node)
 # or
@@ -868,15 +864,15 @@ finish_action(action_node, ActionStatus.ACTION_FINISHED_SUCCESSFULLY)
 
 action_finished = ScKeynodes[ActionStatus.ACTION_FINISHED]
 action_finished_successfully = ScKeynodes[ActionStatus.ACTION_FINISHED_SUCCESSFULLY]
-assert check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, action_finished, action_node)
-assert check_edge(sc_types.EDGE_ACCESS_VAR_POS_PERM, action_finished_successfully, action_node)
+assert check_connector(sc_type.VAR_PERM_POS_ARC, action_finished, action_node)
+assert check_connector(sc_type.VAR_PERM_POS_ARC, action_finished_successfully, action_node)
 ```
 
 # Use-cases
 
-- Script for creating and registration agent until user press ^C:
+- Script for generating and registration agent until user press ^C:
     - [based on ScAgentClassic](docs/examples/register_and_wait_for_user.py)
-- Scripts for creating agent to calculate sum of two arguments and confirm result:
+- Scripts for generating agent to calculate sum of two arguments and confirm result:
     - [based on ScAgent](docs/examples/sum_agent.py)
     - [based on ScAgentClassic](docs/examples/sum_agent_classic.py)
 - Logging examples:

@@ -4,13 +4,14 @@ Distributed under the MIT License
 (See an accompanying file LICENSE or a copy at https://opensource.org/licenses/MIT)
 """
 
+import warnings
 from logging import Logger, getLogger
 from typing import Dict, Optional
 
 from sc_client import client
-from sc_client.client import delete_elements
+from sc_client.client import erase_elements
 from sc_client.constants.exceptions import InvalidValueError
-from sc_client.constants.sc_types import NODE_CONST_ROLE, ScType
+from sc_client.constants.sc_type import CONST_NODE_ROLE, ScType
 from sc_client.models import ScAddr, ScIdtfResolveParams
 
 Idtf = str
@@ -23,6 +24,7 @@ class ScKeynodesMeta(type):
         super().__init__(*args, **kwargs)
         cls._dict: Dict[Idtf, ScAddr] = {}
         cls._logger: Logger = getLogger(f"{__name__}.{cls.__name__}")
+        cls._min_rrel_index: int = 1
         cls._max_rrel_index: int = 10
 
     def __call__(cls, *args, **kwargs) -> None:
@@ -36,11 +38,18 @@ class ScKeynodesMeta(type):
             raise InvalidValueError(f"ScAddr of {identifier} is invalid")
         return addr
 
-    def delete(cls, identifier: Idtf) -> bool:
-        """Delete keynode from the kb and memory and return boolean status"""
+    def erase(cls, identifier: Idtf) -> bool:
+        """Erase keynode from the kb and memory and return boolean status"""
         addr = cls.__getitem__(identifier)  # pylint: disable=no-value-for-parameter
         del cls._dict[identifier]
-        return delete_elements(addr)
+        return erase_elements(addr)
+
+    def delete(cls, identifier: Idtf) -> bool:
+        warnings.warn(
+            "ScKeynodesMeta 'delete' method is deprecated. Use `erase` method instead.",
+            DeprecationWarning,
+        )
+        return cls.erase(identifier)
 
     def get(cls, identifier: Idtf) -> ScAddr:
         """Get keynode, can be ScAddr(0)"""
@@ -54,16 +63,23 @@ class ScKeynodesMeta(type):
             addr = client.resolve_keynodes(params)[0]
             if addr.is_valid():
                 cls._dict[identifier] = addr
-            cls._logger.debug("Resolved %s identifier with type %s: %s", repr(identifier), repr(sc_type), repr(addr))
+            cls._logger.debug(
+                "Resolved %s identifier with type %s: %s",
+                repr(identifier),
+                repr(sc_type),
+                repr(addr),
+            )
         return addr
 
     def rrel_index(cls, index: int) -> ScAddr:
-        """Get rrel_i node. Max rrel index is 10"""
+        """Get rrel_i node. Max rrel index is 10. Min rrel is 1."""
         if not isinstance(index, int):
             raise TypeError("Index of rrel node must be int")
         if index > cls._max_rrel_index:
             raise KeyError(f"You cannot use rrel more than {cls._max_rrel_index}")
-        return cls.resolve(f"rrel_{index}", NODE_CONST_ROLE)  # pylint: disable=no-value-for-parameter
+        if index < cls._min_rrel_index:
+            raise KeyError(f"You cannot use rrel less than {cls._min_rrel_index}")
+        return cls.resolve(f"rrel_{index}", CONST_NODE_ROLE)  # pylint: disable=no-value-for-parameter
 
 
 class ScKeynodes(metaclass=ScKeynodesMeta):

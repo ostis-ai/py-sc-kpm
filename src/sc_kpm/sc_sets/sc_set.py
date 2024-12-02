@@ -2,36 +2,36 @@ from __future__ import annotations
 
 from typing import Iterator
 
-from sc_client.client import create_elements, delete_elements, template_search
-from sc_client.constants import ScType, sc_types
+from sc_client.client import erase_elements, generate_elements, search_by_template
+from sc_client.constants import ScType, sc_type
 from sc_client.models import ScAddr, ScConstruction, ScTemplate, ScTemplateResult
 
-from sc_kpm.utils.common_utils import create_node
+from sc_kpm.utils.common_utils import generate_node
 
 
 class ScSet:
     """
     ScSet is a class for handling set construction in kb.
 
-    It has main set_node and edged elements.
+    It has main set_node and elements.
     """
 
     def __init__(self, *elements: ScAddr, set_node: ScAddr = None, set_node_type: ScType = None) -> None:
         """
         Initialize ScSet.
 
-        Receive or create set_node and add elements.
+        Receive or generate set_node and add elements.
 
         :param elements: Elements of a set to initialize it.
-        :param set_node: Set node has edges to each element.
-        Optional parameter: it will be created if it doesn't exist.
-        :param set_node_type: ScType for creating set node.
+        :param set_node: Set node has arcs to each element.
+        Optional parameter: it will be generated if it doesn't exist.
+        :param set_node_type: ScType for generated set node.
         """
 
         if set_node is None:
             if set_node_type is None:
-                set_node_type = sc_types.NODE_CONST
-            set_node = create_node(set_node_type)
+                set_node_type = sc_type.CONST_NODE
+            set_node = generate_node(set_node_type)
         self._set_node = set_node
         self.add(*elements)
 
@@ -40,8 +40,8 @@ class ScSet:
         if elements:
             construction = ScConstruction()
             for element in elements:
-                construction.create_edge(sc_types.EDGE_ACCESS_CONST_POS_PERM, self._set_node, element)
-            create_elements(construction)
+                construction.generate_connector(sc_type.CONST_PERM_POS_ARC, self._set_node, element)
+            generate_elements(construction)
 
     @property
     def set_node(self) -> ScAddr:
@@ -79,20 +79,20 @@ class ScSet:
         return element in self.elements_set
 
     def remove(self, *elements: ScAddr) -> None:
-        """Remove the connections between set_node and elements"""
+        """Erase the connections between set_node and elements"""
         templ = ScTemplate()
         for element in elements:
-            templ.triple(self._set_node, sc_types.EDGE_ACCESS_VAR_POS_PERM, element)
-        template_results = template_search(templ)
-        delete_elements(*(res[1] for res in template_results))
+            templ.triple(self._set_node, sc_type.VAR_PERM_POS_ARC, element)
+        template_results = search_by_template(templ)
+        erase_elements(*(res[1] for res in template_results))
 
     def clear(self) -> None:
-        """Remove the connections between set_node and all elements"""
+        """Erase the arcs between set_node and all elements"""
         template_results = self._elements_search_results()
-        delete_elements(*(res[1] for res in template_results))
+        erase_elements(*(res[1] for res in template_results))
 
     def _elements_search_results(self) -> list[ScTemplateResult]:
         """Template search of all elements"""
         templ = ScTemplate()
-        templ.triple(self._set_node, sc_types.EDGE_ACCESS_VAR_POS_PERM, sc_types.UNKNOWN)
-        return template_search(templ)
+        templ.triple(self._set_node, sc_type.VAR_PERM_POS_ARC, sc_type.UNKNOWN)
+        return search_by_template(templ)
