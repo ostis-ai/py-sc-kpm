@@ -246,7 +246,8 @@ def search_non_role_relation_template(src: ScAddr, nrel_node: ScAddr) -> Optiona
 
 def search_norole_relation_template(src: ScAddr, nrel_node: ScAddr) -> Optional[ScTemplateResult]:
     warnings.warn(
-        "Common utils 'search_norole_relation_template' method is deprecated. Use `search_non_role_relation_template` method instead.",
+        "Common utils 'search_norole_relation_template' method is deprecated."
+        "Use `search_non_role_relation_template` method instead.",
         DeprecationWarning,
     )
     return search_non_role_relation_template(src, nrel_node)
@@ -259,7 +260,8 @@ def search_element_by_role_relation(src: ScAddr, rrel_node: ScAddr) -> ScAddr:
 
 def get_element_by_role_relation(src: ScAddr, rrel_node: ScAddr) -> ScAddr:
     warnings.warn(
-        "Common utils 'get_element_by_role_relation' method is deprecated. Use `search_element_by_role_relation` method instead.",
+        "Common utils 'get_element_by_role_relation' method is deprecated."
+        "Use `search_element_by_role_relation` method instead.",
         DeprecationWarning,
     )
     return search_element_by_role_relation(src, rrel_node)
@@ -272,7 +274,8 @@ def search_element_by_non_role_relation(src: ScAddr, nrel_node: ScAddr) -> ScAdd
 
 def get_element_by_norole_relation(src: ScAddr, nrel_node: ScAddr) -> ScAddr:
     warnings.warn(
-        "Common utils 'get_element_by_norole_relation' method is deprecated. Use `search_element_by_non_role_relation` method instead.",
+        "Common utils 'get_element_by_norole_relation' method is deprecated."
+        "Use `search_element_by_non_role_relation` method instead.",
         DeprecationWarning,
     )
     return search_element_by_non_role_relation(src, nrel_node)
